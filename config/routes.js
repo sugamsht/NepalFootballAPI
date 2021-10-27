@@ -42,13 +42,11 @@ module.exports = function (app) {
       lost: req.body.lost || 0,
       draw: req.body.draw || 0
     });
-    // console.log(newStat);
-    // newStat.save((error, savedStat) => {
-    //   if (!error && savedStat) {
-    //     res.json(savedStat)
-    //   }
-    // });
-    newStat.save();
+    newStat.save((error, savedStat) => {
+      if (!error && savedStat) {
+        res.json(savedStat);
+      }
+    });
   });
 
   /**

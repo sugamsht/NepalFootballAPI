@@ -10,17 +10,23 @@ block content
       code app/views/home/index.pug
   body
   form(action='/api/test', method='POST')
-    p
-      | Team: 
-      input(type='text', name='team_name')
-      | Position: 
-      input(type='text', name='team_position')
-      | Win: 
-      input(type='text', name='win')
-      | Lost:
-      input(type='text', name='lost')
-      | Draw: 
-      input(type='text', name='draw')
+    h3 Team stat hal
+    br
+    | Team: 
+    input(type='text', name='team_name' style='width: 200px; margin-bottom: 3px;')
+    br
+    | Position: 
+    input(type='number', name='team_position' style='width: 50px; margin-bottom: 3px; ')
+    br
+    | Win: 
+    input(type='number', name='win' style='width: 50px; margin-bottom: 3px;')
+    br
+    | Lost:
+    input(type='number', name='lost' style='width: 50px; margin-bottom: 3px;')
+    br
+    | Draw: 
+    input(type='number', name='draw' style='width: 50px; margin-bottom: 3px;')
+    br
     input(type='submit', value='Submit')
 
     //- h3 Submit a new issue:

@@ -49,10 +49,6 @@
     "supertest": "*",
     "tape": "~4.12.1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/madhums/node-express-mongoose.git"
-  },
   "keywords": [
     "node",
     "mongoose",
