@@ -1,10 +1,9 @@
 {
   "name": "node-express-mongoose",
   "description": "A boilerplate application for node, mongo",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "author": {
-    "name": "Madhusudhan Srinivasa",
-    "email": "me@madhums.me"
+    "name": "Sugam Shrestha"
   },
   "engines": {
     "node": ">=10.x"
@@ -29,7 +28,7 @@
     "express-session": "~1.17.0",
     "helmet": "~3.21.2",
     "method-override": "~3.0.0",
-    "mongoose": "~5.8.4",
+    "mongoose": "^6.0.12",
     "morgan": "~1.9.1",
     "passport": "~0.4.1",
     "passport-local": "~1.0.0",
@@ -44,7 +43,7 @@
     "eslint": "~6.8.0",
     "eslint-config-prettier": "~6.9.0",
     "eslint-plugin-prettier": "~3.1.2",
-    "nodemon": "2.0.2",
+    "nodemon": "^2.0.2",
     "npm-check-updates": "~4.0.1",
     "prettier": "~1.19.1",
     "supertest": "*",
