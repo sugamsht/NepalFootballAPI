@@ -1,4 +1,6 @@
+/* eslint-disable prettier/prettier */
 'use strict';
+
 
 /**
  * Module dependencies.
@@ -6,6 +8,12 @@
 
 const home = require('../app/controllers/home');
 const mongoose = require('mongoose');
+var cors = require('cors');
+
+var corsOptions = {
+  origin: 'http://localhost:5000',
+  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
 
 /**
  * Expose
@@ -21,7 +29,16 @@ module.exports = function (app) {
     draw: Number
   });
 
+  let fixtureSchema = new mongoose.Schema({
+    team1: { type: String, required: true },
+    team2: { type: String, required: true },
+    stadium: String,
+    date: { type: Date, default: Date.now },
+    time: String
+  });
+
   let Stats = mongoose.model('Stats', statSchema);
+  let fixtures = mongoose.model('fixtures', fixtureSchema);
 
   app.get('/', home.index);
 
@@ -30,9 +47,16 @@ module.exports = function (app) {
     res.json({ hello: 'bro' });
   });
 
-  // app.get('/api/lata', function (req, res) {
-  //   res.json({ team1: 'team2', 1: 2 });
-  // });
+  //Get All data
+  app.get('/api/test', cors(corsOptions), function (req, res) {
+    Stats.find({},
+      (error, arrayOfResults) => {
+        if (!error && arrayOfResults) {
+          return res.json(arrayOfResults)
+        }
+      }
+    ).sort('team_position')
+  });
 
   app.post('/api/test', function (req, res) {
     let newStat = new Stats({
@@ -48,6 +72,33 @@ module.exports = function (app) {
       }
     });
   });
+
+  //fixtures post and get
+  app.post('/api/fixtures', function (req, res) {
+    let newFixture = new fixtures({
+      team1: req.body.team1,
+      team2: req.body.team2,
+      stadium: req.body.stadium,
+      date: req.body.date,
+      time: req.body.time,
+    });
+    newFixture.save((error, savedStat) => {
+      if (!error && savedStat) {
+        res.json(savedStat);
+      }
+    });
+  })
+
+  app.get('/api/fixtures', cors(corsOptions), function (req, res) {
+    fixtures.find({},
+      (error, arrayOfResults) => {
+        if (!error && arrayOfResults) {
+          return res.json(arrayOfResults)
+        }
+      }
+    )
+  });
+
 
   /**
    * Error handling

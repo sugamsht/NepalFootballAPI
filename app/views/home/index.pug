@@ -1,16 +1,11 @@
 extends ../layouts/default.pug
 
 block page-header
-  h2 Todo
+  h2 TEAM
 
 block content
-  ol
-    //- li Awesome! Now add some routes, models, views and controllers.
-    li Change the content of&#32;
-      code app/views/home/index.pug
   body
   form(action='/api/test', method='POST')
-    h3 Team stat hal
     br
     | Team: 
     input(type='text', name='team_name' style='width: 200px; margin-bottom: 3px;')
@@ -28,19 +23,24 @@ block content
     input(type='number', name='draw' style='width: 50px; margin-bottom: 3px;')
     br
     input(type='submit', value='Submit')
-
-    //- h3 Submit a new issue:
-    //- form(method='post' action='/api/test')
-    //- input(type='text' name='team_name' placeholder='*Your Team' style='width: 320px; margin-bottom: 3px;' required='true')
-    //- br
-    //- textarea(type='number' name='team_position' placeholder='Number' style='width: 320px; height: 100px;')
-    //- br
-    //- input(type='number' name='win' placeholder='win' style='width: 100px' required='true')
-    //- input(type='number' name='lost' placeholder='lost' style='width: 100px')
-    //- input(type='number' name='draw' placeholder='draw' style='width: 100px')
-    //- br
-    //- button(type='submit') Submit
-
-      form(action='/api/test', method='POST')
-
+    br
+    br
+  h2 FIXTURE DETAIL
+  form(action='/api/fixtures', method='POST')
+    br
+    | Team 1: 
+    input(type='text', name='team1' style='width: 200px; margin-bottom: 3px;')
+    | Team 2: 
+    input(type='text', name='team2' style='width: 200px; margin-bottom: 3px;')
+    br
+    | Stadium: 
+    input(type='text', name='stadium' style='width: 200px; margin-bottom: 3px; ')
+    br
+    | Date : 
+    input(type='date', name='date' style='width: 200px; margin-bottom: 3px;')
+    br
+    | Time:
+    input(type='time', name='time' style='width: 200px; margin-bottom: 3px;')
+    br
+    input(type='submit', value='Submit')
   

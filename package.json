@@ -21,6 +21,7 @@
     "connect-flash": "~0.1.1",
     "connect-mongo": "~3.2.0",
     "cookie-parser": "~1.4.4",
+    "cors": "^2.8.5",
     "cross-env": "~6.0.3",
     "csurf": "1.10.0",
     "dotenv": "~8.2.0",
@@ -45,7 +46,6 @@
     "eslint-plugin-prettier": "~3.1.2",
     "nodemon": "^2.0.2",
     "npm-check-updates": "~4.0.1",
-    "prettier": "~1.19.1",
     "supertest": "*",
     "tape": "~4.12.1"
   },
