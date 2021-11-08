@@ -46,10 +46,18 @@ module.exports = function (app) {
     jersey_no: { type: Number }
   });
 
+  let teamSchema = new mongoose.Schema({
+    name: { type: String, required: true},
+    location: { type: String },
+    manager: {type: String},
+    players: [{type: mongoose.Schema.Types.ObjectId, ref: 'players'}]
+  });
+
   //Models
   let Stats = mongoose.model('Stats', statSchema);
   let fixtures = mongoose.model('fixtures', fixtureSchema);
   let players = mongoose.model('players', playerSchema);
+  let teams = mongoose.model('teams', teamSchema);
 
   app.get('/', home.index);
 
@@ -139,6 +147,34 @@ module.exports = function (app) {
       (error, arrayOfResults) => {
         if (!error && arrayOfResults) {
           return res.json(arrayOfResults)
+        }
+      }
+    )
+  });
+
+
+  //teams halne
+  app.post('/api/teams', function (req, res) {
+    let newTeam = new teams({
+      name: req.body.name,
+      location: req.body.location,
+      manager: req.body.manager,
+      players: req.body.players
+    });
+    newTeam.save((error, savedTeam) => {
+      if (!error && savedTeam) {
+        res.json(savedTeam);
+      }
+    });
+  })
+
+  //teams get
+  app.get('/api/teams', cors(corsOptions), function (req, res) {
+    teams.find({},
+      (error, arrayOfResults) => {
+        if (!error && arrayOfResults) {
+          //console.log(arrayOfResults)
+           return res.json(arrayOfResults)
         }
       }
     )
