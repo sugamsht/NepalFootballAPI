@@ -47,10 +47,10 @@ module.exports = function (app) {
   });
 
   let teamSchema = new mongoose.Schema({
-    name: { type: String, required: true},
+    name: { type: String, required: true },
     location: { type: String },
-    manager: {type: String},
-    players: [{type: mongoose.Schema.Types.ObjectId, ref: 'players'}]
+    manager: { type: String },
+    players: [{ type: mongoose.Schema.Types.ObjectId, ref: 'players' }]
   });
 
   //Models
@@ -58,6 +58,8 @@ module.exports = function (app) {
   let fixtures = mongoose.model('fixtures', fixtureSchema);
   let players = mongoose.model('players', playerSchema);
   let teams = mongoose.model('teams', teamSchema);
+
+
 
   app.get('/', home.index);
 
@@ -173,8 +175,23 @@ module.exports = function (app) {
     teams.find({},
       (error, arrayOfResults) => {
         if (!error && arrayOfResults) {
-          //console.log(arrayOfResults)
-           return res.json(arrayOfResults)
+          return res.json(arrayOfResults.map(team => {
+            return {
+              players: team.players.map(player => {
+
+                //convert player to string
+                const playerId = player.toString();
+                console.log(playerId);
+              })
+            }
+          }))
+          players.find({ _id: "6188f62dd29b304a30751b73" },
+            (error, arrayOfResults) => {
+              if (!error && arrayOfResults) {
+                const asd = res.json(arrayOfResults)
+              }
+            }
+          )
         }
       }
     )
