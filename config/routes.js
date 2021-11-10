@@ -24,6 +24,7 @@ module.exports = function (app) {
   //Schemas
   let statSchema = new mongoose.Schema({
     team_name: { type: String, required: true },
+    played: Number,
     win: Number,
     lost: Number,
     draw: Number,
@@ -55,6 +56,17 @@ module.exports = function (app) {
     playerList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'players' }]
   });
 
+  let resultSchema = new mongoose.Schema({
+    team_name: { type: String, required: true },
+    played: Number,
+    win: Number,
+    lost: Number,
+    draw: Number,
+    gd: Number,
+    points: Number
+  });
+
+
   //Models
   let Stats = mongoose.model('Stats', statSchema);
   let fixtures = mongoose.model('fixtures', fixtureSchema);
@@ -85,10 +97,13 @@ module.exports = function (app) {
     var win = parseInt(req.body.win);
     var draw = parseInt(req.body.draw);
     var points = (win * 3) + draw;
+    var lost = parseInt(req.body.lost);
+    var played = win + draw + lost;
     let newStat = new Stats({
       team_name: req.body.team_name,
+      played: played,
       win: win || 0,
-      lost: req.body.lost || 0,
+      lost: lost || 0,
       draw: draw || 0,
       gd: req.body.gd || 0,
       points: points || 0
@@ -144,6 +159,11 @@ module.exports = function (app) {
         res.json(savedPlayer);
       }
     });
+    teams.findOneAndUpdate({ name: req.body.team_name }, { $push: { playerList: newPlayer._id } }, { new: true }, (error, savedTeam) => {
+      if (!error && savedTeam) {
+        alert('Big Sucess')
+      }
+    })
   })
 
   //players get
