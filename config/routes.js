@@ -39,6 +39,7 @@ module.exports = function (app) {
   });
 
   let playerSchema = new mongoose.Schema({
+    team_name: { type: String, required: true },
     fname: { type: String, required: true },
     lname: { type: String, required: true },
     dob: { type: Date, default: Date.now },
@@ -50,7 +51,7 @@ module.exports = function (app) {
     name: { type: String, required: true },
     location: { type: String },
     manager: { type: String },
-    players: [{ type: mongoose.Schema.Types.ObjectId, ref: 'players' }]
+    playerList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'players' }]
   });
 
   //Models
@@ -130,6 +131,7 @@ module.exports = function (app) {
   //players halne
   app.post('/api/players', function (req, res) {
     let newPlayer = new players({
+      team_name: req.body.team_name,
       fname: req.body.fname,
       lname: req.body.lname,
       dob: req.body.dob,
@@ -161,7 +163,7 @@ module.exports = function (app) {
       name: req.body.name,
       location: req.body.location,
       manager: req.body.manager,
-      players: req.body.players
+      playerList: req.body.players
     });
     newTeam.save((error, savedTeam) => {
       if (!error && savedTeam) {
@@ -174,25 +176,11 @@ module.exports = function (app) {
   app.get('/api/teams', cors(corsOptions), function (req, res) {
     teams.find({},
       (error, arrayOfResults) => {
-        if (!error && arrayOfResults) {
-          return res.json(arrayOfResults.map(team => {
-            return {
-              players: team.players.map(player => {
-
-                //convert player to string
-                const playerId = player.toString();
-                console.log(playerId);
-              })
-            }
-          }))
-          players.find({ _id: "6188f62dd29b304a30751b73" },
-            (error, arrayOfResults) => {
-              if (!error && arrayOfResults) {
-                const asd = res.json(arrayOfResults)
-              }
-            }
-          )
-        }
+        teams.populate(arrayOfResults, { path: 'playerList' }, (err, populated) => {
+          if (!error && populated) {
+            return res.json(populated)
+          }
+        })
       }
     )
   });

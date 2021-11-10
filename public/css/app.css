@@ -1,6 +1,28 @@
-
 /* Show it is fixed to the top */
 
 body {
   padding-top: 6rem;
+}
+
+.content {
+  display: grid;
+  grid-template: "a a a"
+    "b b b";
+}
+
+div#player-form,
+div#fixture-form,
+div#team-form,
+div#stat-form {
+  width: 200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
 }

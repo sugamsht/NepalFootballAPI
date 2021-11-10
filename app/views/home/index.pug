@@ -1,46 +1,92 @@
 extends ../layouts/default.pug
 
 block page-header
-  h2 TEAM
 
 block content
   body
-  form(action='/api/test', method='POST')
-    br
-    | Team: 
-    input(type='text', name='team_name' style='width: 200px; margin-bottom: 3px;')
-    br
-    | Win: 
-    input(type='number', name='win' style='width: 50px; margin-bottom: 3px;')
-    br
-    | Lost:
-    input(type='number', name='lost' style='width: 50px; margin-bottom: 3px;')
-    br
-    | Draw: 
-    input(type='number', name='draw' style='width: 50px; margin-bottom: 3px;')
-    br
-    | GD: 
-    input(type='number', name='gd' style='width: 50px; margin-bottom: 3px;')
-    br
-    input(type='submit', value='Submit')
-    br
-    br
-  h2 FIXTURE DETAIL
-  form(action='/api/fixtures', method='POST')
-    br
-    | Team 1: 
-    input(type='text', name='team1' style='width: 200px; margin-bottom: 3px;')
-    | Team 2: 
-    input(type='text', name='team2' style='width: 200px; margin-bottom: 3px;')
-    br
-    | Stadium: 
-    input(type='text', name='stadium' style='width: 200px; margin-bottom: 3px; ')
-    br
-    | Date : 
-    input(type='date', name='date' style='width: 200px; margin-bottom: 3px;')
-    br
-    | Time:
-    input(type='time', name='time' style='width: 200px; margin-bottom: 3px;')
-    br
-    input(type='submit', value='Submit')
-  
+  div#stat-form
+    h2 TEAM
+    form(action='/api/test' method='POST')
+      | Team: 
+      input(type='text' name='team_name')
+      br
+      | Win: 
+      input(type='number' name='win')
+      br
+      | Lost:
+      input(type='number' name='lost')
+      br
+      | Draw: 
+      input(type='number' name='draw')
+      br
+      | GD: 
+      input(type='number' name='gd')
+      br
+      input(type='submit' value='Submit')
+      br
+  div#fixture-form
+    h2 FIXTURES
+    form(action='/api/fixtures' method='POST')
+      | Team 1: 
+      input(type='text' name='team1' )
+      br
+      | Team 2: 
+      input(type='text' name='team2' )
+      br
+      | Stadium: 
+      input(type='text' name='stadium')
+      br
+      | Date : 
+      input(type='date' name='date' )
+      br
+      | Time:
+      input(type='time' name='time' )
+      br
+      input(type='submit' value='Submit')
+      br
+    //form with player
+  div#player-form
+    h2 Player Detail
+    form(action='/api/players' method='POST')
+      option Choose a Team
+      select#selectTeam(name='team_name')
+      //- | Team:
+      //- input(type="text" name="team_name" )
+      br
+      | First Name:
+      input(type='text' name='fname' )
+      br
+      | Last Name:
+      input(type='text' name='lname' )
+      br
+      | Date of Birth:
+      input(type='date' name='dob' )
+      br
+      | Position:
+      input(type='text' name='position' )
+      br
+      | Jersey Number:
+      input(type="number" name='jersey_no' )
+      br
+      input(type='submit' value='Submit')
+  //form with team detail
+  div#team-form
+    h2 Team Detail
+    form(action='/api/team' method='POST')
+      | Team Name:
+      input(type='text' name='name' )
+      br
+      | City:
+      input(type='text' name='city' )
+      br
+      | Stadium:
+      input(type='text' name='stadium' )
+      br
+      | Manager:
+      input(type='text' name='manager' )
+      br
+      input(type='submit' value='Submit')
+  //- h2#yolo ahhaha
+  //- form#myForm
+  //- select#selectNumber
+  //-   option Choose a number
