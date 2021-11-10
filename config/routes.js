@@ -28,6 +28,7 @@ module.exports = function (app) {
     lost: Number,
     draw: Number,
     gd: Number,
+    points: Number
   });
 
   let fixtureSchema = new mongoose.Schema({

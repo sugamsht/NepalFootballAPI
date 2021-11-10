@@ -2,11 +2,14 @@
 
 document.addEventListener("DOMContentLoaded", function (event) {
     var options = []
-    fetch('http://localhost:3000/api/test')
+    fetch('http://localhost:3000/api/teams')
         .then(response => response.json())
         .then(data => {
-            options = data.map(item => item.team_name)
+            options = data.map(item => item.name)
             var select = document.getElementById("selectTeam");
+            var select1 = document.getElementById("selectTeam1");
+            var select2 = document.getElementById("selectTeam2");
+            var selectStat = document.getElementById("selectTeamStat");
             // var options = ["1", "2", "3", "4", "5"];
 
             for (var i = 0; i < options.length; i++) {
@@ -16,7 +19,23 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 el.text = opt;
                 el.value = opt;
 
+                var el1 = document.createElement("option");
+                el1.text = opt;
+                el1.value = opt;
+
+                var el2 = document.createElement("option");
+                el2.text = opt;
+                el2.value = opt;
+                
+                var el3 = document.createElement("option");
+                el3.text = opt;
+                el3.value = opt;
+
                 select.add(el);
+                select1.add(el1);
+                select2.add(el2);
+                selectStat.add(el3);
+                
             }
         });
 

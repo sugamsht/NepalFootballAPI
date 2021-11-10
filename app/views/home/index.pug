@@ -7,8 +7,8 @@ block content
   div#stat-form
     h2 TEAM
     form(action='/api/test' method='POST')
-      | Team: 
-      input(type='text' name='team_name')
+      option Select Team 
+      select#selectTeamStat(name='team_name')
       br
       | Win: 
       input(type='number' name='win')
@@ -27,11 +27,10 @@ block content
   div#fixture-form
     h2 FIXTURES
     form(action='/api/fixtures' method='POST')
-      | Team 1: 
-      input(type='text' name='team1' )
-      br
-      | Team 2: 
-      input(type='text' name='team2' )
+      option Choose Team1 
+      select#selectTeam1(name='team1')
+      option Choose Team2  
+      select#selectTeam2(name='team2')      
       br
       | Stadium: 
       input(type='text' name='stadium')
