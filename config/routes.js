@@ -22,15 +22,6 @@ var corsOptions = {
 module.exports = function (app) {
 
   //Schemas
-  let statSchema = new mongoose.Schema({
-    team_name: { type: String, required: true },
-    played: Number,
-    win: Number,
-    lost: Number,
-    draw: Number,
-    gd: Number,
-    points: Number
-  });
 
   let fixtureSchema = new mongoose.Schema({
     team1: { type: String, required: true },
@@ -54,6 +45,12 @@ module.exports = function (app) {
     name: { type: String, required: true },
     location: { type: String },
     manager: { type: String },
+    played: { type: Number, default: 0 },
+    win: { type: Number, default: 0 },
+    lost: { type: Number, default: 0 },
+    draw: { type: Number, default: 0 },
+    gd: { type: Number, default: 0 },
+    points: { type: Number, default: 0 },
     playerList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'players' }]
   });
 
@@ -68,7 +65,6 @@ module.exports = function (app) {
 
 
   //Models
-  let Stats = mongoose.model('Stats', statSchema);
   let fixtures = mongoose.model('fixtures', fixtureSchema);
   let players = mongoose.model('players', playerSchema);
   let teams = mongoose.model('teams', teamSchema);
@@ -84,41 +80,7 @@ module.exports = function (app) {
   });
 
   //Get All data
-  app.get('/api/test', cors(corsOptions), function (req, res) {
-    Stats.find({},
-      (error, arrayOfResults) => {
-        if (!error && arrayOfResults) {
-          return res.json(arrayOfResults)
-        }
-      }
-    ).sort([['points', -1]])
-  });
-
-  app.post('/api/test', function (req, res) {
-    var win = parseInt(req.body.win);
-    var draw = parseInt(req.body.draw);
-    var points = (win * 3) + draw;
-    var lost = parseInt(req.body.lost);
-    var played = win + draw + lost;
-    let newStat = new Stats({
-      team_name: req.body.team_name,
-      played: played,
-      win: win || 0,
-      lost: lost || 0,
-      draw: draw || 0,
-      gd: req.body.gd || 0,
-      points: points || 0
-    });
-    newStat.save((error, savedStat) => {
-      if (!error && savedStat) {
-        alert('Sucess')
-        //reset form
-        res.redirect('/');
-        // res.json(savedStat);
-      }
-    });
-  });
-
+  
   //fixtures post and get
   app.post('/api/fixtures', function (req, res) {
     var fixname = req.body.team1 + ' vs ' + req.body.team2;
@@ -132,7 +94,10 @@ module.exports = function (app) {
     });
     newFixture.save((error, savedStat) => {
       if (!error && savedStat) {
-        res.json(savedStat);
+        alert('Big Success'+savedStat)
+        //reset form
+        res.redirect('/');
+        //res.json(savedStat);
       }
     });
   })
@@ -159,12 +124,15 @@ module.exports = function (app) {
     });
     newPlayer.save((error, savedPlayer) => {
       if (!error && savedPlayer) {
-        res.json(savedPlayer);
+        alert('Big Success'+savedPlayer)
+        //reset form
+        res.redirect('/');
+        //res.json(savedPlayer);
       }
     });
     teams.findOneAndUpdate({ name: req.body.team_name }, { $push: { playerList: newPlayer._id } }, { new: true }, (error, savedTeam) => {
       if (!error && savedTeam) {
-        alert('Big Sucess')
+        //alert('Big Success')
       }
     })
   })
@@ -191,7 +159,10 @@ module.exports = function (app) {
     });
     newTeam.save((error, savedTeam) => {
       if (!error && savedTeam) {
-        res.json(savedTeam);
+        alert('Big Success'+savedTeam)
+        //reset form
+        res.redirect('/');
+        //res.json(savedTeam);
       }
     });
   })
@@ -206,7 +177,7 @@ module.exports = function (app) {
           }
         })
       }
-    )
+    ).sort([['points', -1]])
   });
 
   //results halne
@@ -218,40 +189,40 @@ module.exports = function (app) {
     var team2 = result[1];
     var score1 = req.body.score[0];
     var score2 = req.body.score[1];
-    Stats.findOneAndUpdate({ team_name: team1 }, { $inc: { played: 1 } }, { new: true }, (error, savedStat) => { })
-    Stats.findOneAndUpdate({ team_name: team2 }, { $inc: { played: 1 } }, { new: true }, (error, savedStat) => { })
+    teams.findOneAndUpdate({ name: team1 }, { $inc: { played: 1 } }, { new: true }, (error, savedStat) => { })
+    teams.findOneAndUpdate({ name: team2 }, { $inc: { played: 1 } }, { new: true }, (error, savedStat) => { })
     if (score1 > score2) {
       //increase win in stats
-      Stats.findOneAndUpdate({ team_name: team1 }, { $inc: { win: 1, points: 3 } }, { new: true }, (error, savedStat) => {
+      teams.findOneAndUpdate({ name: team1 }, { $inc: { win: 1, points: 3 } }, { new: true }, (error, savedStat) => {
         if (!error && savedStat) {
-          console.log('team1 win')
+          console.log(team1 +' win')
         }
       })
-      Stats.findOneAndUpdate({ team_name: team2 }, { $inc: { lost: 1 } }, { new: true }, (error, savedStat) => {
+      teams.findOneAndUpdate({ name: team2 }, { $inc: { lost: 1 } }, { new: true }, (error, savedStat) => {
         if (!error && savedStat) {
-          console.log('team2 lost')
+          console.log(team2 +' lost')
         }
       })
     } else if (score1 < score2) {
-      Stats.findOneAndUpdate({ team_name: team1 }, { $inc: { lost: 1 } }, { new: true }, (error, savedStat) => {
+      teams.findOneAndUpdate({ name: team1 }, { $inc: { lost: 1 } }, { new: true }, (error, savedStat) => {
         if (!error && savedStat) {
-          console.log('team1 lost')
+          console.log(team1+' lost')
         }
       })
-      Stats.findOneAndUpdate({ team_name: team2 }, { $inc: { win: 1, points: 3 } }, { new: true }, (error, savedStat) => {
+      teams.findOneAndUpdate({ name: team2 }, { $inc: { win: 1, points: 3 } }, { new: true }, (error, savedStat) => {
         if (!error && savedStat) {
-          console.log('team2 win')
+          console.log(team2+' win')
         }
       })
     } else {
-      Stats.findOneAndUpdate({ team_name: team1 }, { $inc: { draw: 1, points: 1 } }, { new: true }, (error, savedStat) => {
+      teams.findOneAndUpdate({ name: team1 }, { $inc: { draw: 1, points: 1 } }, { new: true }, (error, savedStat) => {
         if (!error && savedStat) {
-          console.log('team1 draw')
+          console.log(team1+' draw')
         }
       })
-      Stats.findOneAndUpdate({ team_name: team2 }, { $inc: { draw: 1, points: 1 } }, { new: true }, (error, savedStat) => {
+      teams.findOneAndUpdate({ name: team2 }, { $inc: { draw: 1, points: 1 } }, { new: true }, (error, savedStat) => {
         if (!error && savedStat) {
-          console.log('team2 draw')
+          console.log(team2+' draw')
         }
       })
     }
@@ -265,7 +236,10 @@ module.exports = function (app) {
     });
     newResult.save((error, savedResult) => {
       if (!error && savedResult) {
-        res.json(savedResult);
+        alert('Big Success'+savedResult)
+        //reset form
+        res.redirect('/');
+        //res.json(savedResult);
       }
     });
   })

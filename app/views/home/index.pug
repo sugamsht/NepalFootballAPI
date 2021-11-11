@@ -4,26 +4,6 @@ block page-header
 
 block content
   body
-  div#stat-form
-    h2 TEAM
-    form(action='/api/test' method='POST')
-      option Select Team 
-      select#selectTeamStat(name='team_name')
-      br
-      | Win: 
-      input(type='number' name='win')
-      br
-      | Lost:
-      input(type='number' name='lost')
-      br
-      | Draw: 
-      input(type='number' name='draw')
-      br
-      | GD: 
-      input(type='number' name='gd')
-      br
-      input(type='submit' value='Submit')
-      br
   div#fixture-form
     h2 FIXTURES
     form(action='/api/fixtures' method='POST')
@@ -89,7 +69,7 @@ block content
       input(type='text' name='manager' )
       br
       input(type='submit' value='Submit')
-  #result-form 
+  div#result-form 
     h2 Result
     form(action='/api/results' method='POST')
       option Choose Fixture
