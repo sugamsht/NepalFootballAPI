@@ -37,7 +37,8 @@ module.exports = function (app) {
     team2: { type: String, required: true },
     stadium: String,
     date: { type: Date, default: Date.now },
-    time: String
+    time: String,
+    fixname: String,
   });
 
   let playerSchema = new mongoose.Schema({
@@ -57,13 +58,12 @@ module.exports = function (app) {
   });
 
   let resultSchema = new mongoose.Schema({
-    team_name: { type: String, required: true },
-    played: Number,
-    win: Number,
-    lost: Number,
-    draw: Number,
-    gd: Number,
-    points: Number
+    fixtureResult: { type: String, required: true },
+    score: [Number],
+    fouls: [Number],
+    offsides: [Number],
+    corners: [Number],
+    shots: [Number]
   });
 
 
@@ -72,6 +72,7 @@ module.exports = function (app) {
   let fixtures = mongoose.model('fixtures', fixtureSchema);
   let players = mongoose.model('players', playerSchema);
   let teams = mongoose.model('teams', teamSchema);
+  let results = mongoose.model('results', resultSchema);
 
 
 
@@ -120,12 +121,14 @@ module.exports = function (app) {
 
   //fixtures post and get
   app.post('/api/fixtures', function (req, res) {
+    var fixname = req.body.team1 + ' vs ' + req.body.team2;
     let newFixture = new fixtures({
       team1: req.body.team1,
       team2: req.body.team2,
       stadium: req.body.stadium,
       date: req.body.date,
       time: req.body.time,
+      fixname: fixname
     });
     newFixture.save((error, savedStat) => {
       if (!error && savedStat) {
@@ -205,6 +208,67 @@ module.exports = function (app) {
       }
     )
   });
+
+  //results halne
+  app.post('/api/results', function (req, res) {
+    var fixtureResult = req.body.fixtureResult;
+    //split fixtureResult
+    var result = fixtureResult.split(' vs ');
+    var team1 = result[0];
+    var team2 = result[1];
+    var score1 = req.body.score[0];
+    var score2 = req.body.score[1];
+    Stats.findOneAndUpdate({ team_name: team1 }, { $inc: { played: 1 } }, { new: true }, (error, savedStat) => { })
+    Stats.findOneAndUpdate({ team_name: team2 }, { $inc: { played: 1 } }, { new: true }, (error, savedStat) => { })
+    if (score1 > score2) {
+      //increase win in stats
+      Stats.findOneAndUpdate({ team_name: team1 }, { $inc: { win: 1, points: 3 } }, { new: true }, (error, savedStat) => {
+        if (!error && savedStat) {
+          console.log('team1 win')
+        }
+      })
+      Stats.findOneAndUpdate({ team_name: team2 }, { $inc: { lost: 1 } }, { new: true }, (error, savedStat) => {
+        if (!error && savedStat) {
+          console.log('team2 lost')
+        }
+      })
+    } else if (score1 < score2) {
+      Stats.findOneAndUpdate({ team_name: team1 }, { $inc: { lost: 1 } }, { new: true }, (error, savedStat) => {
+        if (!error && savedStat) {
+          console.log('team1 lost')
+        }
+      })
+      Stats.findOneAndUpdate({ team_name: team2 }, { $inc: { win: 1, points: 3 } }, { new: true }, (error, savedStat) => {
+        if (!error && savedStat) {
+          console.log('team2 win')
+        }
+      })
+    } else {
+      Stats.findOneAndUpdate({ team_name: team1 }, { $inc: { draw: 1, points: 1 } }, { new: true }, (error, savedStat) => {
+        if (!error && savedStat) {
+          console.log('team1 draw')
+        }
+      })
+      Stats.findOneAndUpdate({ team_name: team2 }, { $inc: { draw: 1, points: 1 } }, { new: true }, (error, savedStat) => {
+        if (!error && savedStat) {
+          console.log('team2 draw')
+        }
+      })
+    }
+    let newResult = new results({
+      fixtureResult: fixtureResult,
+      score: req.body.score,
+      fouls: req.body.foul,
+      offsides: req.body.offside,
+      corners: req.body.corner,
+      shots: req.body.shots
+    });
+    newResult.save((error, savedResult) => {
+      if (!error && savedResult) {
+        res.json(savedResult);
+      }
+    });
+  })
 
 
   /**

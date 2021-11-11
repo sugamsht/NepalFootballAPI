@@ -62,9 +62,11 @@ block content
       input(type='date' name='dob' )
       br
       option Position
-      select#selectTeam(name='team_name')
-      | Position:
-      input(type='text' name='position' )
+      select(name='position')
+        option(value='GK') GoalKeeper 
+        option(value='DF') Defender
+        option(value='MD') Midfielder
+        option(value='FW') Forward
       br
       | Jersey Number:
       input(type="number" name='jersey_no' )
@@ -73,7 +75,7 @@ block content
   //form with team detail
   div#team-form
     h2 Team Detail
-    form(action='/api/team' method='POST')
+    form(action='/api/teams' method='POST')
       | Team Name:
       input(type='text' name='name' )
       br
@@ -87,7 +89,30 @@ block content
       input(type='text' name='manager' )
       br
       input(type='submit' value='Submit')
-  //- h2#yolo ahhaha
-  //- form#myForm
-  //- select#selectNumber
-  //-   option Choose a number
+  #result-form 
+    h2 Result
+    form(action='/api/results' method='POST')
+      option Choose Fixture
+      select#selectFixture(name='fixtureResult')
+      br
+      | Score:
+      input(type='number' name='score' )
+      input(type='number' name='score' )
+      br
+      | Offside:
+      input(type='number' name='offsides' )
+      input(type='number' name='offsides' )
+      br
+      | Fouls:
+      input(type='number' name='fouls' )
+      input(type='number' name='fouls' )
+      br
+      | Corners:
+      input(type='number' name='corners' )
+      input(type='number' name='corners' )
+      br
+      | Shots:
+      input(type='number' name='shots' )
+      input(type='number' name='shots' )
+      br
+      input(type='submit' value='Submit')

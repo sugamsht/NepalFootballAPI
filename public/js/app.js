@@ -1,7 +1,5 @@
 
-
 document.addEventListener("DOMContentLoaded", function (event) {
-    var options = []
     fetch('http://localhost:3000/api/teams')
         .then(response => response.json())
         .then(data => {
@@ -26,7 +24,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 var el2 = document.createElement("option");
                 el2.text = opt;
                 el2.value = opt;
-                
+
                 var el3 = document.createElement("option");
                 el3.text = opt;
                 el3.value = opt;
@@ -35,11 +33,28 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 select1.add(el1);
                 select2.add(el2);
                 selectStat.add(el3);
-                
+
             }
         });
 
-    document.getElementById('yolo').innerHTML = "New text!";
+    fetch('http://localhost:3000/api/fixtures')
+        .then(response => response.json())
+        .then(data => {
+            options = data.map(item => item.fixname)
+            var select = document.getElementById("selectFixture");
+
+            for (var i = 0; i < options.length; i++) {
+                var opt = options[i];
+
+                var el = document.createElement("option");
+                el.text = opt;
+                el.value = opt;
+
+                select.add(el);
+
+
+            }
+        });
 
 });
 
