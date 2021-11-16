@@ -12,8 +12,12 @@ block content
       option Choose Team2  
       select#selectTeam2(name='team2')      
       br
-      | Stadium: 
-      input(type='text' name='stadium')
+      option stadium
+      select(name='stadium')
+        option(value='ANFA') ANFA Stadium
+        option(value='Dasthrath') Dashrath Stadium
+        option(value='Chyasal') Chyasal Stadium
+        option(value='Halchowk') Halchowk Stadium
       br
       | Date : 
       input(type='date' name='date' )
@@ -59,11 +63,11 @@ block content
       | Team Name:
       input(type='text' name='name' )
       br
-      | City:
-      input(type='text' name='city' )
+      | Location:
+      input(type='text' name='location' )
       br
-      | Stadium:
-      input(type='text' name='stadium' )
+      | Logo 
+      input(type='text' name='logo' )
       br
       | Manager:
       input(type='text' name='manager' )

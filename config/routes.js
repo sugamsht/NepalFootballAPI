@@ -27,7 +27,7 @@ module.exports = function (app) {
     team1: { type: String, required: true },
     team2: { type: String, required: true },
     stadium: String,
-    date: { type: Date, default: Date.now },
+    date: { type: String },
     time: String,
     fixname: String,
   });
@@ -44,6 +44,7 @@ module.exports = function (app) {
   let teamSchema = new mongoose.Schema({
     name: { type: String, required: true },
     location: { type: String },
+    logo: String,
     manager: { type: String },
     played: { type: Number, default: 0 },
     win: { type: Number, default: 0 },
@@ -84,11 +85,15 @@ module.exports = function (app) {
   //fixtures post and get
   app.post('/api/fixtures', function (req, res) {
     var fixname = req.body.team1 + ' vs ' + req.body.team2;
+    // let date = req.body.date;
+    var dat = new Date(req.body.date).toLocaleDateString("en-US");
+    // var dat = myDate.toLocaleDateString("en-US");
+    console.log(dat);
     let newFixture = new fixtures({
       team1: req.body.team1,
       team2: req.body.team2,
       stadium: req.body.stadium,
-      date: req.body.date,
+      date: dat,
       time: req.body.time,
       fixname: fixname
     });
@@ -154,6 +159,7 @@ module.exports = function (app) {
     let newTeam = new teams({
       name: req.body.name,
       location: req.body.location,
+      logo: req.body.logo,
       manager: req.body.manager,
       playerList: req.body.players
     });
@@ -229,9 +235,9 @@ module.exports = function (app) {
     let newResult = new results({
       fixtureResult: fixtureResult,
       score: req.body.score,
-      fouls: req.body.foul,
-      offsides: req.body.offside,
-      corners: req.body.corner,
+      fouls: req.body.fouls,
+      offsides: req.body.offsides,
+      corners: req.body.corners,
       shots: req.body.shots
     });
     newResult.save((error, savedResult) => {
