@@ -19,6 +19,18 @@ div#stat-form {
   margin-right: auto;
 }
 
+input[type="number"] {
+  width: 4rem;
+}
+
+select#selectFixture {
+  width: 200px;
+}
+
+div#result-form {
+  justify-self: center;
+}
+
 .footer {
   position: fixed;
   left: 0;

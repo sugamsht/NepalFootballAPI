@@ -81,13 +81,11 @@ module.exports = function (app) {
   });
 
   //Get All data
-  
+
   //fixtures post and get
   app.post('/api/fixtures', function (req, res) {
     var fixname = req.body.team1 + ' vs ' + req.body.team2;
-    // let date = req.body.date;
-    var dat = new Date(req.body.date).toLocaleDateString("en-US");
-    // var dat = myDate.toLocaleDateString("en-US");
+    var dat = new Date(req.body.date).toDateString();
     console.log(dat);
     let newFixture = new fixtures({
       team1: req.body.team1,
@@ -99,7 +97,7 @@ module.exports = function (app) {
     });
     newFixture.save((error, savedStat) => {
       if (!error && savedStat) {
-        alert('Big Success'+savedStat)
+        alert('Big Success' + savedStat)
         //reset form
         res.redirect('/');
         //res.json(savedStat);
@@ -129,7 +127,7 @@ module.exports = function (app) {
     });
     newPlayer.save((error, savedPlayer) => {
       if (!error && savedPlayer) {
-        alert('Big Success'+savedPlayer)
+        alert('Big Success' + savedPlayer)
         //reset form
         res.redirect('/');
         //res.json(savedPlayer);
@@ -165,7 +163,7 @@ module.exports = function (app) {
     });
     newTeam.save((error, savedTeam) => {
       if (!error && savedTeam) {
-        alert('Big Success'+savedTeam)
+        alert('Big Success' + savedTeam)
         //reset form
         res.redirect('/');
         //res.json(savedTeam);
@@ -201,34 +199,34 @@ module.exports = function (app) {
       //increase win in stats
       teams.findOneAndUpdate({ name: team1 }, { $inc: { win: 1, points: 3 } }, { new: true }, (error, savedStat) => {
         if (!error && savedStat) {
-          console.log(team1 +' win')
+          console.log(team1 + ' win')
         }
       })
       teams.findOneAndUpdate({ name: team2 }, { $inc: { lost: 1 } }, { new: true }, (error, savedStat) => {
         if (!error && savedStat) {
-          console.log(team2 +' lost')
+          console.log(team2 + ' lost')
         }
       })
     } else if (score1 < score2) {
       teams.findOneAndUpdate({ name: team1 }, { $inc: { lost: 1 } }, { new: true }, (error, savedStat) => {
         if (!error && savedStat) {
-          console.log(team1+' lost')
+          console.log(team1 + ' lost')
         }
       })
       teams.findOneAndUpdate({ name: team2 }, { $inc: { win: 1, points: 3 } }, { new: true }, (error, savedStat) => {
         if (!error && savedStat) {
-          console.log(team2+' win')
+          console.log(team2 + ' win')
         }
       })
     } else {
       teams.findOneAndUpdate({ name: team1 }, { $inc: { draw: 1, points: 1 } }, { new: true }, (error, savedStat) => {
         if (!error && savedStat) {
-          console.log(team1+' draw')
+          console.log(team1 + ' draw')
         }
       })
       teams.findOneAndUpdate({ name: team2 }, { $inc: { draw: 1, points: 1 } }, { new: true }, (error, savedStat) => {
         if (!error && savedStat) {
-          console.log(team2+' draw')
+          console.log(team2 + ' draw')
         }
       })
     }
@@ -242,7 +240,7 @@ module.exports = function (app) {
     });
     newResult.save((error, savedResult) => {
       if (!error && savedResult) {
-        alert('Big Success'+savedResult)
+        alert('Big Success' + savedResult)
         //reset form
         res.redirect('/');
         //res.json(savedResult);
