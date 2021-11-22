@@ -86,7 +86,6 @@ module.exports = function (app) {
   app.post('/api/fixtures', function (req, res) {
     var fixname = req.body.team1 + ' vs ' + req.body.team2;
     var dat = new Date(req.body.date).toDateString();
-    console.log(dat);
     let newFixture = new fixtures({
       team1: req.body.team1,
       team2: req.body.team2,
@@ -114,6 +113,22 @@ module.exports = function (app) {
       }
     )
   });
+
+  //put method for fixtures
+  app.post('/api/editFixtures/', function (req, res) {
+    console.log(req.body);
+    var fixname = req.body.fixname;
+    if (!fixname) {
+      return res.json({ error: 'No fixture name' })
+    }
+    fixtures.findOneAndUpdate({ fixname: fixname }, { $set: { date: req.body.date, time: req.body.time } }, { new: true }, (error, savedFixture) => {
+      if (!error && savedFixture) {
+        alert('Big Success' + savedFixture)
+        //reset form
+        res.redirect('/');
+      }
+    });
+  })
 
   //players halne
   app.post('/api/players', function (req, res) {
@@ -199,34 +214,28 @@ module.exports = function (app) {
       //increase win in stats
       teams.findOneAndUpdate({ name: team1 }, { $inc: { win: 1, points: 3 } }, { new: true }, (error, savedStat) => {
         if (!error && savedStat) {
-          console.log(team1 + ' win')
         }
       })
       teams.findOneAndUpdate({ name: team2 }, { $inc: { lost: 1 } }, { new: true }, (error, savedStat) => {
         if (!error && savedStat) {
-          console.log(team2 + ' lost')
         }
       })
     } else if (score1 < score2) {
       teams.findOneAndUpdate({ name: team1 }, { $inc: { lost: 1 } }, { new: true }, (error, savedStat) => {
         if (!error && savedStat) {
-          console.log(team1 + ' lost')
         }
       })
       teams.findOneAndUpdate({ name: team2 }, { $inc: { win: 1, points: 3 } }, { new: true }, (error, savedStat) => {
         if (!error && savedStat) {
-          console.log(team2 + ' win')
         }
       })
     } else {
       teams.findOneAndUpdate({ name: team1 }, { $inc: { draw: 1, points: 1 } }, { new: true }, (error, savedStat) => {
         if (!error && savedStat) {
-          console.log(team1 + ' draw')
         }
       })
       teams.findOneAndUpdate({ name: team2 }, { $inc: { draw: 1, points: 1 } }, { new: true }, (error, savedStat) => {
         if (!error && savedStat) {
-          console.log(team2 + ' draw')
         }
       })
     }
@@ -247,6 +256,9 @@ module.exports = function (app) {
       }
     });
   })
+
+
+
 
 
   /**

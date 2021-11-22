@@ -33,8 +33,6 @@ block content
     form(action='/api/players' method='POST')
       option Choose a Team
       select#selectTeam(name='team_name')
-      //- | Team:
-      //- input(type="text" name="team_name" )
       br
       | First Name:
       input(type='text' name='fname' )
@@ -100,3 +98,19 @@ block content
       input(type='number' name='shots' )
       br
       input(type='submit' value='Submit')
+  div#edit-form
+    h2 Edit Fixture
+    form(action='/api/editFixtures/' method='POST')
+      option Choose Fixture
+      select#selectFixture1(name='fixname')
+      br
+      | Date : 
+      input(type='date' name='date' )
+      br
+      | Time:
+      input(type='time' name='time' )
+      br
+      input(type='submit' value='Submit')
+
+
+

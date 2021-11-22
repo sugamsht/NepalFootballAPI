@@ -36,19 +36,28 @@ document.addEventListener("DOMContentLoaded", function (event) {
         .then(data => {
             options = data.map(item => item.fixname)
             var select = document.getElementById("selectFixture");
+            var select1 = document.getElementById("selectFixture1");
 
             for (var i = 0; i < options.length; i++) {
                 var opt = options[i];
 
                 var el = document.createElement("option");
+                var el1 = document.createElement("option");
+
                 el.text = opt;
                 el.value = opt;
 
                 select.add(el);
 
 
+                el1.text = opt;
+                el1.value = opt;
+
+                select1.add(el1);
             }
         });
+
+
 
 });
 
