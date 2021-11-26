@@ -196,7 +196,7 @@ module.exports = function (app) {
           }
         })
       }
-    ).sort([['points', -1]])
+    ).sort([['points', -1], ['gd', -1]])
   });
 
   //results halne
@@ -208,6 +208,11 @@ module.exports = function (app) {
     var team2 = result[1];
     var score1 = req.body.score[0];
     var score2 = req.body.score[1];
+    //goal difference
+    var gd1 = score1 - score2;
+    var gd2 = score2 - score1;
+    teams.findOneAndUpdate({ name: team1 }, { $inc: { gd: gd1 } }, { new: true }, (error, savedTeam1) => { })
+    teams.findOneAndUpdate({ name: team2 }, { $inc: { gd: gd2 } }, { new: true }, (error, savedTeam1) => { })
     teams.findOneAndUpdate({ name: team1 }, { $inc: { played: 1 } }, { new: true }, (error, savedStat) => { })
     teams.findOneAndUpdate({ name: team2 }, { $inc: { played: 1 } }, { new: true }, (error, savedStat) => { })
     if (score1 > score2) {
@@ -275,18 +280,22 @@ module.exports = function (app) {
     if (!fixtureResult) {
       return res.json({ error: 'Bhayena hai bhayena' })
     }
-    results.findOneAndUpdate({ fixtureResult: fixtureResult }, 
-      { $set: { score: req.body.score,
-                fouls: req.body.fouls,
-                offsides: req.body.offsides,
-                corners: req.body.corners,
-                shots: req.body.shots } }, { new: true }, (error, savedResults) => {
-      if (!error && savedResults) {
-        alert('Big Success' + savedResults)
-        //reset form
-        res.redirect('/');
-      }
-    });
+    results.findOneAndUpdate({ fixtureResult: fixtureResult },
+      {
+        $set: {
+          //score: req.body.score,
+          fouls: req.body.fouls,
+          offsides: req.body.offsides,
+          corners: req.body.corners,
+          shots: req.body.shots
+        }
+      }, { new: true }, (error, savedResults) => {
+        if (!error && savedResults) {
+          alert('Big Success' + savedResults)
+          //reset form
+          res.redirect('/');
+        }
+      });
   })
 
 
