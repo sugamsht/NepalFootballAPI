@@ -257,7 +257,37 @@ module.exports = function (app) {
     });
   })
 
+  //results get
+  app.get('/api/results', cors(corsOptions), function (req, res) {
+    results.find({},
+      (error, arrayOfResults) => {
+        if (!error && arrayOfResults) {
+          return res.json(arrayOfResults)
+        }
+      }
+    )
+  });
 
+  //edit result
+  app.post('/api/editResults/', function (req, res) {
+    console.log(req.body);
+    var fixtureResult = req.body.fixtureResult;
+    if (!fixtureResult) {
+      return res.json({ error: 'Bhayena hai bhayena' })
+    }
+    results.findOneAndUpdate({ fixtureResult: fixtureResult }, 
+      { $set: { score: req.body.score,
+                fouls: req.body.fouls,
+                offsides: req.body.offsides,
+                corners: req.body.corners,
+                shots: req.body.shots } }, { new: true }, (error, savedResults) => {
+      if (!error && savedResults) {
+        alert('Big Success' + savedResults)
+        //reset form
+        res.redirect('/');
+      }
+    });
+  })
 
 
 

@@ -55,9 +55,35 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
                 select1.add(el1);
             }
+
+            // optioon = data.map(item => item.date)
+            // var seelect = document.getElementById("selectdate");
+            // for (var j = 0; j < optioon.length; j++) {
+            //     var op = optioon[j];
+            //     var el2 = document.createTextNode(optioon);
+            //     el2.text = op;
+            //     el2.value = op;
+            //     seelect.add(el2);
+
+            // }
         });
 
+    fetch('http://localhost:3000/api/results')
+        .then(response => response.json())
+        .then(data => {
+            options = data.map(item => item.fixtureResult)
+            var selectx = document.getElementById("selectResult");
 
+            for (var i = 0; i< options.length; i++){
+                var opt = options[i];
+
+                var el = document.createElement("option");
+                el.text = opt;
+                el.value = opt;
+
+                selectx.add(el);
+            }
+        });
 
 });
 
