@@ -118,10 +118,11 @@ module.exports = function (app) {
   app.post('/api/editFixtures/', function (req, res) {
     console.log(req.body);
     var fixname = req.body.fixname;
+    var dat = new Date(req.body.date).toDateString();
     if (!fixname) {
       return res.json({ error: 'No fixture name' })
     }
-    fixtures.findOneAndUpdate({ fixname: fixname }, { $set: { date: req.body.date, time: req.body.time } }, { new: true }, (error, savedFixture) => {
+    fixtures.findOneAndUpdate({ fixname: fixname }, { $set: { date: dat, time: req.body.time, stadium: req.body.stadium } }, { new: true }, (error, savedFixture) => {
       if (!error && savedFixture) {
         alert('Big Success' + savedFixture)
         //reset form
