@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
     if (location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname === "") {
         url = 'http://localhost:3000'
     } else {
-        url = 'https://nepalscores.herokuapp.com/'
+        url = 'https://nepalscores.herokuapp.com'
     }
     console.log("This is your live site ", url + '/api/teams');
 
