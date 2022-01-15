@@ -1,6 +1,14 @@
 
 document.addEventListener("DOMContentLoaded", function (event) {
-    fetch('http://localhost:3000/api/teams')
+    let url;
+    if (location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname === "") {
+        url = 'http://localhost:3000'
+    } else {
+        url = location.hostname;
+    }
+    // console.log("This is your live site ", url + '/api/teams');
+
+    fetch(url + '/api/teams')
         .then(response => response.json())
         .then(data => {
             options = data.map(item => item.name)
@@ -31,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
             }
         });
 
-    fetch('http://localhost:3000/api/fixtures')
+    fetch(url + '/api/fixtures')
         .then(response => response.json())
         .then(data => {
             options = data.map(item => item.fixname)
@@ -68,13 +76,13 @@ document.addEventListener("DOMContentLoaded", function (event) {
             // }
         });
 
-    fetch('http://localhost:3000/api/results')
+    fetch(url + '/api/results')
         .then(response => response.json())
         .then(data => {
             options = data.map(item => item.fixtureResult)
             var selectx = document.getElementById("selectResult");
 
-            for (var i = 0; i< options.length; i++){
+            for (var i = 0; i < options.length; i++) {
                 var opt = options[i];
 
                 var el = document.createElement("option");
