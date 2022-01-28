@@ -1,13 +1,14 @@
 /* Show it is fixed to the top */
 
 body {
-  padding-top: 6rem;
+  margin-top: 6rem;
 }
 
 .content {
   display: grid;
   grid-template: "a a a"
     "b b b";
+  gap: 2vw;
 }
 
 div#player-form,
@@ -38,3 +39,39 @@ div#result-form {
   width: 100%;
   text-align: center;
 }
+
+
+.center {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+div#login {
+  border: solid 2px #777;
+  width: 100%;
+  background-color: aliceblue;
+  padding: 5rem;
+}
+
+
+div#login input {
+  margin: 10px 0px;
+  background-color: #eee;
+  border: green solid 2px;
+  padding: 10px;
+  width: 30%;
+  margin-right: .5%;
+}
+
+div#login label {
+  margin-right: 10px;
+}
+
+
+/* div#login submit {
+  margin-top: 2rem;
+  margin-left: auto;
+  margin-right: auto;
+} */

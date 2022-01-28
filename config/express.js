@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /**
  * Module dependencies.
  */
@@ -7,9 +8,8 @@ const session = require('express-session');
 const compression = require('compression');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
-const csrf = require('csurf');
+// const csrf = require('csurf');
 const helmet = require('helmet');
 
 const mongoStore = require('connect-mongo')(session);
@@ -31,7 +31,7 @@ module.exports = function (app, passport) {
   // Compression middleware (should be placed before express.static)
   app.use(
     compression({
-      threshold: 512
+      threshold: 512,
     })
   );
 
@@ -43,8 +43,8 @@ module.exports = function (app, passport) {
   if (env !== 'development') {
     log = {
       stream: {
-        write: msg => winston.info(msg)
-      }
+        write: (msg) => winston.info(msg),
+      },
     };
   } else {
     log = 'dev';
@@ -66,12 +66,10 @@ module.exports = function (app, passport) {
   });
 
   // bodyParser should be above methodOverride
-  app.use(
-    bodyParser.urlencoded({
-      extended: true
-    })
-  );
-  app.use(bodyParser.json());
+  app.use(express.urlencoded({ extended: true }));
+
+  app.use(express.json())
+
   app.use(
     methodOverride(function (req) {
       if (req.body && typeof req.body === 'object' && '_method' in req.body) {
@@ -93,8 +91,8 @@ module.exports = function (app, passport) {
       saveUninitialized: true,
       store: new mongoStore({
         url: config.db,
-        collection: 'sessions'
-      })
+        collection: 'sessions',
+      }),
     })
   );
 

@@ -1,0 +1,17 @@
+extends ../layouts/default.pug
+
+block page-header 
+    div#login.center
+        h2 Login Form
+        form(action='/login' method='POST').center
+            div
+                label Username:
+                input(type='text' name='username')
+            div
+                label Password:
+                input(type='password' name='password')
+                br
+            div#loginsubmit
+                input(type='submit' value='Submit')
+
+

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /**
  * Module dependencies.
  */
@@ -11,22 +12,12 @@ const User = mongoose.model('User');
  */
 
 module.exports = new LocalStrategy(
-  {
-    usernameField: 'email',
-    passwordField: 'password'
-  },
-  function(email, password, done) {
-    const options = {
-      criteria: { email: email }
-    };
-    User.load(options, function(err, user) {
-      if (err) return done(err);
-      if (!user) {
-        return done(null, false, { message: 'Unknown user' });
-      }
-      if (!user.authenticate(password)) {
-        return done(null, false, { message: 'Invalid password' });
-      }
+  function (username, password, done) {
+    User.findOne({ username: username }, function (err, user) {
+      console.log('User ' + username + ' attempted to log in.');
+      if (err) { return done(err); }
+      if (!user) { return done(null, false); }
+      if (password !== user.password) { return done(null, false); }
       return done(null, user);
     });
   }

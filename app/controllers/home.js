@@ -8,3 +8,9 @@ exports.index = function (req, res) {
   });
   // res.sendFile('/home/fon.html');
 };
+
+exports.login = function (req, res) {
+  res.render('home/login', {
+    title: 'login to mess things up'
+  });
+};
