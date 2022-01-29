@@ -69,6 +69,10 @@ div#login label {
   margin-right: 10px;
 }
 
+form {
+  margin: 5px;
+}
+
 
 /* div#login submit {
   margin-top: 2rem;

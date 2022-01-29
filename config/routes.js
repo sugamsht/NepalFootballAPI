@@ -68,6 +68,12 @@ module.exports = function (app) {
     res.redirect('/login');
   }
 
+  app.post('/logout', function (req, res) {
+    req.logout();
+    res.redirect('/login');
+  });
+
+
   /**
  * Error handling
  */

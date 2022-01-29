@@ -89,10 +89,14 @@ module.exports = function (app, passport) {
       proxy: true,
       resave: true,
       saveUninitialized: true,
+      cookie: {
+        // Session expires after 1 min of inactivity.
+        expires: 86400000
+      },
       store: new mongoStore({
         url: config.db,
         collection: 'sessions',
-      }),
+      })
     })
   );
 
