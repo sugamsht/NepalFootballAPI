@@ -11,6 +11,7 @@ var corsOptions = {
 
 //Schemas
 let fixtureSchema = new mongoose.Schema({
+    tournament_title1: { type: String, required: true },
     team1: { type: String, required: true },
     team2: { type: String, required: true },
     stadium: String,
@@ -29,6 +30,7 @@ let playerSchema = new mongoose.Schema({
 });
 
 let teamSchema = new mongoose.Schema({
+    tournament_title2: { type: String, required: true },
     name: { type: String, required: true },
     location: { type: String },
     logo: String,
@@ -43,6 +45,7 @@ let teamSchema = new mongoose.Schema({
 });
 
 let resultSchema = new mongoose.Schema({
+    tournament_title3: { type: String, required: true },
     fixtureResult: { type: String, required: true },
     score: [Number],
     fouls: [Number],
@@ -51,12 +54,21 @@ let resultSchema = new mongoose.Schema({
     shots: [Number]
 });
 
+let tournamentSchema = new mongoose.Schema({
+    title: { type: String, required: true },
+    stadium: [{ type: String }],
+    teamList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'teams' }],
+    fixtureList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'fixtures' }],
+    resultList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'results' }]
+});
+
 
 //Models
 let fixtures = mongoose.model('fixtures', fixtureSchema);
 let players = mongoose.model('players', playerSchema);
 let teams = mongoose.model('teams', teamSchema);
 let results = mongoose.model('results', resultSchema);
+let tournaments = mongoose.model('tournaments', tournamentSchema);
 
 
 //Routes
@@ -71,6 +83,7 @@ router.post('/fixtures', function (req, res) {
     var fixname = req.body.team1 + ' vs ' + req.body.team2;
     var dat = new Date(req.body.date).toDateString();
     let newFixture = new fixtures({
+        tournament_title1: req.body.tournament_title1,
         team1: req.body.team1,
         team2: req.body.team2,
         stadium: req.body.stadium,
@@ -86,6 +99,11 @@ router.post('/fixtures', function (req, res) {
             //res.json(savedStat);
         }
     });
+    tournaments.findOneAndUpdate({ title: req.body.tournament_title1 }, { $push: { fixtureList: newFixture._id } }, { new: true }, (error, savedTeam) => {
+        if (!error && savedTeam) {
+            //alert('Big Success')
+        }
+    })
 })
 
 router.get('/fixtures', cors(corsOptions), function (req, res) {
@@ -152,9 +170,49 @@ router.get('/players', cors(corsOptions), function (req, res) {
 });
 
 
+//Tournament post and get
+router.post('/tournaments', function (req, res) {
+    let newTournament = new tournaments({
+        title: req.body.title,
+        stadium: req.body.stadium,
+        teams: req.body.teams,
+        fixtureList: req.body.fixtures,
+        results: req.body.results
+    });
+    newTournament.save((error, savedtournament) => {
+        if (!error && savedtournament) {
+            alert('Big Success' + savedtournament)
+            //reset form
+            res.redirect('/');
+        }
+    });
+});
+
+router.get('/tournaments', cors(corsOptions), function (req, res) {
+    tournaments.find({},
+        (error, arrayOfResults) => {
+            tournaments.populate(arrayOfResults, { path: 'resultList' },  (error, populatedResults) => {
+                if (!error && populatedResults) {
+                    res.json(populatedResults)
+                }
+            })
+            // .populate(arrayOfResults, { path: 'fixtureList' },  (error, populatedResults) => {
+            //     if (!error && populatedResults) {
+            //         return res.json(populatedResults)
+            //     }
+            // })
+        }
+    )
+    // tournaments.find({})
+    //     .populate('resultList')
+    //     // .populate('fixtureList')
+        
+});
+
 //teams halne
 router.post('/teams', function (req, res) {
     let newTeam = new teams({
+        tournament_title2: req.body.tournament_title2,
         name: req.body.name,
         location: req.body.location,
         logo: req.body.logo,
@@ -169,6 +227,11 @@ router.post('/teams', function (req, res) {
             //res.json(savedTeam);
         }
     });
+    tournaments.findOneAndUpdate({ title: req.body.tournament_title2 }, { $push: { teamList: newTeam._id } }, { new: true }, (error, savedTeam) => {
+        if (!error && savedTeam) {
+            //alert('Big Success')
+        }
+    })
 })
 
 //teams get
@@ -186,6 +249,7 @@ router.get('/teams', cors(corsOptions), function (req, res) {
 
 //results halne
 router.post('/results', function (req, res) {
+    
     var fixtureResult = req.body.fixtureResult;
     //split fixtureResult
     var result = fixtureResult.split(' vs ');
@@ -230,6 +294,7 @@ router.post('/results', function (req, res) {
         })
     }
     let newResult = new results({
+        tournament_title3: req.body.tournament_title3,
         fixtureResult: fixtureResult,
         score: req.body.score,
         fouls: req.body.fouls,
@@ -245,6 +310,11 @@ router.post('/results', function (req, res) {
             //res.json(savedResult);
         }
     });
+    tournaments.findOneAndUpdate({ title: req.body.tournament_title3 }, { $push: { resultList: newResult._id } }, { new: true }, (error, savedTeam) => {
+        if (!error && savedTeam) {
+            //alert('Big Success')
+        }
+    })
 })
 
 //results get

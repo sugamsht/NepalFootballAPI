@@ -7,6 +7,9 @@ block content
   div#fixture-form
     h2 FIXTURES
     form(action='/api/fixtures' method='POST')
+      option Select the tournament 
+      select#selectTournament(name='tournament_title')
+      br
       option Choose Team1 
       select#selectTeam1(name='team1')
       option Choose Team2  
@@ -143,6 +146,16 @@ block content
       input(type='number' name='shots' )
       br
       input(type='submit' value='Submit') 
+  div#tournament-form 
+    h2 Tournament-Form
+    form(action='/api/tournaments' method='POST')
+      | Tournament Title:
+      input(type='text' name='title' )
+      br
+      | Stadium :
+      input(type='text' name='stadium' )
+      br
+      input(type='submit' value='Submit')
 
 
 

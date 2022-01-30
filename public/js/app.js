@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", function (event) {
     let url;
     if (location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname === "") {
@@ -92,6 +91,22 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 selectx.add(el);
             }
         });
+
+    fetch(url + '/api/tournaments')
+    .then(response => response.json())
+    .then(data => {
+        options = data.map(item => item.title)
+        var select = document.getElementById("selectTournament");
+
+        for(var i = 0; i < options.length; i++) {
+            var opt = options[i];
+            var el = document.createElement("option");
+            el.text = opt;
+            el.value = opt;
+
+            select.add(el);
+        }
+    });
 
 });
 
