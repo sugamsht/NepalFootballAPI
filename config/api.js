@@ -189,24 +189,15 @@ router.post('/tournaments', function (req, res) {
 });
 
 router.get('/tournaments', cors(corsOptions), function (req, res) {
-    tournaments.find({},
-        (error, arrayOfResults) => {
-            tournaments.populate(arrayOfResults, { path: 'resultList' },  (error, populatedResults) => {
-                if (!error && populatedResults) {
-                    res.json(populatedResults)
-                }
-            })
-            // .populate(arrayOfResults, { path: 'fixtureList' },  (error, populatedResults) => {
-            //     if (!error && populatedResults) {
-            //         return res.json(populatedResults)
-            //     }
-            // })
-        }
-    )
-    // tournaments.find({})
-    //     .populate('resultList')
-    //     // .populate('fixtureList')
-        
+    tournaments.find({})
+        .populate('resultList')
+        .populate('fixtureList')
+        .populate('teamList')
+        .exec((error, arrayOfResults) => {
+            if (!error && arrayOfResults) {
+                res.json(arrayOfResults)
+            }
+        })
 });
 
 //teams halne
@@ -249,7 +240,7 @@ router.get('/teams', cors(corsOptions), function (req, res) {
 
 //results halne
 router.post('/results', function (req, res) {
-    
+
     var fixtureResult = req.body.fixtureResult;
     //split fixtureResult
     var result = fixtureResult.split(' vs ');
