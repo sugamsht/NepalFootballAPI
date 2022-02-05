@@ -107,6 +107,11 @@ block content
       option Choose Fixture
       select#selectFixture1(name='fixname')
       br
+      label Postponed?
+      label.toggle-switch
+        input#checkbox.checkbox(type='checkbox' name='postponed' value='true')
+        span.switch-btn
+      br
       | Date : 
       input(type='date' name='date' )
       br

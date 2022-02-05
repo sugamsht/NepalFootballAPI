@@ -118,19 +118,36 @@ router.get('/fixtures', cors(corsOptions), function (req, res) {
 
 //put method for fixtures
 router.post('/editFixtures/', function (req, res) {
-    console.log(req.body);
+    // console.log(req.body);
     var fixname = req.body.fixname;
     var dat = new Date(req.body.date).toDateString();
+    var postponed = req.body.postponed;
     if (!fixname) {
         return res.json({ error: 'No fixture name' })
     }
-    fixtures.findOneAndUpdate({ fixname: fixname }, { $set: { date: dat, time: req.body.time, stadium: req.body.stadium } }, { new: true }, (error, savedFixture) => {
-        if (!error && savedFixture) {
-            alert('Big Success' + savedFixture)
-            //reset form
-            res.redirect('/');
-        }
-    });
+    if (postponed) {
+        fixtures.findOneAndUpdate({ fixname: fixname, date: dat }, { $set: { date: dat, time: req.body.time, stadium: req.body.stadium } }, { new: true }, (error, savedFixture) => {
+            if (!error && savedFixture) {
+                alert('Big Success' + savedFixture)
+                //reset form
+                res.redirect('/');
+            }
+            else {
+                alert('Enter Correct date of Postponed Fixture');
+                res.redirect('/');
+            }
+        });
+    }
+    else {
+        fixtures.findOneAndUpdate({ fixname: fixname }, { $set: { date: dat, time: req.body.time, stadium: req.body.stadium } }, { new: true }, (error, savedFixture) => {
+            if (!error && savedFixture) {
+                alert('Big Success' + savedFixture)
+                //reset form
+                res.redirect('/');
+            }
+        });
+    }
+
 })
 
 //players halne
@@ -251,6 +268,10 @@ router.post('/results', function (req, res) {
     //goal difference
     var gd1 = score1 - score2;
     var gd2 = score2 - score1;
+
+    //if score1 or score2 is less than 0
+    // if (score1 > -1 && score2 > -1) {    }
+
     teams.findOneAndUpdate({ name: team1 }, { $inc: { gd: gd1 } }, { new: true }, (error, savedTeam1) => { })
     teams.findOneAndUpdate({ name: team2 }, { $inc: { gd: gd2 } }, { new: true }, (error, savedTeam1) => { })
     teams.findOneAndUpdate({ name: team1 }, { $inc: { played: 1 } }, { new: true }, (error, savedStat) => { })
@@ -321,7 +342,7 @@ router.get('/results', cors(corsOptions), function (req, res) {
 
 //edit result
 router.post('/editResults/', function (req, res) {
-    console.log(req.body);
+    // console.log(req.body);
     var fixtureResult = req.body.fixtureResult;
     if (!fixtureResult) {
         return res.json({ error: 'Bhayena hai bhayena' })
