@@ -7,6 +7,18 @@ document.addEventListener("DOMContentLoaded", function (event) {
     }
     console.log("This is your live site ", url + '/api/teams');
 
+    document.getElementById('titleButton').addEventListener('click', function (e) {
+        var tournament_title = document.getElementById("selectTournament").value;
+        console.log("Tournament title is ", tournament_title);
+        document.getElementById('resultTitle').setAttribute('value', tournament_title);
+        document.getElementById('teamTitle').setAttribute('value', tournament_title);
+        document.getElementById('fixtureTitle').setAttribute('value', tournament_title);
+    })
+
+    // function tournament() {
+
+    // }
+
     fetch(url + '/api/teams')
         .then(response => response.json())
         .then(data => {
@@ -78,6 +90,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
     fetch(url + '/api/results')
         .then(response => response.json())
         .then(data => {
+
+
             options = data.map(item => item.fixtureResult)
             var selectx = document.getElementById("selectResult");
 
@@ -93,20 +107,20 @@ document.addEventListener("DOMContentLoaded", function (event) {
         });
 
     fetch(url + '/api/tournaments')
-    .then(response => response.json())
-    .then(data => {
-        options = data.map(item => item.title)
-        var select = document.getElementById("selectTournament");
+        .then(response => response.json())
+        .then(data => {
+            options = data.map(item => item.title)
+            var select = document.getElementById("selectTournament");
 
-        for(var i = 0; i < options.length; i++) {
-            var opt = options[i];
-            var el = document.createElement("option");
-            el.text = opt;
-            el.value = opt;
+            for (var i = 0; i < options.length; i++) {
+                var opt = options[i];
+                var el = document.createElement("option");
+                el.text = opt;
+                el.value = opt;
 
-            select.add(el);
-        }
-    });
+                select.add(el);
+            }
+        });
 
 });
 

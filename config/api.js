@@ -9,9 +9,10 @@ var corsOptions = {
     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
 
+
 //Schemas
 let fixtureSchema = new mongoose.Schema({
-    tournament_title1: { type: String, required: true },
+    tournament_title: { type: String, required: true },
     team1: { type: String, required: true },
     team2: { type: String, required: true },
     stadium: String,
@@ -30,7 +31,7 @@ let playerSchema = new mongoose.Schema({
 });
 
 let teamSchema = new mongoose.Schema({
-    tournament_title2: { type: String, required: true },
+    tournament_title: { type: String, required: true },
     name: { type: String, required: true },
     location: { type: String },
     logo: String,
@@ -45,7 +46,7 @@ let teamSchema = new mongoose.Schema({
 });
 
 let resultSchema = new mongoose.Schema({
-    tournament_title3: { type: String, required: true },
+    tournament_title: { type: String, required: true },
     fixtureResult: { type: String, required: true },
     score: [Number],
     fouls: [Number],
@@ -83,7 +84,7 @@ router.post('/fixtures', function (req, res) {
     var fixname = req.body.team1 + ' vs ' + req.body.team2;
     var dat = new Date(req.body.date).toDateString();
     let newFixture = new fixtures({
-        tournament_title1: req.body.tournament_title1,
+        tournament_title: req.body.tournament_title,
         team1: req.body.team1,
         team2: req.body.team2,
         stadium: req.body.stadium,
@@ -98,10 +99,16 @@ router.post('/fixtures', function (req, res) {
             res.redirect('/');
             //res.json(savedStat);
         }
+        else {
+            console.log("fixture post vayena", error);
+        }
     });
-    tournaments.findOneAndUpdate({ title: req.body.tournament_title1 }, { $push: { fixtureList: newFixture._id } }, { new: true }, (error, savedTeam) => {
+    tournaments.findOneAndUpdate({ title: req.body.tournament_title }, { $push: { fixtureList: newFixture._id } }, { new: true }, (error, savedTeam) => {
         if (!error && savedTeam) {
             //alert('Big Success')
+        }
+        else {
+            console.log("Tournament ma post vayena", error);
         }
     })
 })
@@ -220,7 +227,7 @@ router.get('/tournaments', cors(corsOptions), function (req, res) {
 //teams halne
 router.post('/teams', function (req, res) {
     let newTeam = new teams({
-        tournament_title2: req.body.tournament_title2,
+        tournament_title: req.body.tournament_title,
         name: req.body.name,
         location: req.body.location,
         logo: req.body.logo,
@@ -235,7 +242,7 @@ router.post('/teams', function (req, res) {
             //res.json(savedTeam);
         }
     });
-    tournaments.findOneAndUpdate({ title: req.body.tournament_title2 }, { $push: { teamList: newTeam._id } }, { new: true }, (error, savedTeam) => {
+    tournaments.findOneAndUpdate({ title: req.body.tournament_title }, { $push: { teamList: newTeam._id } }, { new: true }, (error, savedTeam) => {
         if (!error && savedTeam) {
             //alert('Big Success')
         }
@@ -257,7 +264,6 @@ router.get('/teams', cors(corsOptions), function (req, res) {
 
 //results halne
 router.post('/results', function (req, res) {
-
     var fixtureResult = req.body.fixtureResult;
     //split fixtureResult
     var result = fixtureResult.split(' vs ');
@@ -270,43 +276,49 @@ router.post('/results', function (req, res) {
     var gd2 = score2 - score1;
 
     //if score1 or score2 is less than 0
-    // if (score1 > -1 && score2 > -1) {    }
-
-    teams.findOneAndUpdate({ name: team1 }, { $inc: { gd: gd1 } }, { new: true }, (error, savedTeam1) => { })
-    teams.findOneAndUpdate({ name: team2 }, { $inc: { gd: gd2 } }, { new: true }, (error, savedTeam1) => { })
-    teams.findOneAndUpdate({ name: team1 }, { $inc: { played: 1 } }, { new: true }, (error, savedStat) => { })
-    teams.findOneAndUpdate({ name: team2 }, { $inc: { played: 1 } }, { new: true }, (error, savedStat) => { })
-    if (score1 > score2) {
-        //increase win in stats
-        teams.findOneAndUpdate({ name: team1 }, { $inc: { win: 1, points: 3 } }, { new: true }, (error, savedStat) => {
-            if (!error && savedStat) {
-            }
-        })
-        teams.findOneAndUpdate({ name: team2 }, { $inc: { lost: 1 } }, { new: true }, (error, savedStat) => {
-            if (!error && savedStat) {
-            }
-        })
-    } else if (score1 < score2) {
-        teams.findOneAndUpdate({ name: team1 }, { $inc: { lost: 1 } }, { new: true }, (error, savedStat) => {
-            if (!error && savedStat) {
-            }
-        })
-        teams.findOneAndUpdate({ name: team2 }, { $inc: { win: 1, points: 3 } }, { new: true }, (error, savedStat) => {
-            if (!error && savedStat) {
-            }
-        })
-    } else {
-        teams.findOneAndUpdate({ name: team1 }, { $inc: { draw: 1, points: 1 } }, { new: true }, (error, savedStat) => {
-            if (!error && savedStat) {
-            }
-        })
-        teams.findOneAndUpdate({ name: team2 }, { $inc: { draw: 1, points: 1 } }, { new: true }, (error, savedStat) => {
-            if (!error && savedStat) {
-            }
-        })
+    if (score1 < 0 || score2 < 0) {
+        console.log("Postponed vayo");
     }
+    else {
+        console.log("thick cha");
+        teams.findOneAndUpdate({ name: team1 }, { $inc: { gd: gd1 } }, { new: true }, (error, savedTeam1) => { })
+        teams.findOneAndUpdate({ name: team2 }, { $inc: { gd: gd2 } }, { new: true }, (error, savedTeam1) => { })
+        teams.findOneAndUpdate({ name: team1 }, { $inc: { played: 1 } }, { new: true }, (error, savedStat) => { })
+        teams.findOneAndUpdate({ name: team2 }, { $inc: { played: 1 } }, { new: true }, (error, savedStat) => { })
+        if (score1 > score2) {
+            //increase win in stats
+            teams.findOneAndUpdate({ name: team1 }, { $inc: { win: 1, points: 3 } }, { new: true }, (error, savedStat) => {
+                if (!error && savedStat) {
+                }
+            })
+            teams.findOneAndUpdate({ name: team2 }, { $inc: { lost: 1 } }, { new: true }, (error, savedStat) => {
+                if (!error && savedStat) {
+                }
+            })
+        } else if (score1 < score2) {
+            teams.findOneAndUpdate({ name: team1 }, { $inc: { lost: 1 } }, { new: true }, (error, savedStat) => {
+                if (!error && savedStat) {
+                }
+            })
+            teams.findOneAndUpdate({ name: team2 }, { $inc: { win: 1, points: 3 } }, { new: true }, (error, savedStat) => {
+                if (!error && savedStat) {
+                }
+            })
+        } else {
+            teams.findOneAndUpdate({ name: team1 }, { $inc: { draw: 1, points: 1 } }, { new: true }, (error, savedStat) => {
+                if (!error && savedStat) {
+                }
+            })
+            teams.findOneAndUpdate({ name: team2 }, { $inc: { draw: 1, points: 1 } }, { new: true }, (error, savedStat) => {
+                if (!error && savedStat) {
+                }
+            })
+        }
+    }
+
+
     let newResult = new results({
-        tournament_title3: req.body.tournament_title3,
+        tournament_title: req.body.tournament_title,
         fixtureResult: fixtureResult,
         score: req.body.score,
         fouls: req.body.fouls,
@@ -322,7 +334,7 @@ router.post('/results', function (req, res) {
             //res.json(savedResult);
         }
     });
-    tournaments.findOneAndUpdate({ title: req.body.tournament_title3 }, { $push: { resultList: newResult._id } }, { new: true }, (error, savedTeam) => {
+    tournaments.findOneAndUpdate({ title: req.body.tournament_title }, { $push: { resultList: newResult._id } }, { new: true }, (error, savedTeam) => {
         if (!error && savedTeam) {
             //alert('Big Success')
         }
