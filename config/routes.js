@@ -26,6 +26,8 @@ module.exports = function (app) {
 
   app.get('/login', home.login);
 
+  app.get('/live', home.login);
+
   app.use('/api', require('./api'));
 
 

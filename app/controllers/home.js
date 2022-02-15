@@ -14,3 +14,9 @@ exports.login = function (req, res) {
     title: 'login to mess things up'
   });
 };
+
+exports.login = function (req, res) {
+  res.render('home/live', {
+    title: 'login to mess things up'
+  });
+};
