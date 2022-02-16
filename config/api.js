@@ -15,6 +15,8 @@ let fixtureSchema = new mongoose.Schema({
     tournament_title: { type: String, required: true },
     team1: { type: String, required: true },
     team2: { type: String, required: true },
+    team1Object: [{ type: mongoose.Schema.Types.ObjectId, ref: 'teams' }],
+    team2Object: [{ type: mongoose.Schema.Types.ObjectId, ref: 'teams' }],
     stadium: String,
     date: { type: String },
     time: String,
@@ -63,6 +65,14 @@ let tournamentSchema = new mongoose.Schema({
     resultList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'results' }]
 });
 
+// let scoreboardSchema = new mongoose.Schema({
+//     score1: { type: Number, required: true, default: 0 },
+//     score2: { type: Number, required: true, default: 0 },
+//     timer: { type: String, required: true },
+//     fixname: { type: String, required: true },
+//     referee: { type: String, required: true }
+// });
+
 
 //Models
 let fixtures = mongoose.model('fixtures', fixtureSchema);
@@ -81,46 +91,52 @@ router.get('/hello', function (req, res) {
 
 //fixtures post and get
 router.post('/fixtures', function (req, res) {
-    var fixname = req.body.team1 + ' vs ' + req.body.team2;
-    var dat = new Date(req.body.date).toDateString();
-    let newFixture = new fixtures({
-        tournament_title: req.body.tournament_title,
-        team1: req.body.team1,
-        team2: req.body.team2,
-        stadium: req.body.stadium,
-        date: dat,
-        time: req.body.time,
-        fixname: fixname
+    teams.findOne({ name: req.body.team1 }, (error, savedTeam) => {
+        var team1 = savedTeam._id;
+        teams.findOne({ name: req.body.team2 }, (error, savedTeam) => {
+            var fixname = req.body.team1 + ' vs ' + req.body.team2;
+            var dat = new Date(req.body.date).toDateString();
+            var team2 = savedTeam._id;
+            let newFixture = new fixtures({
+                tournament_title: req.body.tournament_title,
+                team1: req.body.team1,
+                team2: req.body.team2,
+                stadium: req.body.stadium,
+                date: dat,
+                time: req.body.time,
+                fixname: fixname,
+                team1Object: team1,
+                team2Object: team2
+            });
+            newFixture.save(function (err, savedFixture) {
+                if (err) {
+                    alert(err);
+                } else {
+                    alert('Big Success' + savedFixture)
+                    res.redirect('/');
+                }
+            });
+            tournaments.findOneAndUpdate({ title: req.body.tournament_title }, { $push: { fixtureList: newFixture._id } }, { new: true }, (error, savedTeam) => {
+                if (!error && savedTeam) {
+                    //alert('Big Success')
+                }
+                else {
+                    console.log("Tournament ma post vayena", error);
+                }
+            })
+        });
     });
-    newFixture.save((error, savedStat) => {
-        if (!error && savedStat) {
-            alert('Big Success' + savedStat)
-            //reset form
-            res.redirect('/');
-            //res.json(savedStat);
-        }
-        else {
-            console.log("fixture post vayena", error);
-        }
-    });
-    tournaments.findOneAndUpdate({ title: req.body.tournament_title }, { $push: { fixtureList: newFixture._id } }, { new: true }, (error, savedTeam) => {
-        if (!error && savedTeam) {
-            //alert('Big Success')
-        }
-        else {
-            console.log("Tournament ma post vayena", error);
-        }
-    })
 })
 
 router.get('/fixtures', cors(corsOptions), function (req, res) {
-    fixtures.find({},
-        (error, arrayOfResults) => {
+    fixtures.find({})
+    // .populate('team1Object')
+    // .populate('team2Object')
+        .exec((error, arrayOfResults) => {
             if (!error && arrayOfResults) {
-                return res.json(arrayOfResults)
+                res.json(arrayOfResults)
             }
-        }
-    )
+        })
 });
 
 //put method for fixtures
@@ -215,8 +231,19 @@ router.post('/tournaments', function (req, res) {
 router.get('/tournaments', cors(corsOptions), function (req, res) {
     tournaments.find({})
         .populate('resultList')
-        .populate('fixtureList')
         .populate('teamList')
+        .populate({
+            path : 'fixtureList',
+            populate : {
+              path : 'team1Object'              
+            }           
+            })
+        .populate({
+            path : 'fixtureList',
+            populate : {
+              path : 'team2Object'              
+            }           
+            })
         .exec((error, arrayOfResults) => {
             if (!error && arrayOfResults) {
                 res.json(arrayOfResults)
