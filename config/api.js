@@ -110,6 +110,7 @@ router.post('/scoreboard', cors(corsOptions), function (req, res) {
                 alert(err);
             } else {
                 alert('Big Success' + savedScoreboard);
+                // res.redirect('/live');
             }
         })
     })
@@ -136,6 +137,28 @@ router.get('/scoreboard', cors(corsOptions), function (req, res) {
             }
         })
 });
+
+router.post('/editScoreboard/', function (req, res) {
+    // console.log(req.body);
+    var fixname = req.body.fixname;
+    if (!fixname) {
+        return res.json({ error: 'Bhayena hai bhayena' })
+    }
+    scoreboards.findOneAndUpdate({ fixname: fixname },
+        {
+            $set: {
+                //score: req.body.score,
+                score1: req.body.score1,
+                score2: req.body.score2,
+                timer: req.body.timer                
+            }
+        }, { new: true }, (error, savedResults) => {
+            if (!error && savedResults) {
+                alert('Big Success' + savedResults)
+                //reset form
+            }
+        });
+})
 
 
 //fixtures post and get

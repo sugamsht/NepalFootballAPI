@@ -17,7 +17,21 @@ document.addEventListener("DOMContentLoaded", function (event) {
     } else {
         url = 'https://nepalscores.herokuapp.com'
     }
-    
+
+//fixture tala aune
+    // document.getElementById('fixButton').addEventListener('click', function (e) {
+    //     var fixture_title = document.getElementById("selectFixture").value;
+    //     console.log("Tournament title is ", fixture_title);
+    //     document.getElementById('scoreboardTitle').setAttribute('value', fixture_title);      
+    //     e.preventDefault();  
+    // })
+
+    document.getElementById('fixtureButton').addEventListener('click', function (e) {
+        var fixture_title = document.getElementById("selectFixture").value;
+        console.log("Tournament title is ", fixture_title);
+        document.getElementById('scoreboardTitle').setAttribute('value', fixture_title);        
+    })
+
     //fetches the fixtures
     fetch(url + '/api/fixtures')
         .then(response => response.json())
