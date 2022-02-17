@@ -18,53 +18,58 @@
         span#downdist
     #subscoreboard
         | Follow us on twitter. @SugaSport
-#control_area
-    | Team1 Score: 
-    input#team1_score_input(type='text' name='team1_score' value='0')
-    button#team1_plus1 +1
-    button#team1_score_update UPDATE
-    br
-    br
-    br
-    | Team2 Score: 
-    input#team2_score_input(type='text' name='team2_score' value='0')
-    button#team2_plus1 +1
-    button#team2_score_update UPDATE
-    br
-    br
-    br
-    | Clock: 
-    input#clock_input_min(type='text' name='clock_min' value='00' style='width:25px;')
-    | :
-    input#clock_input_sec(type='text' name='clock_sec' value='00' style='width:25px;')
-    button#clock_update UPDATE
-    button#clock_start START CLOCK
-    button#clock_stop STOP CLOCK
-    button#clock_plus +
-    button#clock_minus -
-    div(style='font-weight:normal')
-        | W: START CLOCK
-        br
-        | S: STOP CLOCK
-        br
-        | D: PLUS SECOND
-        br
-        | A: MINUS SECOND
-    br
-    | Message: 
-    input#downdist_input(type='text' name='downdist' value='')
-    button#show_msg SHOW
-    br
-    br
-    | Half: 
-    button#qtr_1 1st
-    button#qtr_2 2nd
-    button#qtr_half HALF
-    button#qtr_ot(<button='') ET
-    br
-    i(style='font-weight:normal;')
-        | Half sets clock to 45:00
-        br
-        br
+    div#result-form 
+        form(action='/api/scoreboard' method='POST')
+            option Choose Fixture
+            select#selectFixture(name='fixname')
+            input(type='submit' value='Submit')
+        #control_area
+            | Team1 Score: 
+            input#team1_score_input(type='text' name='team1_score' value='0')
+            button#team1_plus1 +1
+            button#team1_score_update UPDATE
+            br
+            br
+            br
+            | Team2 Score: 
+            input#team2_score_input(type='text' name='team2_score' value='0')
+            button#team2_plus1 +1
+            button#team2_score_update UPDATE
+            br
+            br
+            br
+            | Clock: 
+            input#clock_input_min(type='text' name='clock_min' value='00' style='width:25px;')
+            | :
+            input#clock_input_sec(type='text' name='clock_sec' value='00' style='width:25px;')
+            button#clock_update UPDATE
+            button#clock_start START CLOCK
+            button#clock_stop STOP CLOCK
+            button#clock_plus +
+            button#clock_minus -
+            div(style='font-weight:normal')
+                | W: START CLOCK
+                br
+                | S: STOP CLOCK
+                br
+                | D: PLUS SECOND
+                br
+                | A: MINUS SECOND
+            br
+            | Message: 
+            input#downdist_input(type='text' name='downdist' value='')
+            button#show_msg SHOW
+            br
+            br
+            | Half: 
+            button#qtr_1 1st
+            button#qtr_2 2nd
+            button#qtr_half HALF
+            button#qtr_ot(<button='') ET
+            br
+            i(style='font-weight:normal;')
+                | Half sets clock to 45:00
+                br
+                br
 script(src='/js/live.js')
 script(src='https://code.jquery.com/jquery-3.6.0.min.js' integrity='sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=' crossorigin='anonymous')

@@ -11,6 +11,32 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var team2_update = document.querySelector("#team2_score_update")
     var team2_score = document.querySelector("#team2_score");
 
+    let url;
+    if (location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname === "") {
+        url = 'http://localhost:3000'
+    } else {
+        url = 'https://nepalscores.herokuapp.com'
+    }
+    
+    //fetches the fixtures
+    fetch(url + '/api/fixtures')
+        .then(response => response.json())
+        .then(data => {
+            options = data.map(item => item.fixname)
+            var select = document.getElementById("selectFixture");
+            
+            for (var i = 0; i < options.length; i++) {
+                var opt = options[i];
+
+                var el = document.createElement("option");
+
+                el.text = opt;
+                el.value = opt;
+
+                select.add(el);
+            }
+        });
+
     // TEAM 1 SCORE
     team1_plus1.addEventListener("click", function (e) {
         var oldscore = parseInt(team1_input.value, 10);

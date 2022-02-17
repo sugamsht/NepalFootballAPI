@@ -65,13 +65,14 @@ let tournamentSchema = new mongoose.Schema({
     resultList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'results' }]
 });
 
-// let scoreboardSchema = new mongoose.Schema({
-//     score1: { type: Number, required: true, default: 0 },
-//     score2: { type: Number, required: true, default: 0 },
-//     timer: { type: String, required: true },
-//     fixname: { type: String, required: true },
-//     referee: { type: String, required: true }
-// });
+let scoreboardSchema = new mongoose.Schema({
+    score1: { type: Number, required: true, default: 0 },
+    score2: { type: Number, required: true, default: 0 },
+    timer: { type: String },
+    fixname: { type: String, required: true },
+    fixObject: { type: mongoose.Schema.Types.ObjectId, ref: 'fixtures' },
+    referee: { type: String }
+});
 
 
 //Models
@@ -80,6 +81,7 @@ let players = mongoose.model('players', playerSchema);
 let teams = mongoose.model('teams', teamSchema);
 let results = mongoose.model('results', resultSchema);
 let tournaments = mongoose.model('tournaments', tournamentSchema);
+let scoreboards = mongoose.model('scoreboards', scoreboardSchema);
 
 
 //Routes
@@ -88,6 +90,53 @@ router.get('/hello', function (req, res) {
 });
 
 //Get All data
+
+//post and get scoreboard
+ 
+router.post('/scoreboard', cors(corsOptions), function (req, res) {
+    fixtures.findOne({ fixname: req.body.fixname }, function (err, data) {
+        var fixId = data._id;
+        let newScoreboard = new scoreboards({
+            score1: req.body.score1,
+            score2: req.body.score2,
+            timer: req.body.timer,
+            fixname: req.body.fixname,
+            fixObject: fixId,
+            referee: req.body.referee
+        });
+        console.log("yo ho haiii", data);
+        newScoreboard.save(function (err, savedScoreboard) {
+            if (err) {
+                alert(err);
+            } else {
+                alert('Big Success' + savedScoreboard);
+            }
+        })
+    })
+});
+
+router.get('/scoreboard', cors(corsOptions), function (req, res) {
+    scoreboards.find({})
+        .populate('fixObject')
+        .populate({
+            path : 'fixObject',
+            populate : {
+              path : 'team1Object'              
+            }           
+            })
+        .populate({
+            path : 'fixObject',
+            populate : {
+              path : 'team2Object'              
+            }           
+            })
+        .exec((error, arrayOfResults) => {
+            if (!error && arrayOfResults) {
+                res.json(arrayOfResults)
+            }
+        })
+});
+
 
 //fixtures post and get
 router.post('/fixtures', function (req, res) {
