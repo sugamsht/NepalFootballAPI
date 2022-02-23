@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var team2_plus1 = document.querySelector("#team2_plus1");
     var team2_update = document.querySelector("#team2_score_update")
     var team2_score = document.querySelector("#team2_score");
+    var timer = document.querySelector("#qtr");
 
     let url;
     if (location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname === "") {
@@ -115,21 +116,32 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
     // Half
     $("#qtr_1").click(function () {
-        $("#qtr").text("1st Half");
+        // $("#qtr").value='1st Half';
+        timer.value = '1st half';
+        // console.log("1st Half bhayo");
     });
     $("#qtr_2").click(function () {
-        $("#qtr").text("2nd Half");
+        // $("#qtr").value='2nd Half';
+        timer.value = '2nd half';
+        // console.log("2nd Half bhayo");
     });
-    $("#qtr_ot").click(function () {
-        $("#qtr").text("ET");
+    $("#qtr_ft").click(function () {
+        // $("#qtr").value='2nd Half';
+        timer.value = 'Full Time';
+        // console.log("2nd Half bhayo");
+    });
+    $("#qtr_et").click(function () {
+        // $("#qtr").text("ET");
+        timer.value = 'Extra Time';
     });
     $("#qtr_half").click(function () {
-        $("#qtr").text("Half");
-        $("#downdist").text("");
-        $('#clock_input_min').val("45");
-        $('#clock_input_sec').val("00");
-        $('#clock_update').click();
-        $('#clock_start').click();
+        timer.value = 'Half Time';
+        // $("#qtr").text("Half");
+        // $("#downdist").text("");
+        // $('#clock_input_min').val("45");
+        // $('#clock_input_sec').val("00");
+        // $('#clock_update').click();
+        // $('#clock_start').click();
     });
 
     // CLOCK

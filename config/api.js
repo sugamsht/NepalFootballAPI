@@ -104,7 +104,7 @@ router.post('/scoreboard', cors(corsOptions), function (req, res) {
             fixObject: fixId,
             referee: req.body.referee
         });
-        console.log("yo ho haiii", data);
+        // console.log("yo ho haiii", data);
         newScoreboard.save(function (err, savedScoreboard) {
             if (err) {
                 alert(err);

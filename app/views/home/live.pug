@@ -14,7 +14,7 @@
             span#clock_min 00
             | :
             span#clock_sec 00
-        span#qtr 1st Half
+        span#qtr1 1st Half
         span#downdist
     #subscoreboard
         | Follow us on twitter. @SugaSport
@@ -22,6 +22,9 @@
         form(action='/api/scoreboard' method='POST')
             option Choose Fixture
             select#selectFixture(name='fixname')
+            br
+            | Match referee:
+            input(type="text" name='referee' )
             input#fixButton(type='submit' value='Submit')
         button#fixtureButton Select Fixture
     div#control_area
@@ -44,6 +47,13 @@
             br
             br
             br
+            | Half: 
+            input#qtr(type='text' name='timer' value='1st Half')
+            button#qtr_1 1st 
+            button#qtr_2 2nd 
+            button#qtr_half HT
+            button#qtr_ft FT
+            button#qtr_et(<button='') ET
         | Clock: 
         input#clock_input_min(type='text' name='clock_min' value='00' style='width:25px;')
         | :
@@ -67,11 +77,11 @@
         button#show_msg SHOW
         br
         br
-        | Half: 
-        button#qtr_1 1st
-        button#qtr_2 2nd
-        button#qtr_half HALF
-        button#qtr_ot(<button='') ET
+        //- | Half: 
+        //- button#qtr_1 1st
+        //- button#qtr_2 2nd
+        //- button#qtr_half HALF
+        //- button#qtr_ot(<button='') ET
         br
         i(style='font-weight:normal;')
             | Half sets clock to 45:00
