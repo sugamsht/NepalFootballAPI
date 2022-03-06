@@ -5,7 +5,8 @@ const mongoose = require('mongoose');
 var cors = require('cors');
 
 var corsOptions = {
-    origin: 'http://localhost:5000',
+    // origin: 'http://localhost:5000',
+    origin: 'https://nepscores.herokuapp.com',
     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
 
@@ -92,8 +93,8 @@ router.get('/hello', function (req, res) {
 //Get All data
 
 //post and get scoreboard
- 
-router.post('/scoreboard', cors(corsOptions), function (req, res) {
+
+router.post('/scoreboard', function (req, res) {
     fixtures.findOne({ fixname: req.body.fixname }, function (err, data) {
         var fixId = data._id;
         let newScoreboard = new scoreboards({
@@ -120,17 +121,17 @@ router.get('/scoreboard', cors(corsOptions), function (req, res) {
     scoreboards.find({})
         .populate('fixObject')
         .populate({
-            path : 'fixObject',
-            populate : {
-              path : 'team1Object'              
-            }           
-            })
+            path: 'fixObject',
+            populate: {
+                path: 'team1Object'
+            }
+        })
         .populate({
-            path : 'fixObject',
-            populate : {
-              path : 'team2Object'              
-            }           
-            })
+            path: 'fixObject',
+            populate: {
+                path: 'team2Object'
+            }
+        })
         .exec((error, arrayOfResults) => {
             if (!error && arrayOfResults) {
                 res.json(arrayOfResults)
@@ -150,7 +151,7 @@ router.post('/editScoreboard/', function (req, res) {
                 //score: req.body.score,
                 score1: req.body.score1,
                 score2: req.body.score2,
-                timer: req.body.timer                
+                timer: req.body.timer
             }
         }, { new: true }, (error, savedResults) => {
             if (!error && savedResults) {
@@ -202,8 +203,8 @@ router.post('/fixtures', function (req, res) {
 
 router.get('/fixtures', cors(corsOptions), function (req, res) {
     fixtures.find({})
-    // .populate('team1Object')
-    // .populate('team2Object')
+        // .populate('team1Object')
+        // .populate('team2Object')
         .exec((error, arrayOfResults) => {
             if (!error && arrayOfResults) {
                 res.json(arrayOfResults)
@@ -305,17 +306,17 @@ router.get('/tournaments', cors(corsOptions), function (req, res) {
         .populate('resultList')
         .populate('teamList')
         .populate({
-            path : 'fixtureList',
-            populate : {
-              path : 'team1Object'              
-            }           
-            })
+            path: 'fixtureList',
+            populate: {
+                path: 'team1Object'
+            }
+        })
         .populate({
-            path : 'fixtureList',
-            populate : {
-              path : 'team2Object'              
-            }           
-            })
+            path: 'fixtureList',
+            populate: {
+                path: 'team2Object'
+            }
+        })
         .exec((error, arrayOfResults) => {
             if (!error && arrayOfResults) {
                 res.json(arrayOfResults)
