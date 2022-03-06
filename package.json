@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "alert": "^5.0.10",
+    "bcrypt": "^5.0.1",
     "co": "^4.6.0",
     "compression": "^1.7.4",
     "connect-flash": "^0.1.1",

@@ -11,7 +11,7 @@ const mongoose = require('mongoose');
 const passport = require('passport');
 const User = mongoose.model('User');
 
-
+const bcrypt = require('bcrypt');
 /**
  * Expose
  */
@@ -34,7 +34,8 @@ module.exports = function (app) {
   //register
   // app.route('/login').post(
   //   (req, res, next) => {
-  //     const password = req.body.password;
+  //     // const password = req.body.password;
+  //     const password = bcrypt.hashSync(req.body.password, 12);
   //     User.findOne({ username: req.body.username }, function (err, user) {
   //       if (err) {
   //         next(err);
