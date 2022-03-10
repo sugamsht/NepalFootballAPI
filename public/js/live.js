@@ -11,6 +11,11 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var team2_update = document.querySelector("#team2_score_update")
     var team2_score = document.querySelector("#team2_score");
     var timer = document.querySelector("#qtr");
+    var qtr_1 = document.querySelector("#qtr_1");
+    var qtr_2 = document.querySelector("#qtr_2");
+    var qtr_ft = document.querySelector("#qtr_ft");
+    var qtr_et = document.querySelector("#qtr_et");
+    var qtr_half = document.querySelector("#qtr_half");
 
     let url;
     if (location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname === "") {
@@ -19,18 +24,11 @@ document.addEventListener("DOMContentLoaded", function (event) {
         url = 'https://nepalscores.herokuapp.com'
     }
 
-//fixture tala aune
-    // document.getElementById('fixButton').addEventListener('click', function (e) {
-    //     var fixture_title = document.getElementById("selectFixture").value;
-    //     console.log("Tournament title is ", fixture_title);
-    //     document.getElementById('scoreboardTitle').setAttribute('value', fixture_title);      
-    //     e.preventDefault();  
-    // })
-
+    //fixture tala aune
     document.getElementById('fixtureButton').addEventListener('click', function (e) {
         var fixture_title = document.getElementById("selectFixture").value;
         console.log("Tournament title is ", fixture_title);
-        document.getElementById('scoreboardTitle').setAttribute('value', fixture_title);        
+        document.getElementById('scoreboardTitle').setAttribute('value', fixture_title);
     })
 
     //fetches the fixtures
@@ -39,7 +37,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
         .then(data => {
             options = data.map(item => item.fixname)
             var select = document.getElementById("selectFixture");
-            
             for (var i = 0; i < options.length; i++) {
                 var opt = options[i];
 
@@ -91,173 +88,172 @@ document.addEventListener("DOMContentLoaded", function (event) {
         }
     });
 
+    //timer
+    qtr_1.addEventListener('click', function (e) {
+        timer.value = 'First Half';
+    }, false);
+    qtr_2.addEventListener('click', function (e) {
+        timer.value = 'Second half';
+    }, false);
+    qtr_et.addEventListener('click', function (e) {
+        timer.value = 'Extra Time';
+    }, false);
+    qtr_ft.addEventListener('click', function (e) {
+        timer.value = 'Full Time';
+    }, false);
+    qtr_half.addEventListener('click', function (e) {
+        timer.value = 'Half Time';
+    }, false);
+
+
 
     // Extra Time MESSAGE
-    document.querySelector("#show_msg").addEventListener("click", function (e) {
-        document.querySelector("#downdist").innerText = document.querySelector("#downdist_input").value;
-    }, false);
+    // document.querySelector("#show_msg").addEventListener("click", function (e) {
+    //     document.querySelector("#downdist").innerText = document.querySelector("#downdist_input").value;
+    // }, false);
 
 
     // $("#show_msg").click(function() {
     // $("#downdist").text($("#downdist_input").val());
     // });
 
-    $("#downdist_input").keyup(function (event) {
-        if (event.keyCode == 13) {
-            $("#show_msg").click();
-        }
-    });
+    // $("#downdist_input").keyup(function (event) {
+    //     if (event.keyCode == 13) {
+    //         $("#show_msg").click();
+    //     }
+    // });
 
-    $("#show_kickoff").click(function () {
-        $("#downdist").text("Kickoff");
-    });
+    // $("#show_kickoff").click(function () {
+    //     $("#downdist").text("Kickoff");
+    // });
 
 
 
-    // Half
-    $("#qtr_1").click(function () {
-        // $("#qtr").value='1st Half';
-        timer.value = '1st half';
-        // console.log("1st Half bhayo");
-    });
-    $("#qtr_2").click(function () {
-        // $("#qtr").value='2nd Half';
-        timer.value = '2nd half';
-        // console.log("2nd Half bhayo");
-    });
-    $("#qtr_ft").click(function () {
-        // $("#qtr").value='2nd Half';
-        timer.value = 'Full Time';
-        // console.log("2nd Half bhayo");
-    });
-    $("#qtr_et").click(function () {
-        // $("#qtr").text("ET");
-        timer.value = 'Extra Time';
-    });
-    $("#qtr_half").click(function () {
-        timer.value = 'Half Time';
-        // $("#qtr").text("Half");
-        // $("#downdist").text("");
-        // $('#clock_input_min').val("45");
-        // $('#clock_input_sec').val("00");
-        // $('#clock_update').click();
-        // $('#clock_start').click();
-    });
+    // qtr_half.click(function () {
+    //     timer.value = 'Half Time';
+    //     // $("#qtr").text("Half");
+    //     // $("#downdist").text("");
+    //     // $('#clock_input_min').val("45");
+    //     // $('#clock_input_sec').val("00");
+    //     // $('#clock_update').click();
+    //     // $('#clock_start').click();
+    // });
 
     // CLOCK
-    $("#clock_start").click(function () {
-        if (clock_going == 0) {
-            clock = setInterval('countUp()', 1000);
-            clock_going = 1;
-        }
-    });
+    // $("#clock_start").click(function () {
+    //     if (clock_going == 0) {
+    //         clock = setInterval('countUp()', 1000);
+    //         clock_going = 1;
+    //     }
+    // });
 
-    $("#clock_stop").click(function () {
-        clearInterval(clock);
-        clock_going = 0;
-        $("#clock_input_min").val($('#clock_min').html());
-        $("#clock_input_sec").val($('#clock_sec').html());
-    });
+    // $("#clock_stop").click(function () {
+    //     clearInterval(clock);
+    //     clock_going = 0;
+    //     $("#clock_input_min").val($('#clock_min').html());
+    //     $("#clock_input_sec").val($('#clock_sec').html());
+    // });
 
-    $("#clock_update").click(function () {
-        //clock_going = 0; clearInterval(clock); // THIS WOULD STOP THE CLOCK WHILE UPDATING - uncomment if needed
-        $('#clock_min').html($("#clock_input_min").val());
-        $('#clock_sec').html($("#clock_input_sec").val());
-    });
+    // $("#clock_update").click(function () {
+    //     //clock_going = 0; clearInterval(clock); // THIS WOULD STOP THE CLOCK WHILE UPDATING - uncomment if needed
+    //     $('#clock_min').html($("#clock_input_min").val());
+    //     $('#clock_sec').html($("#clock_input_sec").val());
+    // });
 
-    $("#clock_plus").click(function () {
+    // $("#clock_plus").click(function () {
 
-        clearInterval(clock);
-        var m = $('#clock_min');
-        var s = $('#clock_sec');
-        if ((parseInt(s.html()) == 59)) {
-            m.html(parseInt(m.html()) + 1);
-            s.html("00");
-        } else {
-            if ((parseInt(s.html()) + 1) < 10) { s.html("0" + (parseInt(s.html()) + 1)); } else {
-                s.html(parseInt(s.html()) + 1);
-            }
-        }
-        if (clock_going == 1) { clock = setInterval('countUp()', 1000); }
+    //     clearInterval(clock);
+    //     var m = $('#clock_min');
+    //     var s = $('#clock_sec');
+    //     if ((parseInt(s.html()) == 59)) {
+    //         m.html(parseInt(m.html()) + 1);
+    //         s.html("00");
+    //     } else {
+    //         if ((parseInt(s.html()) + 1) < 10) { s.html("0" + (parseInt(s.html()) + 1)); } else {
+    //             s.html(parseInt(s.html()) + 1);
+    //         }
+    //     }
+    //     if (clock_going == 1) { clock = setInterval('countUp()', 1000); }
 
-        $("#clock_input_min").val($('#clock_min').html());
-        $("#clock_input_sec").val($('#clock_sec').html());
+    //     $("#clock_input_min").val($('#clock_min').html());
+    //     $("#clock_input_sec").val($('#clock_sec').html());
 
-    });
+    // });
 
-    $("#clock_minus").click(function () {
+    // $("#clock_minus").click(function () {
 
-        clearInterval(clock);
-        var m = $('#clock_min');
-        var s = $('#clock_sec');
-        if ((parseInt(s.html()) == 00)) {
-            m.html(parseInt(m.html()) - 1);
-            s.html("59");
-        } else {
-            if ((parseInt(s.html()) - 1) < 10) { s.html("0" + (parseInt(s.html()) - 1)); } else {
-                s.html(parseInt(s.html()) - 1);
-            }
-        }
+    //     clearInterval(clock);
+    //     var m = $('#clock_min');
+    //     var s = $('#clock_sec');
+    //     if ((parseInt(s.html()) == 00)) {
+    //         m.html(parseInt(m.html()) - 1);
+    //         s.html("59");
+    //     } else {
+    //         if ((parseInt(s.html()) - 1) < 10) { s.html("0" + (parseInt(s.html()) - 1)); } else {
+    //             s.html(parseInt(s.html()) - 1);
+    //         }
+    //     }
 
 
-        $("#clock_input_min").val($('#clock_min').html());
-        $("#clock_input_sec").val($('#clock_sec').html());
+    //     $("#clock_input_min").val($('#clock_min').html());
+    //     $("#clock_input_sec").val($('#clock_sec').html());
 
-    });
+    // });
 
-    $("#clock_input_min").keyup(function (event) {
-        if (event.keyCode == 13) {
-            $("#clock_update").click();
-        }
-    });
+    // $("#clock_input_min").keyup(function (event) {
+    //     if (event.keyCode == 13) {
+    //         $("#clock_update").click();
+    //     }
+    // });
 
-    $("#clock_input_sec").keyup(function (event) {
-        if (event.keyCode == 13) {
-            $("#clock_update").click();
-        }
-    });
-
-});
-
-function countUp() {
-    var m = $('#clock_min');
-    var s = $('#clock_sec');
-    if (m.html() == "45" && s.html() == "00") {
-        clearInterval(clock);
-        clock_going = 0;
-        return;
-    }
-    if ((parseInt(s.html()) == 59)) {
-        m.html(parseInt(m.html()) + 1);
-        s.html("00");
-    } else {
-        if ((parseInt(s.html()) + 1) < 10) { s.html("0" + (parseInt(s.html()) + 1)); } else {
-            s.html(parseInt(s.html()) + 1);
-        }
-    }
-}
-
-document.addEventListener("DOMContentLoaded", function (event) {
-
-    document.addEventListener("keypress", function (event) {
-        // console.log(event);
-        var keyName = event.key;
-        if (keyName == 'w') { //left
-            document.querySelector("#clock_start").click();
-        }
-        if (keyName == 'd') { //up
-            document.querySelector("#clock_plus").click();
-        }
-        if (keyName == 's') { //right
-            document.querySelector("#clock_stop").click();
-        }
-        if (keyName == 'a') { //down
-            document.querySelector("#clock_minus").click();
-        }
-
-    });
+    // $("#clock_input_sec").keyup(function (event) {
+    //     if (event.keyCode == 13) {
+    //         $("#clock_update").click();
+    //     }
+    // });
 
 });
+
+// function countUp() {
+//     var m = $('#clock_min');
+//     var s = $('#clock_sec');
+//     if (m.html() == "45" && s.html() == "00") {
+//         clearInterval(clock);
+//         clock_going = 0;
+//         return;
+//     }
+//     if ((parseInt(s.html()) == 59)) {
+//         m.html(parseInt(m.html()) + 1);
+//         s.html("00");
+//     } else {
+//         if ((parseInt(s.html()) + 1) < 10) { s.html("0" + (parseInt(s.html()) + 1)); } else {
+//             s.html(parseInt(s.html()) + 1);
+//         }
+//     }
+// }
+
+//key to change the clock
+// document.addEventListener("DOMContentLoaded", function (event) {
+
+//     document.addEventListener("keypress", function (event) {
+//         // console.log(event);
+//         var keyName = event.key;
+//         if (keyName == 'w') { //left
+//             document.querySelector("#clock_start").click();
+//         }
+//         if (keyName == 'd') { //up
+//             document.querySelector("#clock_plus").click();
+//         }
+//         if (keyName == 's') { //right
+//             document.querySelector("#clock_stop").click();
+//         }
+//         if (keyName == 'a') { //down
+//             document.querySelector("#clock_minus").click();
+//         }
+
+//     });
+
+// });
 
 
 

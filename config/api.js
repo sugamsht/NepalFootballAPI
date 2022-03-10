@@ -5,8 +5,8 @@ const mongoose = require('mongoose');
 var cors = require('cors');
 
 var corsOptions = {
-    // origin: 'http://localhost:5000',
-    origin: 'https://nepscores.herokuapp.com',
+    origin: 'http://localhost:5000',
+    // origin: ['http://localhost:5000/', 'https://nepscores.herokuapp.com'],
     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
 
@@ -159,6 +159,26 @@ router.post('/editScoreboard/', function (req, res) {
                 //reset form
             }
         });
+    //asdasd
+    let newResult = new results({
+        tournament_title: req.body.tournament_title,
+        fixtureResult: req.body.fixname,
+        score: [req.body.score1, req.body.score2],
+        fouls: req.body.fouls,
+        offsides: req.body.offsides,
+        corners: req.body.corners,
+        shots: req.body.shots
+    });
+    newResult.save((error, savedResult) => {
+        if (!error && savedResult) {
+            alert('Big Success' + savedResult)
+        }
+    });
+    tournaments.findOneAndUpdate({ title: req.body.tournament_title }, { $push: { resultList: newResult._id } }, { new: true }, (error, savedTeam) => {
+        if (!error && savedTeam) {
+            //alert('Big Success')
+        }
+    })
 })
 
 
@@ -379,42 +399,42 @@ router.post('/results', function (req, res) {
     if (score1 < 0 || score2 < 0) {
         console.log("Postponed vayo");
     }
-    else {
-        console.log("thick cha");
-        teams.findOneAndUpdate({ name: team1 }, { $inc: { gd: gd1 } }, { new: true }, (error, savedTeam1) => { })
-        teams.findOneAndUpdate({ name: team2 }, { $inc: { gd: gd2 } }, { new: true }, (error, savedTeam1) => { })
-        teams.findOneAndUpdate({ name: team1 }, { $inc: { played: 1 } }, { new: true }, (error, savedStat) => { })
-        teams.findOneAndUpdate({ name: team2 }, { $inc: { played: 1 } }, { new: true }, (error, savedStat) => { })
-        if (score1 > score2) {
-            //increase win in stats
-            teams.findOneAndUpdate({ name: team1 }, { $inc: { win: 1, points: 3 } }, { new: true }, (error, savedStat) => {
-                if (!error && savedStat) {
-                }
-            })
-            teams.findOneAndUpdate({ name: team2 }, { $inc: { lost: 1 } }, { new: true }, (error, savedStat) => {
-                if (!error && savedStat) {
-                }
-            })
-        } else if (score1 < score2) {
-            teams.findOneAndUpdate({ name: team1 }, { $inc: { lost: 1 } }, { new: true }, (error, savedStat) => {
-                if (!error && savedStat) {
-                }
-            })
-            teams.findOneAndUpdate({ name: team2 }, { $inc: { win: 1, points: 3 } }, { new: true }, (error, savedStat) => {
-                if (!error && savedStat) {
-                }
-            })
-        } else {
-            teams.findOneAndUpdate({ name: team1 }, { $inc: { draw: 1, points: 1 } }, { new: true }, (error, savedStat) => {
-                if (!error && savedStat) {
-                }
-            })
-            teams.findOneAndUpdate({ name: team2 }, { $inc: { draw: 1, points: 1 } }, { new: true }, (error, savedStat) => {
-                if (!error && savedStat) {
-                }
-            })
-        }
-    }
+    // else {
+    //     console.log("thick cha");
+    //     teams.findOneAndUpdate({ name: team1 }, { $inc: { gd: gd1 } }, { new: true }, (error, savedTeam1) => { })
+    //     teams.findOneAndUpdate({ name: team2 }, { $inc: { gd: gd2 } }, { new: true }, (error, savedTeam1) => { })
+    //     teams.findOneAndUpdate({ name: team1 }, { $inc: { played: 1 } }, { new: true }, (error, savedStat) => { })
+    //     teams.findOneAndUpdate({ name: team2 }, { $inc: { played: 1 } }, { new: true }, (error, savedStat) => { })
+    //     if (score1 > score2) {
+    //         //increase win in stats
+    //         teams.findOneAndUpdate({ name: team1 }, { $inc: { win: 1, points: 3 } }, { new: true }, (error, savedStat) => {
+    //             if (!error && savedStat) {
+    //             }
+    //         })
+    //         teams.findOneAndUpdate({ name: team2 }, { $inc: { lost: 1 } }, { new: true }, (error, savedStat) => {
+    //             if (!error && savedStat) {
+    //             }
+    //         })
+    //     } else if (score1 < score2) {
+    //         teams.findOneAndUpdate({ name: team1 }, { $inc: { lost: 1 } }, { new: true }, (error, savedStat) => {
+    //             if (!error && savedStat) {
+    //             }
+    //         })
+    //         teams.findOneAndUpdate({ name: team2 }, { $inc: { win: 1, points: 3 } }, { new: true }, (error, savedStat) => {
+    //             if (!error && savedStat) {
+    //             }
+    //         })
+    //     } else {
+    //         teams.findOneAndUpdate({ name: team1 }, { $inc: { draw: 1, points: 1 } }, { new: true }, (error, savedStat) => {
+    //             if (!error && savedStat) {
+    //             }
+    //         })
+    //         teams.findOneAndUpdate({ name: team2 }, { $inc: { draw: 1, points: 1 } }, { new: true }, (error, savedStat) => {
+    //             if (!error && savedStat) {
+    //             }
+    //         })
+    //     }
+    // }
 
 
     let newResult = new results({

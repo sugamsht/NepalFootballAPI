@@ -1,23 +1,28 @@
-#WIRECAST
+extends ../layouts/default.pug
+
+block page-header
+    #WIRECAST
     #scoreboard
         span#team1
-            | MANCHESTER 
-            br
+            | MANCHESTER
             | CITY
-        span#team1_score 0
+        span#team1_score
+            |   0
+            br
         span#team2
             | MANCHESTER
-            br
             | UNITED
-        span#team2_score 0
+        span#team2_score
+            |   0
+            br
         #clock
             span#clock_min 00
             | :
             span#clock_sec 00
         span#qtr1 1st Half
         span#downdist
-    #subscoreboard
-        | Follow us on twitter. @SugaSport
+        br
+        br
     div#result-form 
         form(action='/api/scoreboard' method='POST')
             option Choose Fixture
@@ -26,11 +31,11 @@
             | Match referee:
             input(type="text" name='referee' )
             input#fixButton(type='submit' value='Submit')
+        br
         button#fixtureButton Select Fixture
     div#control_area
         form(action='/api/editScoreboard/' method='POST')
             input#scoreboardTitle(type='string' name='fixname' readonly)
-            br
             br
             br
             | Team1 Score: 
@@ -39,53 +44,58 @@
             button#team1_score_update UPDATE
             br
             br
-            br
             | Team2 Score: 
             input#team2_score_input(type='number' name='score2' value='0')
             button#team2_plus1 +1
             button#team2_score_update UPDATE
             br
             br
-            br
             | Half: 
-            input#qtr(type='text' name='timer' value='1st Half')
+            input#qtr(type='text' name='timer' value='First Half')
             button#qtr_1 1st 
             button#qtr_2 2nd 
             button#qtr_half HT
             button#qtr_ft FT
-            button#qtr_et(<button='') ET
-        | Clock: 
-        input#clock_input_min(type='text' name='clock_min' value='00' style='width:25px;')
-        | :
-        input#clock_input_sec(type='text' name='clock_sec' value='00' style='width:25px;')
-        button#clock_update UPDATE
-        button#clock_start START CLOCK
-        button#clock_stop STOP CLOCK
-        button#clock_plus +
-        button#clock_minus -
-        div(style='font-weight:normal')
-            | W: START CLOCK
+            button#qtr_et ET
             br
-            | S: STOP CLOCK
             br
-            | D: PLUS SECOND
+            input#resultTitle(type='string' name='tournament_title'  readonly)
             br
-            | A: MINUS SECOND
-        br
-        | Message: 
-        input#downdist_input(type='text' name='downdist' value='')
-        button#show_msg SHOW
-        br
-        br
+            button#gotoresults Final Score to Result
+
+
+        //- | Clock: 
+        //- input#clock_input_min(type='text' name='clock_min' value='00' style='width:25px;')
+        //- | :
+        //- input#clock_input_sec(type='text' name='clock_sec' value='00' style='width:25px;')
+        //- button#clock_update UPDATE
+        //- button#clock_start START CLOCK
+        //- button#clock_stop STOP CLOCK
+        //- button#clock_plus +
+        //- button#clock_minus -
+        //- div(style='font-weight:normal')
+        //-     | W: START CLOCK
+        //-     br
+        //-     | S: STOP CLOCK
+        //-     br
+        //-     | D: PLUS SECOND
+        //-     br
+        //-     | A: MINUS SECOND
+        //- br
+        //- | Message: 
+        //- input#downdist_input(type='text' name='downdist' value='')
+        //- button#show_msg SHOW
+        //- br
+        //- br
         //- | Half: 
         //- button#qtr_1 1st
         //- button#qtr_2 2nd
         //- button#qtr_half HALF
         //- button#qtr_ot(<button='') ET
-        br
-        i(style='font-weight:normal;')
-            | Half sets clock to 45:00
-            br
-            br
-script(src='/js/live.js')
-script(src='https://code.jquery.com/jquery-3.6.0.min.js' integrity='sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=' crossorigin='anonymous')
+        //- br
+        //- i(style='font-weight:normal;')
+        //-     | Half sets clock to 45:00
+        //-     br
+        //-     br
+    script(src='/js/live.js')
+    script(src='https://code.jquery.com/jquery-3.6.0.min.js' integrity='sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=' crossorigin='anonymous')
