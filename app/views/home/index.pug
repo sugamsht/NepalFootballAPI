@@ -122,6 +122,7 @@ block content
       select(name='stadium')
         option(value='Dasthrath Stadium') Dashrath Stadium
         option(value='Pokhara Stadium') Pokhara Stadium
+        option(value='ANFA Stadium') ANFA Stadium
       br
       input(type='submit' value='Submit')
   div#edit-results
@@ -160,6 +161,15 @@ block content
       | Stadium :
       input(type='text' name='stadium' )
       br
+      input(type='submit' value='Submit')
+  div#table-form 
+    h2 Table
+    form(action='/api/tables' method='POST')
+      option Choose Tournament
+      select#selectTournament1(name='tournament_title')
+      br
+      option Choose Team 
+      select#selectTeam3(name='team_name')
       input(type='submit' value='Submit')
 
 

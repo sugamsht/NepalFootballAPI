@@ -75,6 +75,19 @@ let scoreboardSchema = new mongoose.Schema({
     referee: { type: String }
 });
 
+let tableSchema = new mongoose.Schema({
+    tournament_title: { type: String, required: true },
+        team_name: { type: String, required: true },
+        played: { type: Number, default: 0 },
+        win: { type: Number, default: 0 },
+        lost: { type: Number, default: 0 },
+        draw: { type: Number, default: 0 },
+        gf: { type: Number, default: 0 },
+        ga: { type: Number, default: 0 },
+        gd: { type: Number, default: 0 },
+        points: { type: Number, default: 0 }
+});
+
 
 //Models
 let fixtures = mongoose.model('fixtures', fixtureSchema);
@@ -83,6 +96,7 @@ let teams = mongoose.model('teams', teamSchema);
 let results = mongoose.model('results', resultSchema);
 let tournaments = mongoose.model('tournaments', tournamentSchema);
 let scoreboards = mongoose.model('scoreboards', scoreboardSchema);
+let tables = mongoose.model('tables', tableSchema);
 
 
 //Routes
@@ -91,6 +105,32 @@ router.get('/hello', function (req, res) {
 });
 
 //Get All data
+
+//post table data
+router.post('/tables', cors(corsOptions), function (req, res) {
+    let newTable = new tables({
+        tournament_title: req.body.tournament_title,
+        team_name: req.body.team_name
+    });
+    newTable.save(function (err, savedTable) {
+        if (err) {
+            alert(err);
+        } else {
+            alert('Big Success' + savedTable);
+            res.redirect('/');        }
+    })
+});
+
+router.get('/tables', cors(corsOptions), function (req, res) {
+    tables.find({}, function (err, data) {
+        if (err) {
+            res.json({ success: false, message: err });
+        } else {
+            res.json({ success: true, message: data });
+        }
+    });
+});
+
 
 //post and get scoreboard
 
@@ -379,7 +419,8 @@ router.get('/teams', cors(corsOptions), function (req, res) {
                 }
             })
         }
-    ).sort([['points', -1], ['gd', -1]])
+    )
+    .sort([['points', -1], ['gd', -1]])
 });
 
 //results halne
@@ -399,42 +440,40 @@ router.post('/results', function (req, res) {
     if (score1 < 0 || score2 < 0) {
         console.log("Postponed vayo");
     }
-    // else {
-    //     console.log("thick cha");
-    //     teams.findOneAndUpdate({ name: team1 }, { $inc: { gd: gd1 } }, { new: true }, (error, savedTeam1) => { })
-    //     teams.findOneAndUpdate({ name: team2 }, { $inc: { gd: gd2 } }, { new: true }, (error, savedTeam1) => { })
-    //     teams.findOneAndUpdate({ name: team1 }, { $inc: { played: 1 } }, { new: true }, (error, savedStat) => { })
-    //     teams.findOneAndUpdate({ name: team2 }, { $inc: { played: 1 } }, { new: true }, (error, savedStat) => { })
-    //     if (score1 > score2) {
-    //         //increase win in stats
-    //         teams.findOneAndUpdate({ name: team1 }, { $inc: { win: 1, points: 3 } }, { new: true }, (error, savedStat) => {
-    //             if (!error && savedStat) {
-    //             }
-    //         })
-    //         teams.findOneAndUpdate({ name: team2 }, { $inc: { lost: 1 } }, { new: true }, (error, savedStat) => {
-    //             if (!error && savedStat) {
-    //             }
-    //         })
-    //     } else if (score1 < score2) {
-    //         teams.findOneAndUpdate({ name: team1 }, { $inc: { lost: 1 } }, { new: true }, (error, savedStat) => {
-    //             if (!error && savedStat) {
-    //             }
-    //         })
-    //         teams.findOneAndUpdate({ name: team2 }, { $inc: { win: 1, points: 3 } }, { new: true }, (error, savedStat) => {
-    //             if (!error && savedStat) {
-    //             }
-    //         })
-    //     } else {
-    //         teams.findOneAndUpdate({ name: team1 }, { $inc: { draw: 1, points: 1 } }, { new: true }, (error, savedStat) => {
-    //             if (!error && savedStat) {
-    //             }
-    //         })
-    //         teams.findOneAndUpdate({ name: team2 }, { $inc: { draw: 1, points: 1 } }, { new: true }, (error, savedStat) => {
-    //             if (!error && savedStat) {
-    //             }
-    //         })
-    //     }
-    // }
+    else {
+        console.log("thick cha");
+        tables.findOneAndUpdate({ tournament_title: req.body.tournament_title, team_name: team1 }, { $inc: { gd: gd1 } }, { new: true }, (error, savedTeam1) => { if (error) { res.json(error) } })
+        tables.findOneAndUpdate({ tournament_title: req.body.tournament_title, team_name: team2 }, { $inc: { gd: gd2 } }, { new: true }, (error, savedTeam1) => { if (error) { res.json(error) } })
+        tables.findOneAndUpdate({ tournament_title: req.body.tournament_title, team_name: team1 }, { $inc: { gf: score1 } }, { new: true }, (error, savedTeam1) => { if (error) { res.json(error) } })
+        tables.findOneAndUpdate({ tournament_title: req.body.tournament_title, team_name: team2 }, { $inc: { gf: score2 } }, { new: true }, (error, savedTeam1) => { if (error) { res.json(error) } })
+        tables.findOneAndUpdate({ tournament_title: req.body.tournament_title, team_name: team1 }, { $inc: { ga: score2 } }, { new: true }, (error, savedTeam1) => { if (error) { res.json(error) } })
+        tables.findOneAndUpdate({ tournament_title: req.body.tournament_title, team_name: team2 }, { $inc: { ga: score1 } }, { new: true }, (error, savedTeam1) => { if (error) { res.json(error) } })
+        tables.findOneAndUpdate({ tournament_title: req.body.tournament_title, team_name: team1 }, { $inc: { played: 1 } }, { new: true }, (error, savedStat) => { if (error) { res.json(error) } })
+        tables.findOneAndUpdate({ tournament_title: req.body.tournament_title, team_name: team2 }, { $inc: { played: 1 } }, { new: true }, (error, savedStat) => { if (error) { res.json(error) } })
+        if (score1 > score2) {
+            //increase win in stats
+            tables.findOneAndUpdate({ tournament_title: req.body.tournament_title, team_name: team1 }, { $inc: { win: 1, points: 3 } }, { new: true }, (error, savedStat) => {
+                if (error) { res.json(error) }
+            })
+            tables.findOneAndUpdate({ tournament_title: req.body.tournament_title, team_name: team2 }, { $inc: { lost: 1 } }, { new: true }, (error, savedStat) => {
+                if (error) { res.json(error) }
+            })
+        } else if (score1 < score2) {
+            tables.findOneAndUpdate({ tournament_title: req.body.tournament_title, team_name: team1 }, { $inc: { lost: 1 } }, { new: true }, (error, savedStat) => {
+                if (error) { res.json(error) }
+            })
+            tables.findOneAndUpdate({ tournament_title: req.body.tournament_title, team_name: team2 }, { $inc: { win: 1, points: 3 } }, { new: true }, (error, savedStat) => {
+                if (error) { res.json(error) }
+            })
+        } else {
+            tables.findOneAndUpdate({ tournament_title: req.body.tournament_title, team_name: team1 }, { $inc: { draw: 1, points: 1 } }, { new: true }, (error, savedStat) => {
+                if (error) { res.json(error) }
+            })
+            tables.findOneAndUpdate({ tournament_title: req.body.tournament_title, team_name: team2 }, { $inc: { draw: 1, points: 1 } }, { new: true }, (error, savedStat) => {
+                if (error) { res.json(error) }
+            })
+        }
+    }
 
 
     let newResult = new results({
