@@ -13,7 +13,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
         document.getElementById('resultTitle').setAttribute('value', tournament_title);
         document.getElementById('teamTitle').setAttribute('value', tournament_title);
         document.getElementById('fixtureTitle').setAttribute('value', tournament_title);
-        document.getElementById('tableTitle').setAttribute('value', tournament_title);
     })
 
     // function tournament() {
@@ -27,7 +26,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
             var select = document.getElementById("selectTeam");
             var select1 = document.getElementById("selectTeam1");
             var select2 = document.getElementById("selectTeam2");
-            var select3 = document.getElementById("selectTeam3");
             // var options = ["1", "2", "3", "4", "5"];
 
             for (var i = 0; i < options.length; i++) {
@@ -45,14 +43,9 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 el2.text = opt;
                 el2.value = opt;
 
-                var el3 = document.createElement("option");
-                el3.text = opt;
-                el3.value = opt;
-
                 select.add(el);
                 select1.add(el1);
                 select2.add(el2);
-                select3.add(el3);
 
             }
         });

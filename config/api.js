@@ -38,13 +38,7 @@ let teamSchema = new mongoose.Schema({
     name: { type: String, required: true },
     location: { type: String },
     logo: String,
-    manager: { type: String },
-    played: { type: Number, default: 0 },
-    win: { type: Number, default: 0 },
-    lost: { type: Number, default: 0 },
-    draw: { type: Number, default: 0 },
-    gd: { type: Number, default: 0 },
-    points: { type: Number, default: 0 },
+    manager: { type: String },    
     playerList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'players' }]
 });
 
@@ -63,7 +57,8 @@ let tournamentSchema = new mongoose.Schema({
     stadium: [{ type: String }],
     teamList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'teams' }],
     fixtureList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'fixtures' }],
-    resultList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'results' }]
+    resultList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'results' }],
+    tableList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'tables' }]
 });
 
 let scoreboardSchema = new mongoose.Schema({
@@ -365,6 +360,7 @@ router.get('/tournaments', cors(corsOptions), function (req, res) {
     tournaments.find({})
         .populate('resultList')
         .populate('teamList')
+        .populate('tableList')
         .populate({
             path: 'fixtureList',
             populate: {
@@ -382,6 +378,7 @@ router.get('/tournaments', cors(corsOptions), function (req, res) {
                 res.json(arrayOfResults)
             }
         })
+        
 });
 
 //teams halne
@@ -398,13 +395,33 @@ router.post('/teams', function (req, res) {
         if (!error && savedTeam) {
             alert('Big Success' + savedTeam)
             //reset form
+            // res.redirect('/');
+            //res.json(savedTeam);
+        }
+    });
+    
+    tournaments.findOneAndUpdate({ title: req.body.tournament_title }, { $push: { teamList: newTeam._id } }, { new: true }, (error, savedTeam) => {
+        if (!error && savedTeam) {
+            //alert('Big Success')
+        }
+    })
+
+    let newTable = new tables({
+        tournament_title: req.body.tournament_title,
+        team_name: req.body.name
+    });
+    newTable.save((error, savedTable) => {
+        if (!error && savedTable) {
+            alert('Big Success' + savedTable)
+            //reset form
             res.redirect('/');
             //res.json(savedTeam);
         }
     });
-    tournaments.findOneAndUpdate({ title: req.body.tournament_title }, { $push: { teamList: newTeam._id } }, { new: true }, (error, savedTeam) => {
-        if (!error && savedTeam) {
-            //alert('Big Success')
+
+    tournaments.findOneAndUpdate({ title: req.body.tournament_title }, { $push: { tableList: newTable._id } }, { new: true }, (error, savedTable) => {
+        if (error) {
+            alert('Big vye ka', error)
         }
     })
 })
@@ -474,7 +491,6 @@ router.post('/results', function (req, res) {
             })
         }
     }
-
 
     let newResult = new results({
         tournament_title: req.body.tournament_title,
