@@ -22,11 +22,16 @@ module.exports = function (app) {
     res.render('home/index', { username: req.user.username });
   });
 
+  app.route('/live').get(ensureAuthenticated, (req, res) => {
+    res.render('home/live', { username: req.user.username });
+  });
+
+
   // app.get('/', home.index)
 
   app.get('/login', home.login);
 
-  app.get('/live', home.live);
+  app.get('/live', home.live)
 
   app.use('/api', require('./api'));
 

@@ -38,7 +38,7 @@ let teamSchema = new mongoose.Schema({
     name: { type: String, required: true },
     location: { type: String },
     logo: String,
-    manager: { type: String },    
+    manager: { type: String },
     playerList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'players' }]
 });
 
@@ -72,15 +72,15 @@ let scoreboardSchema = new mongoose.Schema({
 
 let tableSchema = new mongoose.Schema({
     tournament_title: { type: String, required: true },
-        team_name: { type: String, required: true },
-        played: { type: Number, default: 0 },
-        win: { type: Number, default: 0 },
-        lost: { type: Number, default: 0 },
-        draw: { type: Number, default: 0 },
-        gf: { type: Number, default: 0 },
-        ga: { type: Number, default: 0 },
-        gd: { type: Number, default: 0 },
-        points: { type: Number, default: 0 }
+    team_name: { type: String, required: true },
+    played: { type: Number, default: 0 },
+    win: { type: Number, default: 0 },
+    lost: { type: Number, default: 0 },
+    draw: { type: Number, default: 0 },
+    gf: { type: Number, default: 0 },
+    ga: { type: Number, default: 0 },
+    gd: { type: Number, default: 0 },
+    points: { type: Number, default: 0 }
 });
 
 
@@ -112,7 +112,8 @@ router.post('/tables', cors(corsOptions), function (req, res) {
             alert(err);
         } else {
             alert('Big Success' + savedTable);
-            res.redirect('/');        }
+            res.redirect('/');
+        }
     })
 });
 
@@ -153,7 +154,7 @@ router.post('/scoreboard', function (req, res) {
 });
 
 router.get('/scoreboard', cors(corsOptions), function (req, res) {
-    scoreboards.find({})
+    scoreboards.find({}).sort({ _id: -1 }).limit(1)
         .populate('fixObject')
         .populate({
             path: 'fixObject',
@@ -378,7 +379,7 @@ router.get('/tournaments', cors(corsOptions), function (req, res) {
                 res.json(arrayOfResults)
             }
         })
-        
+
 });
 
 //teams halne
@@ -399,7 +400,7 @@ router.post('/teams', function (req, res) {
             //res.json(savedTeam);
         }
     });
-    
+
     tournaments.findOneAndUpdate({ title: req.body.tournament_title }, { $push: { teamList: newTeam._id } }, { new: true }, (error, savedTeam) => {
         if (!error && savedTeam) {
             //alert('Big Success')
@@ -437,7 +438,7 @@ router.get('/teams', cors(corsOptions), function (req, res) {
             })
         }
     )
-    .sort([['points', -1], ['gd', -1]])
+        .sort([['points', -1], ['gd', -1]])
 });
 
 //results halne
