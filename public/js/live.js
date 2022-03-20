@@ -89,21 +89,21 @@ document.addEventListener("DOMContentLoaded", function (event) {
     });
 
     //timer
-    qtr_1.addEventListener('click', function (e) {
-        timer.value = 'First Half';
-    }, false);
-    qtr_2.addEventListener('click', function (e) {
-        timer.value = 'Second half';
-    }, false);
-    qtr_et.addEventListener('click', function (e) {
-        timer.value = 'Extra Time';
-    }, false);
-    qtr_ft.addEventListener('click', function (e) {
-        timer.value = 'Full Time';
-    }, false);
-    qtr_half.addEventListener('click', function (e) {
-        timer.value = 'Half Time';
-    }, false);
+    // qtr_1.addEventListener('click', function (e) {
+    //     timer.value = 'First Half';
+    // }, false);
+    // qtr_2.addEventListener('click', function (e) {
+    //     timer.value = 'Second half';
+    // }, false);
+    // qtr_et.addEventListener('click', function (e) {
+    //     timer.value = 'Extra Time';
+    // }, false);
+    // qtr_ft.addEventListener('click', function (e) {
+    //     timer.value = 'Full Time';
+    // }, false);
+    // qtr_half.addEventListener('click', function (e) {
+    //     timer.value = 'Half Time';
+    // }, false);
 
 
 
@@ -127,8 +127,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
     //     $("#downdist").text("Kickoff");
     // });
 
-
-
     // qtr_half.click(function () {
     //     timer.value = 'Half Time';
     //     // $("#qtr").text("Half");
@@ -140,12 +138,20 @@ document.addEventListener("DOMContentLoaded", function (event) {
     // });
 
     // CLOCK
-    // $("#clock_start").click(function () {
-    //     if (clock_going == 0) {
-    //         clock = setInterval('countUp()', 1000);
-    //         clock_going = 1;
-    //     }
-    // });
+    $("#clock_start").click(function () {
+        if (clock_going == 0) {
+            clock = setInterval('countUp()', 1000 * 60);
+            clock_going = 1;
+            $("#clock_start").text("Stop Clock");
+            $("#clock_input_min").val($('#clock_min').html());
+        }
+        else {
+            clearInterval(clock);
+            clock_going = 0;
+            $("#clock_input_min").val($('#clock_min').html());
+            $("#clock_start").text("Start Clock");
+        }
+    });
 
     // $("#clock_stop").click(function () {
     //     clearInterval(clock);
@@ -154,51 +160,29 @@ document.addEventListener("DOMContentLoaded", function (event) {
     //     $("#clock_input_sec").val($('#clock_sec').html());
     // });
 
-    // $("#clock_update").click(function () {
-    //     //clock_going = 0; clearInterval(clock); // THIS WOULD STOP THE CLOCK WHILE UPDATING - uncomment if needed
-    //     $('#clock_min').html($("#clock_input_min").val());
-    //     $('#clock_sec').html($("#clock_input_sec").val());
-    // });
+    $("#clock_update").click(function () {
+        //clock_going = 0; clearInterval(clock); // THIS WOULD STOP THE CLOCK WHILE UPDATING - uncomment if needed
+        $('#clock_min').html($("#clock_input_min").val());
+    });
 
-    // $("#clock_plus").click(function () {
+    $("#clock_plus").click(function () {
+        clearInterval(clock);
+        var m = $('#clock_min');
 
-    //     clearInterval(clock);
-    //     var m = $('#clock_min');
-    //     var s = $('#clock_sec');
-    //     if ((parseInt(s.html()) == 59)) {
-    //         m.html(parseInt(m.html()) + 1);
-    //         s.html("00");
-    //     } else {
-    //         if ((parseInt(s.html()) + 1) < 10) { s.html("0" + (parseInt(s.html()) + 1)); } else {
-    //             s.html(parseInt(s.html()) + 1);
-    //         }
-    //     }
-    //     if (clock_going == 1) { clock = setInterval('countUp()', 1000); }
+        m.html(parseInt(m.html()) + 1);
 
-    //     $("#clock_input_min").val($('#clock_min').html());
-    //     $("#clock_input_sec").val($('#clock_sec').html());
+        $("#clock_input_min").val($('#clock_min').html());
 
-    // });
+    });
 
-    // $("#clock_minus").click(function () {
+    $("#clock_minus").click(function () {
 
-    //     clearInterval(clock);
-    //     var m = $('#clock_min');
-    //     var s = $('#clock_sec');
-    //     if ((parseInt(s.html()) == 00)) {
-    //         m.html(parseInt(m.html()) - 1);
-    //         s.html("59");
-    //     } else {
-    //         if ((parseInt(s.html()) - 1) < 10) { s.html("0" + (parseInt(s.html()) - 1)); } else {
-    //             s.html(parseInt(s.html()) - 1);
-    //         }
-    //     }
+        clearInterval(clock);
+        var m = $('#clock_min');
+        m.html(parseInt(m.html()) - 1);
+        $("#clock_input_min").val($('#clock_min').html());
 
-
-    //     $("#clock_input_min").val($('#clock_min').html());
-    //     $("#clock_input_sec").val($('#clock_sec').html());
-
-    // });
+    });
 
     // $("#clock_input_min").keyup(function (event) {
     //     if (event.keyCode == 13) {
@@ -231,6 +215,16 @@ document.addEventListener("DOMContentLoaded", function (event) {
 //         }
 //     }
 // }
+
+function countUp() {
+    var m = $('#clock_min');
+    // var i = $('#clock_input_min');
+    // i.html(parseInt(i.html()) + 1);
+    m.html(parseInt(m.html()) + 1);
+    $("#clock_input_min").val($('#clock_min').html());
+}
+
+
 
 //key to change the clock
 // document.addEventListener("DOMContentLoaded", function (event) {

@@ -67,7 +67,8 @@ let scoreboardSchema = new mongoose.Schema({
     timer: { type: String },
     fixname: { type: String, required: true },
     fixObject: { type: mongoose.Schema.Types.ObjectId, ref: 'fixtures' },
-    referee: { type: String }
+    referee: { type: String },
+    event: { type: String },
 });
 
 let tableSchema = new mongoose.Schema({
@@ -181,14 +182,18 @@ router.post('/editScoreboard/', function (req, res) {
     if (!fixname) {
         return res.json({ error: 'Bhayena hai bhayena' })
     }
+    var event = req.body.timer + '  ' + req.body.playername + '  ' + req.body.eventtype
+    console.log("yo ho hamro event", event);
     scoreboards.findOneAndUpdate({ fixname: fixname },
         {
             $set: {
                 //score: req.body.score,
                 score1: req.body.score1,
                 score2: req.body.score2,
-                timer: req.body.timer
+                timer: req.body.timer,
+                event: event
             }
+
         }, { new: true }, (error, savedResults) => {
             if (!error && savedResults) {
                 alert('Big Success' + savedResults)
