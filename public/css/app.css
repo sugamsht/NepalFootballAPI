@@ -1,5 +1,11 @@
 /* Show it is fixed to the top */
 
+/* menu */
+input.right {
+  position: absolute;
+  right: 2rem;
+}
+
 body {
   margin-top: 6rem;
 }
@@ -123,4 +129,41 @@ form {
 .checkbox:checked+.switch-btn::before {
   left: calc(100% - 4px);
   transform: translateX(-100%);
+}
+
+
+/* live starts here */
+
+#WIRECAST {
+  background: grey;
+}
+
+form#choose-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+div#event {
+  display: flex;
+  gap: 1rem;
+}
+
+#control_area {
+  background: white;
+}
+
+#scoreboard {
+  background: rgb(197, 197, 197);
+  color: black;
+  display: flex;
+  justify-content: space-evenly;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+#team1_score,
+#team2_score {
+  font-size: 2rem;
 }

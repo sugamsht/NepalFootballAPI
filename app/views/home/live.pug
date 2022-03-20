@@ -1,103 +1,102 @@
 extends ../layouts/default.pug
 
 block page-header
-    #WIRECAST
-    #scoreboard
-        span#team1
-            | MANCHESTER
-            | CITY
-        span#team1_score
-            |   0
-            br
-        span#team2
-            | MANCHESTER
-            | UNITED
-        span#team2_score
-            |   0
-            br
-        #clock
-            //- span#clock_min 1
-        span#qtr1 1st Half
-        span#downdist
-        br
-        br
-    div#result-form 
-        form(action='/api/scoreboard' method='POST')
-            option Choose Fixture
-            select#selectFixture(name='fixname')
-            br
-            | Match referee:
-            input(type="text" name='referee' )
-            input#fixButton(type='submit' value='Submit')
-        br
-        button#fixtureButton Select Fixture
-    div#control_area
-        form(action='/api/editScoreboard/' method='POST')
-            input#scoreboardTitle(type='string' name='fixname' readonly)
+    #LIVESCORE
+        #scoreboard
+            span#team1
+                | MANCHESTER
+                | CITY
+            span#team1_score
+                |   0
+                br
+            span#team2
+                | MANCHESTER
+                | UNITED
+            span#team2_score
+                |   0
+                br
+            #clock
+                //- span#clock_min 1
+            span#qtr1 1st Half
+            span#downdist
             br
             br
-            | Team1 Score: 
-            option Choose Player
-            select#selectPlayer(name='playername')
-                option(value='Sugam Shrestha') Sugam Shrestha
-                option(value='Prashant Bajracharya') Prashant Bajracharya
-                option(value='Sushan Shahi') Sushan Shahi
-            option Choose Event Type
-            select#selectEvent(name='eventtype')
-                option(value='goal') Goal
-                option(value='yellow') Yellow Card
-                option(value='red') Red Card
-                option(value='sub') Substitution
-            input#team1_score_input(type='number' name='score1' value='0')
-            button#team1_plus1 +1
-            button#team1_score_update UPDATE
+        div#top-select
+            form#choose-form(action='/api/scoreboard' method='POST')
+                option Choose Fixture
+                select#selectFixture(name='fixname')
+                br
+                | Match referee:
+                input(type="text" name='referee' )
+                input#fixButton(type='submit' value='Submit')
             br
-            br
-            | Team2 Score: 
-            input#team2_score_input(type='number' name='score2' value='0')
-            button#team2_plus1 +1
-            button#team2_score_update UPDATE
-            br
-            br
-            //- | Clock: 
-            input#clock_input_min(type='number' name='timer' value='0' min='0' max='90' hidden)
-            //- button#clock_update UPDATE
-            //- button#clock_start START CLOCK
-            | Minutes:
-            span#clock_min  1
-            //- #clock_input_min(type='number' name='timer' value='0' min='0' max='90')
-            //- input#clock_min(type='text' name='timer' value='1' ) 
-            br
-            //- | Half: 
-            //- input#qtr(type='text' name='timer' value='First Half')
-            //- button#qtr_1 1st 
-            //- button#qtr_2 2nd 
-            //- button#qtr_half HT
-            //- button#qtr_ft FT
-            //- button#qtr_et ET
-            br
-            br
-            input#resultTitle(type='string' name='tournament_title'  readonly)
-            br
-            button#gotoresults Final Score to Result
-            br
-            br
+        div#control_area
+            button#fixtureButton Select Fixture
+            form(action='/api/editScoreboard/' method='POST')
+                input#scoreboardTitle(type='string' name='fixname' readonly)
+                br
+                br
+                div#event
+                    option Choose Player
+                    select#selectPlayer(name='playername')
+                        option(value='Sugam Shrestha') Sugam Shrestha
+                        option(value='Prashant Bajracharya') Prashant Bajracharya
+                        option(value='Sushan Shahi') Sushan Shahi
+                        option(value='Jayesh Bajracharya') Jayesh Bajracharya
+                        option(value='Sagar Shrestha') Sagar Shrestha
 
-        | Clock: 
-        //- input#clock_input_min(type='number' name='timer' value='0' min='0' max='90')
-        button#clock_update UPDATE
-        button#clock_start START CLOCK
-        //- button#clock_stop STOP CLOCK
-        button#clock_plus +
-        button#clock_minus -
-        div(style='font-weight:normal')
-            | W: START CLOCK
-            br
-            | S: STOP CLOCK
-        //- br
-        //- | Message: 
-        //- input#downdist_input(type='text' name='downdist' value='')
-        //- button#show_msg SHOW
-        //- br
+                    option Choose Event Type
+                    select#selectEvent(name='eventtype')
+                        option(value='goal') Goal
+                        option(value='yellow') Yellow Card
+                        option(value='red') Red Card
+                        option(value='sub') Substitution
+                br
+                | Team1 Score: 
+                input#team1_score_input(type='number' name='score1' value='0')
+                button#team1_plus1 +1
+                button#team1_score_update UPDATE
+                br
+                br
+                | Team2 Score: 
+                input#team2_score_input(type='number' name='score2' value='0')
+                button#team2_plus1 +1
+                button#team2_score_update UPDATE
+                br
+                br
+                | Clock: 
+                input#clock_input_min(type='number' name='timer' value='0' min='0' max='90' hidden)
+                | Minutes:
+                span#clock_min  1
+                br
+                br
+                //- | Half: 
+                //- input#qtr(type='text' name='timer' value='First Half')
+                //- button#qtr_1 1st 
+                //- button#qtr_2 2nd 
+                //- button#qtr_half HT
+                //- button#qtr_ft FT
+                //- button#qtr_et ET
+                div#result
+                    input#resultTitle(type='string' name='tournament_title' placeholder='need tournament name'  readonly)   
+                    button#gotoresults Final Score to Result
+                br
+
+            | Clock: 
+            //- input#clock_input_min(type='number' name='timer' value='0' min='0' max='90')
+            button#clock_update UPDATE
+            button#clock_start START CLOCK
+            //- button#clock_stop STOP CLOCK
+            button#clock_plus +
+            button#clock_minus -
+            div(style='font-weight:normal')
+                | W: START CLOCK
+                br
+                | S: STOP CLOCK
+            //- br
+            //- | Message: 
+            //- input#downdist_input(type='text' name='downdist' value='')
+            //- button#show_msg SHOW
+            //- br
     script(src='/js/live.js')
     script(src='https://code.jquery.com/jquery-3.6.0.min.js' integrity='sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=' crossorigin='anonymous')

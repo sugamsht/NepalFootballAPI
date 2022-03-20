@@ -21,7 +21,7 @@ let fixtureSchema = new mongoose.Schema({
     stadium: String,
     date: { type: String },
     time: String,
-    fixname: String,
+    fixname: [String],
 });
 
 let playerSchema = new mongoose.Schema({
@@ -68,7 +68,7 @@ let scoreboardSchema = new mongoose.Schema({
     fixname: { type: String, required: true },
     fixObject: { type: mongoose.Schema.Types.ObjectId, ref: 'fixtures' },
     referee: { type: String },
-    event: { type: String },
+    event: [{ type: String }],
 });
 
 let tableSchema = new mongoose.Schema({
@@ -182,8 +182,8 @@ router.post('/editScoreboard/', function (req, res) {
     if (!fixname) {
         return res.json({ error: 'Bhayena hai bhayena' })
     }
-    var event = req.body.timer + '  ' + req.body.playername + '  ' + req.body.eventtype
-    console.log("yo ho hamro event", event);
+    var event = req.body.timer + "'   " + req.body.playername + '  ' + req.body.eventtype
+    // console.log("yo ho hamro event", event);
     scoreboards.findOneAndUpdate({ fixname: fixname },
         {
             $set: {
@@ -191,9 +191,10 @@ router.post('/editScoreboard/', function (req, res) {
                 score1: req.body.score1,
                 score2: req.body.score2,
                 timer: req.body.timer,
+            },
+            $push: {
                 event: event
             }
-
         }, { new: true }, (error, savedResults) => {
             if (!error && savedResults) {
                 alert('Big Success' + savedResults)
