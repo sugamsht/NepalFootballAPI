@@ -35,16 +35,30 @@ document.addEventListener("DOMContentLoaded", function (event) {
     fetch(url + '/api/fixtures')
         .then(response => response.json())
         .then(data => {
-            options = data.map(item => item.fixname)
+            data.sort(function (a, b) {
+                var dateA = new Date(a.date), dateB = new Date(b.date)
+                return dateA - dateB
+            });
+            var fullDay = new Date();
+            var today = new Date(fullDay.toDateString());
+            var yochai;
+            // console.log('first wala', today);
+            for (let j = 0; j < data.length; j++) {
+                var datea = new Date(data[j].date);
+                // console.log("1st date hai", datea);
+                if (datea >= today) {
+                    yochai = data.slice(j, j + 5);
+                    break;
+                }
+            }
+            console.log("Fixtures are ", yochai);
+            options = yochai.map(item => item.fixname)
             var select = document.getElementById("selectFixture");
             for (var i = 0; i < options.length; i++) {
                 var opt = options[i];
-
                 var el = document.createElement("option");
-
                 el.text = opt;
                 el.value = opt;
-
                 select.add(el);
             }
         });
