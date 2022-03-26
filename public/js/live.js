@@ -17,6 +17,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var qtr_et = document.querySelector("#qtr_et");
     var qtr_half = document.querySelector("#qtr_half");
 
+    var fix1 =  document.querySelector("#scoreboardTitle");
+    
     let url;
     if (location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname === "") {
         url = 'http://localhost:3000'
@@ -29,6 +31,52 @@ document.addEventListener("DOMContentLoaded", function (event) {
         var fixture_title = document.getElementById("selectFixture").value;
         console.log("Tournament title is ", fixture_title);
         document.getElementById('scoreboardTitle').setAttribute('value', fixture_title);
+        console.log('Maile leko is: ', fix1.value);
+        var result = fix1.value.split(' vs ');
+        var team1 = result[0];
+        var team2 = result[1];
+        
+        //fetches the players
+        fetch(url + '/api/players')
+        .then(response => response.json())
+        .then(data => {
+            console.log("Players are ", data);
+            console.log('Team 1 is: ', team1);
+            console.log('Team 2 is: ', team2);
+            // var newdata = [];
+            
+            for(var j = 0; j < data.length; j++) {
+                console.log('hereko hai ', data[j].team_name);
+                if(data[j].team_name === team1 || data[j].team_name === team2) {
+                    // newdata += data[j];
+                    console.log("Chaine Players are ", data[j]);
+                    // Object.keys(data[j]).map(function(fname, index) {
+                    //     console.log("objects gareko are ", data[j].fname + " " + data[j].lname);
+                    //     options =  data[j].fname + " " + data[j].lname;
+                        
+                    // });
+                    options =  data[j].fname + " " + data[j].lname;
+                    var select = document.getElementById("selectPlayer");
+                    // for (var i = 0; i < options.length; i++) {
+                    // var opt = options[i];
+                    var el = document.createElement("option");
+                    el.text = options;
+                    el.value = options;
+                    select.add(el);
+                    // }  
+                }
+            }
+
+            // options = Object.keys(data[j]).map(item => item.fname + " " + item.lname)
+            // var select = document.getElementById("selectPlayer");
+            // for (var i = 0; i < options.length; i++) {
+            // var opt = options[i];
+            // var el = document.createElement("option");
+            // el.text = opt;
+            // el.value = opt;
+            // select.add(el);
+            // }                     
+        });
     })
 
     //fetches the fixtures
@@ -63,6 +111,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
             }
         });
 
+    
     // TEAM 1 SCORE
     team1_plus1.addEventListener("click", function (e) {
         var oldscore = parseInt(team1_input.value, 10);

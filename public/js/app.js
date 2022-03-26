@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         for(i = L; i >= 0; i--) {
             selectElement.remove(i);
         }
-        }
+    }
 
     fetch(url + '/api/tournaments')
         .then(response => response.json())
