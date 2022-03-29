@@ -26,6 +26,13 @@ document.addEventListener("DOMContentLoaded", function (event) {
         url = 'https://nepalscores.herokuapp.com'
     }
 
+    function removeOptions(selectElement) {
+        var i, L = selectElement.options.length - 1;
+        for(i = L; i >= 0; i--) {
+            selectElement.remove(i);
+        }
+    }
+
     //fixture tala aune
     document.getElementById('fixtureButton').addEventListener('click', function (e) {
         var fixture_title = document.getElementById("selectFixture").value;
@@ -40,42 +47,24 @@ document.addEventListener("DOMContentLoaded", function (event) {
         fetch(url + '/api/players')
         .then(response => response.json())
         .then(data => {
-            console.log("Players are ", data);
-            console.log('Team 1 is: ', team1);
-            console.log('Team 2 is: ', team2);
-            // var newdata = [];
+            // console.log("Players are ", data);
+            // console.log('Team 1 is: ', team1);
+            // console.log('Team 2 is: ', team2);
             
+            var select = document.getElementById("selectPlayer");
+            removeOptions(select)
             for(var j = 0; j < data.length; j++) {
-                console.log('hereko hai ', data[j].team_name);
+                // console.log('hereko hai ', data[j].team_name);
                 if(data[j].team_name === team1 || data[j].team_name === team2) {
-                    // newdata += data[j];
-                    console.log("Chaine Players are ", data[j]);
-                    // Object.keys(data[j]).map(function(fname, index) {
-                    //     console.log("objects gareko are ", data[j].fname + " " + data[j].lname);
-                    //     options =  data[j].fname + " " + data[j].lname;
-                        
-                    // });
+                    // console.log("Chaine Players are ", data[j]);
                     options =  data[j].fname + " " + data[j].lname;
-                    var select = document.getElementById("selectPlayer");
-                    // for (var i = 0; i < options.length; i++) {
-                    // var opt = options[i];
                     var el = document.createElement("option");
                     el.text = options;
                     el.value = options;
                     select.add(el);
                     // }  
                 }
-            }
-
-            // options = Object.keys(data[j]).map(item => item.fname + " " + item.lname)
-            // var select = document.getElementById("selectPlayer");
-            // for (var i = 0; i < options.length; i++) {
-            // var opt = options[i];
-            // var el = document.createElement("option");
-            // el.text = opt;
-            // el.value = opt;
-            // select.add(el);
-            // }                     
+            }              
         });
     })
 
