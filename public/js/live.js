@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         console.log("Tournament title is ", fixture_title);
         document.getElementById('scoreboardTitle').setAttribute('value', fixture_title);
         console.log('Maile leko is: ', fix1.value);
-        var result = fix1.value.split(' vs ');
+        var result = fix1.value?.split(' vs ');
         var team1 = result[0];
         var team2 = result[1];
         
@@ -53,18 +53,20 @@ document.addEventListener("DOMContentLoaded", function (event) {
             
             var select = document.getElementById("selectPlayer");
             removeOptions(select)
+            
             for(var j = 0; j < data.length; j++) {
                 // console.log('hereko hai ', data[j].team_name);
                 if(data[j].team_name === team1 || data[j].team_name === team2) {
                     // console.log("Chaine Players are ", data[j]);
-                    options =  data[j].fname + " " + data[j].lname;
                     var el = document.createElement("option");
+                    options =  data[j].fname + " " + data[j].lname;
                     el.text = options;
                     el.value = options;
                     select.add(el);
                     // }  
                 }
-            }              
+            }         
+            select.selectedIndex = -1; 
         });
     })
 
