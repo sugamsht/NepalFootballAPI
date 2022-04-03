@@ -4,12 +4,15 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
     var team1_input = document.querySelector("#team1_score_input");
     var team1_score = document.querySelector("#team1_score");
+    var team1_name = document.querySelector("#team1");
     var team1_plus1 = document.querySelector("#team1_plus1");
     var team1_update = document.querySelector("#team1_score_update");
+    var team2_name = document.querySelector("#team2");
     var team2_input = document.querySelector("#team2_score_input");
     var team2_plus1 = document.querySelector("#team2_plus1");
     var team2_update = document.querySelector("#team2_score_update")
     var team2_score = document.querySelector("#team2_score");
+    var minutes = document.querySelector("#clock_min");
     var timer = document.querySelector("#qtr");
     var qtr_1 = document.querySelector("#qtr_1");
     var qtr_2 = document.querySelector("#qtr_2");
@@ -17,8 +20,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var qtr_et = document.querySelector("#qtr_et");
     var qtr_half = document.querySelector("#qtr_half");
 
-    var fix1 =  document.querySelector("#scoreboardTitle");
-    
+    var fix1 = document.querySelector("#scoreboardTitle");
+
     let url;
     if (location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname === "") {
         url = 'http://localhost:3000'
@@ -28,7 +31,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
     function removeOptions(selectElement) {
         var i, L = selectElement.options.length - 1;
-        for(i = L; i >= 0; i--) {
+        for (i = L; i >= 0; i--) {
             selectElement.remove(i);
         }
     }
@@ -42,32 +45,55 @@ document.addEventListener("DOMContentLoaded", function (event) {
         var result = fix1.value?.split(' vs ');
         var team1 = result[0];
         var team2 = result[1];
-        
+
+
+
+        fetch(url + '/api/scoreboard/')
+            .then(response => response.json())
+            .then(data => {
+                var score1 = data[0].score1;
+                var score2 = data[0].score2;
+                var timer = data[0].timer;
+                var team1 = data[0].team1;
+                var team2 = data[0].team2;
+                console.log("yo live data aako", data);
+                team1_score.innerHTML = score1;
+                team1_input.value = score1;
+                team2_score.innerHTML = score2;
+                team2_input.value = score2;
+                console.log("timer is", timer);
+                var [team1, team2] = data[0].fixname?.split(' vs ');
+                minutes.innerHTML = timer;
+                team1_name.innerHTML = team1;
+                team2_name.innerHTML = team2;
+            }
+            );
+
         //fetches the players
         fetch(url + '/api/players')
-        .then(response => response.json())
-        .then(data => {
-            // console.log("Players are ", data);
-            // console.log('Team 1 is: ', team1);
-            // console.log('Team 2 is: ', team2);
-            
-            var select = document.getElementById("selectPlayer");
-            removeOptions(select)
-            
-            for(var j = 0; j < data.length; j++) {
-                // console.log('hereko hai ', data[j].team_name);
-                if(data[j].team_name === team1 || data[j].team_name === team2) {
-                    // console.log("Chaine Players are ", data[j]);
-                    var el = document.createElement("option");
-                    options =  data[j].fname + " " + data[j].lname;
-                    el.text = options;
-                    el.value = options;
-                    select.add(el);
-                    // }  
+            .then(response => response.json())
+            .then(data => {
+                // console.log("Players are ", data);
+                // console.log('Team 1 is: ', team1);
+                // console.log('Team 2 is: ', team2);
+
+                var select = document.getElementById("selectPlayer");
+                removeOptions(select)
+
+                for (var j = 0; j < data.length; j++) {
+                    // console.log('hereko hai ', data[j].team_name);
+                    if (data[j].team_name === team1 || data[j].team_name === team2) {
+                        // console.log("Chaine Players are ", data[j]);
+                        var el = document.createElement("option");
+                        options = data[j].fname + " " + data[j].lname;
+                        el.text = options;
+                        el.value = options;
+                        select.add(el);
+                        // }  
+                    }
                 }
-            }         
-            select.selectedIndex = -1; 
-        });
+                select.selectedIndex = -1;
+            });
     })
 
     //fetches the fixtures
@@ -102,7 +128,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
             }
         });
 
-    
+
     // TEAM 1 SCORE
     team1_plus1.addEventListener("click", function (e) {
         var oldscore = parseInt(team1_input.value, 10);
@@ -220,36 +246,31 @@ document.addEventListener("DOMContentLoaded", function (event) {
     });
 
     $("#clock_plus").click(function () {
-        clearInterval(clock);
+        // clearInterval(clock);
         var m = $('#clock_min');
-
         m.html(parseInt(m.html()) + 1);
-
         $("#clock_input_min").val($('#clock_min').html());
 
     });
 
     $("#clock_minus").click(function () {
-
-        clearInterval(clock);
+        // clearInterval(clock);
         var m = $('#clock_min');
         m.html(parseInt(m.html()) - 1);
         $("#clock_input_min").val($('#clock_min').html());
 
     });
 
-    // $("#clock_input_min").keyup(function (event) {
-    //     if (event.keyCode == 13) {
-    //         $("#clock_update").click();
-    //     }
-    // });
-
-    // $("#clock_input_sec").keyup(function (event) {
-    //     if (event.keyCode == 13) {
-    //         $("#clock_update").click();
-    //     }
-    // });
-
+    //key to change the clock
+    document.addEventListener("keypress", function (event) {
+        var keyName = event.key;
+        if (keyName == '+') { //up
+            document.querySelector("#clock_plus").click();
+        }
+        if (keyName == '-') { //down
+            document.querySelector("#clock_minus").click();
+        }
+    });
 });
 
 // function countUp() {
@@ -277,31 +298,5 @@ function countUp() {
     m.html(parseInt(m.html()) + 1);
     $("#clock_input_min").val($('#clock_min').html());
 }
-
-
-
-//key to change the clock
-// document.addEventListener("DOMContentLoaded", function (event) {
-
-//     document.addEventListener("keypress", function (event) {
-//         // console.log(event);
-//         var keyName = event.key;
-//         if (keyName == 'w') { //left
-//             document.querySelector("#clock_start").click();
-//         }
-//         if (keyName == 'd') { //up
-//             document.querySelector("#clock_plus").click();
-//         }
-//         if (keyName == 's') { //right
-//             document.querySelector("#clock_stop").click();
-//         }
-//         if (keyName == 'a') { //down
-//             document.querySelector("#clock_minus").click();
-//         }
-
-//     });
-
-// });
-
 
 

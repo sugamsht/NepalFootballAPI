@@ -31,14 +31,14 @@ let playerSchema = new mongoose.Schema({
     dob: { type: Date, default: Date.now },
     position: { type: String, required: true },
     jersey_no: { type: Number },
-    match_played: { type: Number, default: 0},
-    goals_scored: { type: Number, default: 0},
-    own_goals: { type: Number, default: 0},
-    goals_conceded: { type: Number, default: 0},
-    assists: { type: Number, default: 0},
-    clean_sheets: { type: Number, default: 0},
-    yellow_cards: { type: Number, default: 0},
-    red_cards: { type: Number, default: 0}
+    match_played: { type: Number, default: 0 },
+    goals_scored: { type: Number, default: 0 },
+    own_goals: { type: Number, default: 0 },
+    goals_conceded: { type: Number, default: 0 },
+    assists: { type: Number, default: 0 },
+    clean_sheets: { type: Number, default: 0 },
+    yellow_cards: { type: Number, default: 0 },
+    red_cards: { type: Number, default: 0 }
 });
 
 let teamSchema = new mongoose.Schema({
@@ -72,7 +72,7 @@ let tournamentSchema = new mongoose.Schema({
 let scoreboardSchema = new mongoose.Schema({
     score1: { type: Number, required: true, default: 0 },
     score2: { type: Number, required: true, default: 0 },
-    timer: { type: String },
+    timer: { type: String, default: '1' },
     fixname: { type: String, required: true },
     fixObject: { type: mongoose.Schema.Types.ObjectId, ref: 'fixtures' },
     referee: { type: String },
@@ -190,7 +190,7 @@ router.post('/editScoreboard/', function (req, res) {
     if (!fixname) {
         return res.json({ error: 'Bhayena hai bhayena' })
     }
-    var player_name = req.body.playername??" ";
+    var player_name = req.body.playername ?? " ";
     var event = req.body.timer + "'   " + player_name + '  ' + req.body.eventtype
     // console.log("yo ho hamro event", event);
     scoreboards.findOneAndUpdate({ fixname: fixname },
@@ -210,13 +210,13 @@ router.post('/editScoreboard/', function (req, res) {
                 //reset form
             }
         });
-    
+
     var name = req.body.playername?.split(' ');
     var fname = name?.[0];
     var lname = name?.[1];
     var eventtype = req.body.eventtype;
 
-    if(eventtype == 'goal'){
+    if (eventtype == 'goal') {
         players.findOneAndUpdate({ fname: fname, lname: lname },
             {
                 $inc: {
@@ -229,7 +229,7 @@ router.post('/editScoreboard/', function (req, res) {
                 }
             });
     }
-    else if(eventtype == 'yellow'){
+    else if (eventtype == 'yellow') {
         players.findOneAndUpdate({ fname: fname, lname: lname },
             {
                 $inc: {
@@ -242,7 +242,7 @@ router.post('/editScoreboard/', function (req, res) {
                 }
             });
     }
-    else if(eventtype == 'red'){
+    else if (eventtype == 'red') {
         players.findOneAndUpdate({ fname: fname, lname: lname },
             {
                 $inc: {
