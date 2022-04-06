@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
                     if (data[j].team_name === team1 || data[j].team_name === team2) {
                         // console.log("Chaine Players are ", data[j]);
                         var el = document.createElement("option");
-                        options = data[j].fname + " " + data[j].lname;
+                        options = data[j].jersey_no + " " + data[j].fname + " " + data[j].lname;
                         el.text = options;
                         el.value = options;
                         select.add(el);

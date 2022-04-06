@@ -187,10 +187,16 @@ router.get('/scoreboard', cors(corsOptions), function (req, res) {
 router.post('/editScoreboard/', function (req, res) {
     // console.log(req.body);
     var fixname = req.body.fixname;
+    var name = req.body.playername?.split(' ');
+    var fname = name?.[1] ?? " ";
+    var lname = name?.[2] ?? " ";
+    var jersey_no = name?.[0];
+    var eventtype = req.body.eventtype;
+    
     if (!fixname) {
         return res.json({ error: 'Bhayena hai bhayena' })
     }
-    var player_name = req.body.playername ?? " ";
+    var player_name = fname + lname ;
     var event = req.body.timer + "'   " + player_name + '  ' + req.body.eventtype
     // console.log("yo ho hamro event", event);
     scoreboards.findOneAndUpdate({ fixname: fixname },
@@ -211,13 +217,8 @@ router.post('/editScoreboard/', function (req, res) {
             }
         });
 
-    var name = req.body.playername?.split(' ');
-    var fname = name?.[0];
-    var lname = name?.[1];
-    var eventtype = req.body.eventtype;
-
     if (eventtype == 'goal') {
-        players.findOneAndUpdate({ fname: fname, lname: lname },
+        players.findOneAndUpdate({ fname: fname, lname: lname, jersey_no: jersey_no },
             {
                 $inc: {
                     goals_scored: 1
@@ -230,7 +231,7 @@ router.post('/editScoreboard/', function (req, res) {
             });
     }
     else if (eventtype == 'yellow') {
-        players.findOneAndUpdate({ fname: fname, lname: lname },
+        players.findOneAndUpdate({ fname: fname, lname: lname, jersey_no: jersey_no },
             {
                 $inc: {
                     yellow_cards: 1
@@ -243,7 +244,7 @@ router.post('/editScoreboard/', function (req, res) {
             });
     }
     else if (eventtype == 'red') {
-        players.findOneAndUpdate({ fname: fname, lname: lname },
+        players.findOneAndUpdate({ fname: fname, lname: lname, jersey_no: jersey_no },
             {
                 $inc: {
                     red_cards: 1
