@@ -36,6 +36,15 @@ document.addEventListener("DOMContentLoaded", function (event) {
         }
     }
 
+    document.getElementById('fixButton').addEventListener('click', function (e) {
+        var lineup_array = [];
+        document.querySelectorAll('input:checked').forEach(element => {
+            lineup_array.push(element.value);
+        });
+        document.getElementById('linecha').setAttribute('value', lineup_array)
+        document.getElementById('linecha1').setAttribute('value', lineup_array)
+    })
+
     //fixture tala aune
     document.getElementById('fixtureButton').addEventListener('click', function (e) {
         var fixture_title = document.getElementById("selectFixture").value;
@@ -93,8 +102,45 @@ document.addEventListener("DOMContentLoaded", function (event) {
                     }
                 }
                 select.selectedIndex = -1;
+
+                // Generate a dynamic number of inputs
+                var number = data.length;
+                // Get the element where the inputs will be added to
+                var container = document.getElementById("lineup_div");
+                var container1 = document.getElementById("lineup_div1");
+                // Remove every children it had before
+                while (container.hasChildNodes()) {
+                    container.removeChild(container.lastChild);
+                }
+                while (container1.hasChildNodes()) {
+                    container1.removeChild(container1.lastChild);
+                }
+                for (i = 0; i < number; i++) {
+                    // Append a node with a random text
+                    if (data[i].team_name === team1) {
+                        container.appendChild(document.createTextNode(data[i].jersey_no + " " + data[i].fname + " " + data[i].lname));
+                        var input = document.createElement("input");
+                        input.type = "checkbox";
+                        input.name = data[i].jersey_no + " " + data[i].fname + " " + data[i].lname;
+                        input.value = data[i].jersey_no + " " + data[i].fname + " " + data[i].lname;
+                        container.appendChild(input);
+                        container.appendChild(document.createElement("br"));
+                    }
+                    if (data[i].team_name === team2) {
+                        container1.appendChild(document.createTextNode(data[i].jersey_no + " " + data[i].fname + " " + data[i].lname));
+                        var input = document.createElement("input");
+                        input.type = "checkbox";
+                        input.name = data[i].jersey_no + " " + data[i].fname + " " + data[i].lname;
+                        input.value = data[i].jersey_no + " " + data[i].fname + " " + data[i].lname;
+                        container1.appendChild(input);
+                        container1.appendChild(document.createElement("br"));
+                    }
+                }
+
             });
     })
+
+
 
     //fetches the fixtures
     fetch(url + '/api/fixtures')

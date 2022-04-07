@@ -77,6 +77,7 @@ let scoreboardSchema = new mongoose.Schema({
     fixObject: { type: mongoose.Schema.Types.ObjectId, ref: 'fixtures' },
     referee: { type: String },
     event: [{ type: String }],
+    lineup: [{ type: String }],
 });
 
 let tableSchema = new mongoose.Schema({
@@ -142,13 +143,16 @@ router.get('/tables', cors(corsOptions), function (req, res) {
 router.post('/scoreboard', function (req, res) {
     fixtures.findOne({ fixname: req.body.fixname }, function (err, data) {
         var fixId = data._id;
+        var lineup = req.body.liney.trim();
+        console.log("yo lineup aako", lineup);
         let newScoreboard = new scoreboards({
             score1: req.body.score1,
             score2: req.body.score2,
             timer: req.body.timer,
             fixname: req.body.fixname,
             fixObject: fixId,
-            referee: req.body.referee
+            referee: req.body.referee,
+            lineup: lineup,
         });
         // console.log("yo ho haiii", data);
         newScoreboard.save(function (err, savedScoreboard) {
@@ -192,11 +196,11 @@ router.post('/editScoreboard/', function (req, res) {
     var lname = name?.[2] ?? " ";
     var jersey_no = name?.[0];
     var eventtype = req.body.eventtype;
-    
+
     if (!fixname) {
         return res.json({ error: 'Bhayena hai bhayena' })
     }
-    var player_name = fname + lname ;
+    var player_name = fname + lname;
     var event = req.body.timer + "'   " + player_name + '  ' + req.body.eventtype
     // console.log("yo ho hamro event", event);
     scoreboards.findOneAndUpdate({ fixname: fixname },
