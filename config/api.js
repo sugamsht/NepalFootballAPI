@@ -143,7 +143,7 @@ router.get('/tables', cors(corsOptions), function (req, res) {
 router.post('/scoreboard', function (req, res) {
     fixtures.findOne({ fixname: req.body.fixname }, function (err, data) {
         var fixId = data._id;
-        var lineup = req.body.liney.trim();
+        var lineup = [req.body.line1, req.body.liney2];
         console.log("yo lineup aako", lineup);
         let newScoreboard = new scoreboards({
             score1: req.body.score1,

@@ -37,12 +37,18 @@ document.addEventListener("DOMContentLoaded", function (event) {
     }
 
     document.getElementById('fixButton').addEventListener('click', function (e) {
-        var lineup_array = [];
-        document.querySelectorAll('input:checked').forEach(element => {
-            lineup_array.push(element.value);
-        });
-        document.getElementById('linecha').setAttribute('value', lineup_array)
-        document.getElementById('linecha1').setAttribute('value', lineup_array)
+        var lineup1_array = [];
+        document.querySelector("#lineup_div")
+            .querySelectorAll('input:checked').forEach(function (item) {
+                lineup1_array.push(item.value);
+            });
+        var lineup2_array = [];
+        document.querySelector("#lineup_div1")
+            .querySelectorAll('input:checked').forEach(function (item) {
+                lineup2_array.push(item.value);
+            });
+        document.getElementById('line1').setAttribute('value', lineup1_array)
+        document.getElementById('line2').setAttribute('value', lineup2_array)
     })
 
     //fixture tala aune
