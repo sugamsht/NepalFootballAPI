@@ -12,7 +12,7 @@ const methodOverride = require('method-override');
 // const csrf = require('csurf');
 const helmet = require('helmet');
 
-const mongoStore = require('connect-mongo')(session);
+const MongoStore = require('connect-mongo');
 const flash = require('connect-flash');
 const winston = require('winston');
 const helpers = require('view-helpers');
@@ -90,11 +90,11 @@ module.exports = function (app, passport) {
       resave: true,
       saveUninitialized: true,
       cookie: {
-        // Session expires after 1 min of inactivity.
+        // Session expires after 24hr of inactivity.
         expires: 86400000
       },
-      store: new mongoStore({
-        url: config.db,
+      store: MongoStore.create({
+        mongoUrl: config.db,
         collection: 'sessions',
       })
     })
