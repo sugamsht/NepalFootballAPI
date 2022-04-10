@@ -160,7 +160,7 @@ router.post('/scoreboard', function (req, res) {
                 alert(err);
             } else {
                 alert('Big Success' + savedScoreboard);
-                // res.redirect('/live');
+                res.redirect('/live');
             }
         })
     })
@@ -200,7 +200,7 @@ router.post('/editScoreboard/', function (req, res) {
     if (!fixname) {
         return res.json({ error: 'Bhayena hai bhayena' })
     }
-    var player_name = fname + lname;
+    var player_name = fname + " " + lname;
     var event = req.body.timer + "'   " + player_name + '  ' + req.body.eventtype
     // console.log("yo ho hamro event", event);
     scoreboards.findOneAndUpdate({ fixname: fixname },
@@ -219,7 +219,8 @@ router.post('/editScoreboard/', function (req, res) {
                 alert('Big Success' + savedResults)
                 //reset form
             }
-        });
+        }).sort({ _id: -1 });
+
 
     if (eventtype == 'goal') {
         players.findOneAndUpdate({ fname: fname, lname: lname, jersey_no: jersey_no },

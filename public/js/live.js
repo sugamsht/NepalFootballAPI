@@ -81,34 +81,36 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 minutes.innerHTML = timer;
                 team1_name.innerHTML = team1;
                 team2_name.innerHTML = team2;
-            }
-            );
+                
+                var lineupa = data[0].lineup[0].split(',');
+                var lineupb = data[0].lineup[1].split(',');
+                var select1 = document.getElementById("selectPlayer1");
+                var select2 = document.getElementById("selectPlayer2");             
+                removeOptions(select1);
+                removeOptions(select2);
+                for(var i = 0; i < lineupa.length; i++){
+                    var opt = document.createElement('option');
+                    options = lineupa[i];
+                    opt.text = options;
+                    opt.value = options;
+                    select1.add(opt);
+                }
+                for(var i = 0; i < lineupb.length; i++){
+                    var opt = document.createElement('option');
+                    options = lineupb[i];
+                    opt.text = options;
+                    opt.value = options;
+                    select2.add(opt);
+                }
+
+                select1.selectedIndex = -1;
+                select2.selectedIndex = -1;
+            });
 
         //fetches the players
         fetch(url + '/api/players')
             .then(response => response.json())
-            .then(data => {
-                // console.log("Players are ", data);
-                // console.log('Team 1 is: ', team1);
-                // console.log('Team 2 is: ', team2);
-
-                var select = document.getElementById("selectPlayer");
-                removeOptions(select)
-
-                for (var j = 0; j < data.length; j++) {
-                    // console.log('hereko hai ', data[j].team_name);
-                    if (data[j].team_name === team1 || data[j].team_name === team2) {
-                        // console.log("Chaine Players are ", data[j]);
-                        var el = document.createElement("option");
-                        options = data[j].jersey_no + " " + data[j].fname + " " + data[j].lname;
-                        el.text = options;
-                        el.value = options;
-                        select.add(el);
-                        // }  
-                    }
-                }
-                select.selectedIndex = -1;
-
+            .then(data => {                
                 // Generate a dynamic number of inputs
                 var number = data.length;
                 // Get the element where the inputs will be added to
@@ -145,7 +147,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
             });
     })
-
 
 
     //fetches the fixtures
