@@ -191,17 +191,29 @@ router.get('/scoreboard', cors(corsOptions), function (req, res) {
 router.post('/editScoreboard/', function (req, res) {
     // console.log(req.body);
     var fixname = req.body.fixname;
-    var name = req.body.playername?.split(' ');
-    var fname = name?.[1] ?? " ";
-    var lname = name?.[2] ?? " ";
-    var jersey_no = name?.[0];
+    var player_name = null;
+    var name1 = req.body.playername1?.split(' ');
+    var name2 = req.body.playername2?.split(' ');
+    if (name1.length > 1) {
+        var fname = name1?.[1] ?? " ";
+        var lname = name1?.[2] ?? " ";
+        var jersey_no = name1?.[0];
+        player_name = fname + " " + lname;
+    }
+    if (name2.length > 1) {
+        var fname = name2?.[1] ?? " ";
+        var lname = name2?.[2] ?? " ";
+        var jersey_no = name2?.[0];
+        player_name = fname + " " + lname;
+    }
     var eventtype = req.body.eventtype;
+    console.log("yo event ho", eventtype);
+    var event = req.body.timer + "'" + ' ' + player_name + ' ' + eventtype
 
     if (!fixname) {
         return res.json({ error: 'Bhayena hai bhayena' })
     }
-    var player_name = fname + " " + lname;
-    var event = req.body.timer + "'   " + player_name + '  ' + req.body.eventtype
+
     // console.log("yo ho hamro event", event);
     scoreboards.findOneAndUpdate({ fixname: fixname },
         {

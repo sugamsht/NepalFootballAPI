@@ -29,13 +29,13 @@ block page-header
                 | Match referee:
                 input(type="text" name='referee' )
                 br
+                button#showTeam1(type="button") Team1 
                 input#line1(type="text" name="line1" hidden)
                 input#line2(type="text" name="liney2" hidden)
-                div#lineup_div
-                    | Lineup
-                    input#player_lineup(type='checkbox' name='player_lineup')
+                div#lineup_div(style="display:none")
                     br
-                div#lineup_div1
+                button#showTeam2(type="button") Team2
+                div#lineup_div1(style="display:none")
                     //- | Lineup
                     //- input#player_lineup1(type='checkbox' name='player_lineup1')
                     br
@@ -49,9 +49,9 @@ block page-header
                 br
                 div#event
                     option Choose Team 1 Player
-                    select#selectPlayer1(name='playername')
+                    select#selectPlayer1(name='playername1')
                     option Choose Team 2 Player
-                    select#selectPlayer2(name='playername')
+                    select#selectPlayer2(name='playername2')
 
                     option Choose Event Type
                     select#selectEvent(name='eventtype')

@@ -21,6 +21,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var qtr_half = document.querySelector("#qtr_half");
 
     var fix1 = document.querySelector("#scoreboardTitle");
+    var select1 = document.getElementById("selectPlayer1");
+    var select2 = document.getElementById("selectPlayer2");
 
     let url;
     if (location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname === "") {
@@ -35,6 +37,23 @@ document.addEventListener("DOMContentLoaded", function (event) {
             selectElement.remove(i);
         }
     }
+
+    document.getElementById("showTeam1").addEventListener("click", function () {
+        var x = document.querySelector("#lineup_div")
+        x.style = "display: block!important";
+        document.querySelector("#showTeam1").style = "display: none!important";
+        // if (x.style.display === "none") {
+        //     x.style.display = "block!important";
+        // } else {
+        //     x.style.display = "none";
+        // }
+    });
+
+    document.getElementById("showTeam2").addEventListener("click", function () {
+        var x = document.querySelector("#lineup_div1")
+        x.style = "display: block!important";
+        document.querySelector("#showTeam2").style = "display: none!important";
+    });
 
     document.getElementById('fixButton').addEventListener('click', function (e) {
         var lineup1_array = [];
@@ -61,8 +80,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
         var team1 = result[0];
         var team2 = result[1];
 
-
-
         fetch(url + '/api/scoreboard/')
             .then(response => response.json())
             .then(data => {
@@ -81,21 +98,19 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 minutes.innerHTML = timer;
                 team1_name.innerHTML = team1;
                 team2_name.innerHTML = team2;
-                
+
                 var lineupa = data[0].lineup[0].split(',');
                 var lineupb = data[0].lineup[1].split(',');
-                var select1 = document.getElementById("selectPlayer1");
-                var select2 = document.getElementById("selectPlayer2");             
                 removeOptions(select1);
                 removeOptions(select2);
-                for(var i = 0; i < lineupa.length; i++){
+                for (var i = 0; i < lineupa.length; i++) {
                     var opt = document.createElement('option');
                     options = lineupa[i];
                     opt.text = options;
                     opt.value = options;
                     select1.add(opt);
                 }
-                for(var i = 0; i < lineupb.length; i++){
+                for (var i = 0; i < lineupb.length; i++) {
                     var opt = document.createElement('option');
                     options = lineupb[i];
                     opt.text = options;
@@ -103,14 +118,17 @@ document.addEventListener("DOMContentLoaded", function (event) {
                     select2.add(opt);
                 }
 
-                select1.selectedIndex = -1;
-                select2.selectedIndex = -1;
+                $("#selectPlayer1").prepend("<option value='null' selected='selected'></option>");
+                $("#selectPlayer2").prepend("<option value='null' selected='selected'></option>");
+
+                // select1.selectedIndex = -1;
+                // select2.selectedIndex = -1;
             });
 
         //fetches the players
         fetch(url + '/api/players')
             .then(response => response.json())
-            .then(data => {                
+            .then(data => {
                 // Generate a dynamic number of inputs
                 var number = data.length;
                 // Get the element where the inputs will be added to
