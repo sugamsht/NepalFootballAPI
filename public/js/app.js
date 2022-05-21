@@ -14,11 +14,12 @@ document.addEventListener("DOMContentLoaded", function (event) {
         document.getElementById('resultTitle').setAttribute('value', tournament_title);
         document.getElementById('teamTitle').setAttribute('value', tournament_title);
         document.getElementById('fixtureTitle').setAttribute('value', tournament_title);
+        document.getElementById('tournament_title').setAttribute('value', tournament_title);
     })
 
     function removeOptions(selectElement) {
         var i, L = selectElement.options.length - 1;
-        for(i = L; i >= 0; i--) {
+        for (i = L; i >= 0; i--) {
             selectElement.remove(i);
         }
     }
@@ -52,8 +53,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
                 var selectr = document.getElementById("selectResult");
 
-                
-                if(tournament_title === "International Friendlies"){
+
+                if (tournament_title === "International Friendlies") {
                     removeOptions(select);
                     removeOptions(select1);
                     removeOptions(select2);
@@ -61,7 +62,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
                     removeOptions(selectf2);
                     removeOptions(selectr);
 
-                    var opt2 = data[1].resultList.map(item2=> item2.fixtureResult);
+                    var opt2 = data[1].resultList.map(item2 => item2.fixtureResult);
                     console.log("This is your result list ", opt2);
                     for (var i = 0; i < opt2.length; i++) {
                         var opt = opt2[i];
@@ -70,7 +71,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
                         el.value = opt;
                         selectr.add(el);
                     }
-                    
+
                     var opt1 = data[1].fixtureList.map(item1 => item1.fixname);
                     console.log("This is your fixture list ", opt1);
                     for (var i = 0; i < opt1.length; i++) {
@@ -88,23 +89,23 @@ document.addEventListener("DOMContentLoaded", function (event) {
                     var opt = data[1].teamList.map(item => item?.name);
                     console.log("This is the team list ", opt);
                     for (var i = 0; i < opt.length; i++) {
-                    var option = opt[i];
-                    var el=document.createElement("option");
-                    var el1=document.createElement("option");
-                    var el2=document.createElement("option");
-                    el.text = option;
-                    el.value = option;                    
-                    select.add(el);
-                    el1.text = option;
-                    el1.value = option;
-                    select1.add(el1);
-                    el2.text = option;
-                    el2.value = option;
-                    select2.add(el2);
+                        var option = opt[i];
+                        var el = document.createElement("option");
+                        var el1 = document.createElement("option");
+                        var el2 = document.createElement("option");
+                        el.text = option;
+                        el.value = option;
+                        select.add(el);
+                        el1.text = option;
+                        el1.value = option;
+                        select1.add(el1);
+                        el2.text = option;
+                        el2.value = option;
+                        select2.add(el2);
                     }
-                    
+
                 }
-                else if(tournament_title === "NSL - Nepal Super League 2022"){
+                else if (tournament_title === "NSL - Nepal Super League 2022") {
                     removeOptions(select);
                     removeOptions(select1);
                     removeOptions(select2);
@@ -112,7 +113,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
                     removeOptions(selectf2);
                     removeOptions(selectr);
 
-                    var opt2 = data[2].resultList.map(item2=> item2.fixtureResult);
+                    var opt2 = data[2].resultList.map(item2 => item2.fixtureResult);
                     console.log("This is your result list ", opt2);
                     for (var i = 0; i < opt2.length; i++) {
                         var opt = opt2[i];
@@ -134,26 +135,26 @@ document.addEventListener("DOMContentLoaded", function (event) {
                         el1.text = opt;
                         el1.value = opt;
                         selectf2.add(el1);
-                    }                
+                    }
                     var opt = data[2].teamList.map(item => item?.name);
                     console.log("This is the team list ", opt);
                     for (var i = 0; i < opt.length; i++) {
-                    var option = opt[i];
-                    var el=document.createElement("option");
-                    var el1=document.createElement("option");
-                    var el2=document.createElement("option");
-                    el.text = option;
-                    el.value = option;                    
-                    select.add(el);
-                    el1.text = option;
-                    el1.value = option;
-                    select1.add(el1);
-                    el2.text = option;
-                    el2.value = option;
-                    select2.add(el2);
+                        var option = opt[i];
+                        var el = document.createElement("option");
+                        var el1 = document.createElement("option");
+                        var el2 = document.createElement("option");
+                        el.text = option;
+                        el.value = option;
+                        select.add(el);
+                        el1.text = option;
+                        el1.value = option;
+                        select1.add(el1);
+                        el2.text = option;
+                        el2.value = option;
+                        select2.add(el2);
                     }
                 }
-                else if(tournament_title === "Martyr's Memorial A-Division League (2078)"){
+                else if (tournament_title === "Martyr's Memorial A-Division League (2078)") {
                     removeOptions(select);
                     removeOptions(select1);
                     removeOptions(select2);
@@ -161,7 +162,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
                     removeOptions(selectf2);
                     removeOptions(selectr);
 
-                    var opt2 = data[0].resultList.map(item2=> item2.fixtureResult);
+                    var opt2 = data[0].resultList.map(item2 => item2.fixtureResult);
                     console.log("This is your result list ", opt2);
                     for (var i = 0; i < opt2.length; i++) {
                         var opt = opt2[i];
@@ -187,24 +188,24 @@ document.addEventListener("DOMContentLoaded", function (event) {
                     var opt = data[0].teamList.map(item => item?.name);
                     console.log("This is the team list ", opt);
                     for (var i = 0; i < opt.length; i++) {
-                    var option = opt[i];
-                    var el=document.createElement("option");
-                    var el1=document.createElement("option");
-                    var el2=document.createElement("option");
-                    el.text = option;
-                    el.value = option;                    
-                    select.add(el);
-                    el1.text = option;
-                    el1.value = option;
-                    select1.add(el1);
-                    el2.text = option;
-                    el2.value = option;
-                    select2.add(el2);
+                        var option = opt[i];
+                        var el = document.createElement("option");
+                        var el1 = document.createElement("option");
+                        var el2 = document.createElement("option");
+                        el.text = option;
+                        el.value = option;
+                        select.add(el);
+                        el1.text = option;
+                        el1.value = option;
+                        select1.add(el1);
+                        el2.text = option;
+                        el2.value = option;
+                        select2.add(el2);
                     }
                 }
 
             })
-            
+
             // var nayaoption = document.getElementById("fixtureTitle").value;
             // console.log("This is your nayaoption ", nayaoption);
             // if(nayaoption= "International Friendlies"){

@@ -32,6 +32,7 @@ block content
   div#player-form
     h2 Player Detail
     form(action='/api/players' method='POST')
+      input#tournament_title(type='text' name='tournament_title' hidden)
       option Choose a Team
       select#selectTeam(name='team_name')
       br
