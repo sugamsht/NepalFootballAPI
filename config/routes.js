@@ -76,11 +76,17 @@ module.exports = function (app) {
     res.redirect('/login');
   }
 
-  app.post('/logout', function (req, res) {
-    req.logout();
-    res.redirect('/login');
-  });
+  // app.post('/logout', function (req, res) {
+  //   req.logout();
+  //   res.redirect('/login');
+  // });
 
+  app.post('/logout', function(req, res, next) {
+    req.logout(function(err) {
+      if (err) { return next(err); }
+      res.redirect('/');
+    });
+  });
 
   /**
  * Error handling

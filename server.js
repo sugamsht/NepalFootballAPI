@@ -56,7 +56,8 @@ function listen() {
 }
 
 function connect() {
-  var options = { keepAlive: 1, useNewUrlParser: true };
+  var options = { keepAlive: true, useNewUrlParser: true };
+  mongoose.set("strictQuery", false);
   mongoose.connect(config.db, options);
   return mongoose.connection;
 }
