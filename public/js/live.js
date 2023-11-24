@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var minutes = document.querySelector("#clock_min");
     var fix1 = document.querySelector("#scoreboardTitle");
     var select1 = document.getElementById("selectPlayer1");
+    var select2 = document.getElementById("selectPlayer2");
 
     let url;
     if (location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname === "") {
@@ -68,7 +69,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         fetch(url + '/api/scoreboard/')
             .then(response => response.json())
             .then(data => {
-                var [score1, score2, timer, team1, team2] = [data[0].score1, data[0].score2, data[0].timer, data[0].team1, data[0].team2];
+                const [score1, score2, timer] = [data[0].score1, data[0].score2, data[0].timer];
                 console.log("yo live data aako", data);
                 team1Score.innerHTML = score1;
                 team1Input.value = score1;
@@ -79,20 +80,20 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 team1Name.innerHTML = team1;
                 team2Name.innerHTML = team2;
 
-                var lineupa = data[0].lineup[0].split(',');
-                var lineupb = data[0].lineup[1].split(',');
-                removeOptions(select1);
-                for (var i = 0; i < lineupa.length; i++) {
-                    var opt = document.createElement('option');
-                    opt.text = lineupa[i];
-                    opt.value = lineupa[i];
-                    select1.add(opt);
-                }
+                const [lineupa, lineupb] = data[0].lineup.map(lineup => lineup.split(','));
 
+                removeOptions(select1);
+                removeOptions(select2);
+
+                lineupa.forEach(player => select1.add(new Option(player, player)));
                 $("#selectPlayer1").prepend("<option value='null' selected='selected'></option>");
+
+                lineupb.forEach(player => select2.add(new Option(player, player)));
+                $("#selectPlayer2").prepend("<option value='null' selected='selected'></option>");
 
             })
             .catch(error => console.error('Fetch error:', error));
+
 
         fetch(url + '/api/players')
             .then(response => response.json())

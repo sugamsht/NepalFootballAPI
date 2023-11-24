@@ -202,13 +202,13 @@ router.post('/editScoreboard/', function (req, res) {
     var player_name = null;
     var name1 = req.body.playername1?.split(' ');
     var name2 = req.body.playername2?.split(' ');
-    if (name1.length > 1) {
+    if (name1 && name1.length > 1) {
         var fname = name1?.[1] ?? " ";
         var lname = name1?.[2] ?? " ";
         var jersey_no = name1?.[0];
         player_name = fname + " " + lname;
     }
-    if (name2.length > 1) {
+    if (name2 && name2.length > 1) {
         var fname = name2?.[1] ?? " ";
         var lname = name2?.[2] ?? " ";
         var jersey_no = name2?.[0];
