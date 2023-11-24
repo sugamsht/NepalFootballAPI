@@ -180,20 +180,31 @@ router.get('/scoreboard', cors(corsOptions), function (req, res) {
         .populate({
             path: 'fixObject',
             populate: {
-                path: 'team1Object'
+                path: 'team1Object',
+                populate: {
+                    path: 'playerList',
+                    model: 'players'
+                }
             }
         })
         .populate({
             path: 'fixObject',
             populate: {
-                path: 'team2Object'
+                path: 'team2Object',
+                populate: {
+                    path: 'playerList',
+                    model: 'players'
+                }
             }
         })
         .exec((error, arrayOfResults) => {
-            if (!error && arrayOfResults) {
-                res.json(arrayOfResults)
+            if (error) {
+                console.error("Error:", error);
+                res.status(500).json({ error: 'Internal Server Error' });
+            } else {
+                res.json(arrayOfResults);
             }
-        })
+        });
 });
 
 router.post('/editScoreboard/', function (req, res) {
