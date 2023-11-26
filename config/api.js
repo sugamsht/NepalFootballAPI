@@ -208,29 +208,36 @@ router.get('/scoreboard', cors(corsOptions), function (req, res) {
 });
 
 router.post('/editScoreboard/', function (req, res) {
-    // console.log(req.body);
     var fixname = req.body.fixname;
     var player_name = null;
+    var fname, lname, jersey_no, tournament_title;
+
     var name1 = req.body.playername1?.split(' ');
     var name2 = req.body.playername2?.split(' ');
+
+    tournament_title = req.body.tournament_title;
+
     if (name1 && name1.length > 1) {
-        var fname = name1?.[1] ?? " ";
-        var lname = name1?.[2] ?? " ";
-        var jersey_no = name1?.[0];
+        fname = name1?.[1] ?? " ";
+        lname = name1?.[2] ?? " ";
+        jersey_no = name1?.[0];
         player_name = fname + " " + lname;
     }
+
     if (name2 && name2.length > 1) {
-        var fname = name2?.[1] ?? " ";
-        var lname = name2?.[2] ?? " ";
-        var jersey_no = name2?.[0];
+        fname = name2?.[1] ?? " ";
+        lname = name2?.[2] ?? " ";
+        jersey_no = name2?.[0];
         player_name = fname + " " + lname;
     }
+
     var eventtype = req.body.eventtype;
     console.log("yo event ho", eventtype);
-    var event = req.body.timer + "'" + ' ' + player_name + ' ' + eventtype
+
+    var event = `${req.body.timer}' ${player_name} ${eventtype}`;
 
     if (!fixname) {
-        return res.json({ error: 'Bhayena hai bhayena' })
+        return res.json({ error: 'Bhayena hai bhayena' });
     }
 
     // console.log("yo ho hamro event", event);
@@ -252,50 +259,30 @@ router.post('/editScoreboard/', function (req, res) {
             }
         }).sort({ _id: -1 });
 
+    //yo chai player ko stats update garna ko lagi
+    const updateField = eventtype === 'goal' ? 'goals_scored' : eventtype === 'yellow' ? 'yellow_cards' : 'red_cards';
 
-    if (eventtype == 'goal') {
-        players.findOneAndUpdate({ fname: fname, lname: lname, jersey_no: jersey_no },
-            {
-                $inc: {
-                    goals_scored: 1
-                }
-            }, { new: true }, (error, savedResults) => {
-                if (!error && savedResults) {
-                    alert('gayo hai' + savedResults)
-                    //reset form
-                }
-            });
-    }
-    else if (eventtype == 'yellow') {
-        players.findOneAndUpdate({ fname: fname, lname: lname, jersey_no: jersey_no },
-            {
-                $inc: {
-                    yellow_cards: 1
-                }
-            }, { new: true }, (error, savedResults) => {
-                if (!error && savedResults) {
-                    alert('gayo hai' + savedResults)
-                    //reset form
-                }
-            });
-    }
-    else if (eventtype == 'red') {
-        players.findOneAndUpdate({ fname: fname, lname: lname, jersey_no: jersey_no },
-            {
-                $inc: {
-                    red_cards: 1
-                }
-            }, { new: true }, (error, savedResults) => {
-                if (!error && savedResults) {
-                    alert('gayo hai' + savedResults)
-                    //reset form
-                }
-            });
-    }
+    const updateObject = {
+        $inc: {
+            [`tournament.$.${updateField}`]: 1
+        }
+    };
 
+    players.findOneAndUpdate(
+        { fname, lname, jersey_no, 'tournament.tournament_title': tournament_title },
+        updateObject,
+        { new: true },
+        (error, savedResults) => {
+            if (!error && savedResults) {
+                alert('gayo hai' + savedResults);
+                // reset form or additional logic
+            } else {
+                console.error('Error updating:', error);
+            }
+        }
+    );
 
-
-    //asdasd
+    //yo result ma pathauna
     let newResult = new results({
         tournament_title: req.body.tournament_title,
         fixtureResult: req.body.fixname,
