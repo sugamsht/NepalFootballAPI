@@ -109,7 +109,9 @@ document.addEventListener("DOMContentLoaded", function (event) {
         .then(responseData => {
             data = responseData; // Assign responseData to the global data variable
             var optionsd = data.map(item => item.title);
+            optionsd.reverse(); //New Tournament first
             var select0 = document.getElementById("selectTournament");
+
 
             console.log("This is your data ", optionsd);
 

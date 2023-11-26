@@ -59,7 +59,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
     document.getElementById('fixtureButton').addEventListener('click', function (e) {
         var fixtureTitle = document.getElementById("selectFixture").value;
-        console.log("Tournament title is ", fixtureTitle);
         document.getElementById('scoreboardTitle').setAttribute('value', fixtureTitle);
         console.log('Maile leko is: ', fix1.value);
         var result = fix1.value?.split(' vs ');
@@ -95,38 +94,32 @@ document.addEventListener("DOMContentLoaded", function (event) {
             .catch(error => console.error('Fetch error:', error));
 
 
-        fetch(url + '/api/players')
+        fetch(url + '/api/scoreboard')
             .then(response => response.json())
             .then(data => {
-                var container = document.getElementById("lineup_div");
-                container.innerHTML = ""; // Clear existing content
-                for (var i = 0; i < data.length; i++) {
-                    if (data[i].team_name === team1) {
-                        container.appendChild(document.createTextNode(data[i].jersey_no + " " + data[i].fname + " " + data[i].lname));
-                        var input = document.createElement("input");
+                const renderPlayerList = (playerList, container) => {
+                    container.innerHTML = ""; // Clear existing content
+                    playerList.forEach(player => {
+                        const fullName = `${player.tournament[0].jersey_no}. ${player.fname} ${player.lname}`;
+                        const input = document.createElement("input");
                         input.type = "checkbox";
-                        input.name = data[i].jersey_no + " " + data[i].fname + " " + data[i].lname;
-                        input.value = data[i].jersey_no + " " + data[i].fname + " " + data[i].lname;
+                        input.name = `${player.jersey_no} ${player.fname} ${player.lname}`;
+                        input.value = `${player.tournament[0].jersey_no}. ${player.fname} ${player.lname}`;
+                        container.appendChild(document.createTextNode(fullName));
                         container.appendChild(input);
                         container.appendChild(document.createElement("br"));
-                    }
-                }
+                    });
+                };
 
-                var container2 = document.getElementById("lineup_div1");
-                container2.innerHTML = ""; // Clear existing content
-                for (var i = 0; i < data.length; i++) {
-                    if (data[i].team_name === team2) {
-                        container2.appendChild(document.createTextNode(data[i].jersey_no + " " + data[i].fname + " " + data[i].lname));
-                        var input = document.createElement("input");
-                        input.type = "checkbox";
-                        input.name = data[i].jersey_no + " " + data[i].fname + " " + data[i].lname;
-                        input.value = data[i].jersey_no + " " + data[i].fname + " " + data[i].lname;
-                        container2.appendChild(input);
-                        container2.appendChild(document.createElement("br"));
-                    }
-                }
+                const team1PlayerList = data?.[0]?.fixObject?.team1Object[0]?.playerList || [];
+                const team2PlayerList = data?.[0]?.fixObject?.team2Object[0]?.playerList || [];
+
+                renderPlayerList(team1PlayerList, document.getElementById("lineup_div"));
+                renderPlayerList(team2PlayerList, document.getElementById("lineup_div1"));
             })
             .catch(error => console.error('Fetch error:', error));
+
+
     });
 
     fetch(url + '/api/fixtures')
