@@ -1,9 +1,9 @@
 // menu.js
 
 let selectedTournamentData; // Declare data outside the event listener scope
+let url;
 
 document.addEventListener("DOMContentLoaded", function (event) {
-    let url;
     if (location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname === "") {
         url = 'http://localhost:3000';
     } else {

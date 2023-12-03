@@ -216,35 +216,64 @@ router.post('/editScoreboard/', function (req, res) {
     var name2 = req.body.playername2?.split(' ');
 
     tournament_title = req.body.tournament_title;
+    console.log("yo tournament title", tournament_title);
 
     if (name1 && name1.length > 1) {
-        fname = name1?.[1] ?? " ";
-        lname = name1?.[2] ?? " ";
-        jersey_no = name1?.[0];
+        jersey_no = parseInt(name1[0].replace(/\D+/g, ''), 10) || 0; // Extracts digits and converts to number
+        fname = name1.slice(1, -1).join(' ') ?? " ";
+        lname = name1.slice(-1)[0] ?? " ";
         player_name = fname + " " + lname;
     }
 
     if (name2 && name2.length > 1) {
-        fname = name2?.[1] ?? " ";
-        lname = name2?.[2] ?? " ";
-        jersey_no = name2?.[0];
+        jersey_no = parseInt(name2[0].replace(/\D+/g, ''), 10) || 0; // Extracts digits and converts to number
+        fname = name2.slice(1, -1).join(' ') ?? " ";
+        lname = name2.slice(-1)[0] ?? " ";
         player_name = fname + " " + lname;
     }
 
     var eventtype = req.body.eventtype;
-    console.log("yo event ho", eventtype);
 
     var event = `${req.body.timer}' ${player_name} ${eventtype}`;
 
     if (!fixname) {
-        return res.json({ error: 'Bhayena hai bhayena' });
+        return res.status(400).json({ error: 'Bhayena hai bhayena' });
     }
 
-    // console.log("yo ho hamro event", event);
+    const updateField = req.body.eventtype === 'goal' ? 'goals_scored' :
+        req.body.eventtype === 'yellow' ? 'yellow_cards' :
+            req.body.eventtype === 'red' ? 'red_cards' : null;
+
+    if (!updateField) {
+        return res.status(400).json({ error: 'Invalid eventtype' });
+    }
+
+    const updateObject = {
+        $inc: {
+            [`tournament.$[elem].${updateField}`]: 1
+        }
+    };
+
+    updateObject.$inc[`tournament.$[elem].${updateField}`] = 1;
+
+    players.findOneAndUpdate(
+        { 'tournament.jersey_no': jersey_no, fname, lname, 'tournament.tournament_title': tournament_title },
+        updateObject,
+        { new: true, arrayFilters: [{ 'elem.tournament_title': tournament_title }] },
+        (error, savedResults) => {
+            if (!error && savedResults) {
+                console.log('Player updated successfully:', savedResults);
+                // reset form or additional logic
+            } else {
+                console.error('Error updating player:', error);
+                console.log("Player not found:", { fname, lname, tournament_title });
+            }
+        }
+    );
+
     scoreboards.findOneAndUpdate({ fixname: fixname },
         {
             $set: {
-                //score: req.body.score,
                 score1: req.body.score1,
                 score2: req.body.score2,
                 timer: req.body.timer,
@@ -254,33 +283,13 @@ router.post('/editScoreboard/', function (req, res) {
             }
         }, { new: true }, (error, savedResults) => {
             if (!error && savedResults) {
-                alert('Big Success' + savedResults)
-                //reset form
+                console.log('Big Success', savedResults);
+                // Additional logic or reset form
+            } else {
+                console.error('Error updating scoreboard:', error);
             }
         }).sort({ _id: -1 });
 
-    //yo chai player ko stats update garna ko lagi
-    const updateField = eventtype === 'goal' ? 'goals_scored' : eventtype === 'yellow' ? 'yellow_cards' : 'red_cards';
-
-    const updateObject = {
-        $inc: {
-            [`tournament.$.${updateField}`]: 1
-        }
-    };
-
-    players.findOneAndUpdate(
-        { fname, lname, jersey_no, 'tournament.tournament_title': tournament_title },
-        updateObject,
-        { new: true },
-        (error, savedResults) => {
-            if (!error && savedResults) {
-                alert('gayo hai' + savedResults);
-                // reset form or additional logic
-            } else {
-                console.error('Error updating:', error);
-            }
-        }
-    );
 
     //yo result ma pathauna
     let newResult = new results({
