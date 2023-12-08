@@ -24,13 +24,10 @@ let fixtureSchema = new mongoose.Schema({
     fixname: [String],
 });
 
-let playerSchema = new mongoose.Schema({
-    team_name: { type: String, required: true },
-    fname: { type: String, required: true },
-    lname: { type: String, required: true },
-    dob: { type: Date, default: Date.now },
-    position: { type: String, required: true },
-    jersey_no: { type: Number },
+let tournamentStatSchema = new mongoose.Schema({
+    tournament_title: { type: String },
+    team_name: { type: String },
+    jersey_no: { type: Number, default: 0 },
     match_played: { type: Number, default: 0 },
     goals_scored: { type: Number, default: 0 },
     own_goals: { type: Number, default: 0 },
@@ -38,8 +35,18 @@ let playerSchema = new mongoose.Schema({
     assists: { type: Number, default: 0 },
     clean_sheets: { type: Number, default: 0 },
     yellow_cards: { type: Number, default: 0 },
-    red_cards: { type: Number, default: 0 }
+    red_cards: { type: Number, default: 0 },
 });
+
+
+let playerSchema = new mongoose.Schema({
+    fname: { type: String, required: true },
+    lname: { type: String, required: true },
+    dob: { type: Date, default: Date.now },
+    position: { type: String, required: true },
+    tournament: [tournamentStatSchema],
+});
+
 
 let teamSchema = new mongoose.Schema({
     tournament_title: { type: String, required: true },
@@ -102,6 +109,7 @@ let results = mongoose.model('results', resultSchema);
 let tournaments = mongoose.model('tournaments', tournamentSchema);
 let scoreboards = mongoose.model('scoreboards', scoreboardSchema);
 let tables = mongoose.model('tables', tableSchema);
+let tournamentStats = mongoose.model('tournamentStats', tournamentStatSchema);
 
 
 //Routes
@@ -172,53 +180,100 @@ router.get('/scoreboard', cors(corsOptions), function (req, res) {
         .populate({
             path: 'fixObject',
             populate: {
-                path: 'team1Object'
+                path: 'team1Object',
+                populate: {
+                    path: 'playerList',
+                    model: 'players'
+                }
             }
         })
         .populate({
             path: 'fixObject',
             populate: {
-                path: 'team2Object'
+                path: 'team2Object',
+                populate: {
+                    path: 'playerList',
+                    model: 'players'
+                }
             }
         })
         .exec((error, arrayOfResults) => {
-            if (!error && arrayOfResults) {
-                res.json(arrayOfResults)
+            if (error) {
+                console.error("Error:", error);
+                res.status(500).json({ error: 'Internal Server Error' });
+            } else {
+                res.json(arrayOfResults);
             }
-        })
+        });
 });
 
 router.post('/editScoreboard/', function (req, res) {
-    // console.log(req.body);
     var fixname = req.body.fixname;
     var player_name = null;
+    var fname, lname, jersey_no, tournament_title;
+
     var name1 = req.body.playername1?.split(' ');
     var name2 = req.body.playername2?.split(' ');
-    if (name1.length > 1) {
-        var fname = name1?.[1] ?? " ";
-        var lname = name1?.[2] ?? " ";
-        var jersey_no = name1?.[0];
+
+    tournament_title = req.body.tournament_title;
+    console.log("yo tournament title", tournament_title);
+
+    if (name1 && name1.length > 1) {
+        jersey_no = parseInt(name1[0].replace(/\D+/g, ''), 10) || 0; // Extracts digits and converts to number
+        fname = name1.slice(1, -1).join(' ') ?? " ";
+        lname = name1.slice(-1)[0] ?? " ";
         player_name = fname + " " + lname;
     }
-    if (name2.length > 1) {
-        var fname = name2?.[1] ?? " ";
-        var lname = name2?.[2] ?? " ";
-        var jersey_no = name2?.[0];
+
+    if (name2 && name2.length > 1) {
+        jersey_no = parseInt(name2[0].replace(/\D+/g, ''), 10) || 0; // Extracts digits and converts to number
+        fname = name2.slice(1, -1).join(' ') ?? " ";
+        lname = name2.slice(-1)[0] ?? " ";
         player_name = fname + " " + lname;
     }
+
     var eventtype = req.body.eventtype;
-    console.log("yo event ho", eventtype);
-    var event = req.body.timer + "'" + ' ' + player_name + ' ' + eventtype
+
+    var event = `${req.body.timer}' ${player_name} ${eventtype}`;
 
     if (!fixname) {
-        return res.json({ error: 'Bhayena hai bhayena' })
+        return res.status(400).json({ error: 'Bhayena hai bhayena' });
     }
 
-    // console.log("yo ho hamro event", event);
+    const updateField = req.body.eventtype === 'goal' ? 'goals_scored' :
+        req.body.eventtype === 'yellow' ? 'yellow_cards' :
+            req.body.eventtype === 'red' ? 'red_cards' : null;
+
+    if (!updateField) {
+        return res.status(400).json({ error: 'Invalid eventtype' });
+    }
+
+    const updateObject = {
+        $inc: {
+            [`tournament.$[elem].${updateField}`]: 1
+        }
+    };
+
+    updateObject.$inc[`tournament.$[elem].${updateField}`] = 1;
+
+    players.findOneAndUpdate(
+        { 'tournament.jersey_no': jersey_no, fname, lname, 'tournament.tournament_title': tournament_title },
+        updateObject,
+        { new: true, arrayFilters: [{ 'elem.tournament_title': tournament_title }] },
+        (error, savedResults) => {
+            if (!error && savedResults) {
+                console.log('Player updated successfully:', savedResults);
+                // reset form or additional logic
+            } else {
+                console.error('Error updating player:', error);
+                console.log("Player not found:", { fname, lname, tournament_title });
+            }
+        }
+    );
+
     scoreboards.findOneAndUpdate({ fixname: fixname },
         {
             $set: {
-                //score: req.body.score,
                 score1: req.body.score1,
                 score2: req.body.score2,
                 timer: req.body.timer,
@@ -228,55 +283,15 @@ router.post('/editScoreboard/', function (req, res) {
             }
         }, { new: true }, (error, savedResults) => {
             if (!error && savedResults) {
-                alert('Big Success' + savedResults)
-                //reset form
+                console.log('Big Success', savedResults);
+                // Additional logic or reset form
+            } else {
+                console.error('Error updating scoreboard:', error);
             }
         }).sort({ _id: -1 });
 
 
-    if (eventtype == 'goal') {
-        players.findOneAndUpdate({ fname: fname, lname: lname, jersey_no: jersey_no },
-            {
-                $inc: {
-                    goals_scored: 1
-                }
-            }, { new: true }, (error, savedResults) => {
-                if (!error && savedResults) {
-                    alert('gayo hai' + savedResults)
-                    //reset form
-                }
-            });
-    }
-    else if (eventtype == 'yellow') {
-        players.findOneAndUpdate({ fname: fname, lname: lname, jersey_no: jersey_no },
-            {
-                $inc: {
-                    yellow_cards: 1
-                }
-            }, { new: true }, (error, savedResults) => {
-                if (!error && savedResults) {
-                    alert('gayo hai' + savedResults)
-                    //reset form
-                }
-            });
-    }
-    else if (eventtype == 'red') {
-        players.findOneAndUpdate({ fname: fname, lname: lname, jersey_no: jersey_no },
-            {
-                $inc: {
-                    red_cards: 1
-                }
-            }, { new: true }, (error, savedResults) => {
-                if (!error && savedResults) {
-                    alert('gayo hai' + savedResults)
-                    //reset form
-                }
-            });
-    }
-
-
-
-    //asdasd
+    //yo result ma pathauna
     let newResult = new results({
         tournament_title: req.body.tournament_title,
         fixtureResult: req.body.fixname,
@@ -391,21 +406,64 @@ router.post('/players', function (req, res) {
         lname: req.body.lname,
         dob: req.body.dob,
         position: req.body.position,
-        jersey_no: req.body.jersey_no
     });
-    newPlayer.save((error, savedPlayer) => {
+
+    players.findOne({ fname: req.body.fname, lname: req.body.lname, position: req.body.position }, (error, savedPlayer) => {
         if (!error && savedPlayer) {
-            alert('Big Success' + savedPlayer)
-            //reset form
-            res.redirect('/');
-            //res.json(savedPlayer);
+            // alert('Player already exists')
+            // res.redirect('/');
+            //push to tournament
+            savedPlayer.tournament.push({
+                tournament_title: req.body.tournament_title,
+                team_name: req.body.team_name,
+                jersey_no: req.body.jersey_no,
+                match_played: 0,
+                goals_scored: 0,
+                own_goals: 0,
+                goals_conceded: 0,
+                assists: 0,
+                clean_sheets: 0,
+                yellow_cards: 0,
+                red_cards: 0,
+            })
+            savedPlayer.save((error, savedPlayer) => {
+                if (!error && savedPlayer) {
+                    alert('Big Success' + savedPlayer)
+                }
+            });
+        }
+        else {
+            newPlayer.tournament.push({
+                tournament_title: req.body.tournament_title,
+                team_name: req.body.team_name,
+                jersey_no: req.body.jersey_no,
+                match_played: 0,
+                goals_scored: 0,
+                own_goals: 0,
+                goals_conceded: 0,
+                assists: 0,
+                clean_sheets: 0,
+                yellow_cards: 0,
+                red_cards: 0,
+            });
+
+            newPlayer.save((error, savedPlayer) => {
+                if (!error && savedPlayer) {
+                    alert('Big Success' + savedPlayer)
+                    //reset form
+                    res.redirect('/');
+                    //res.json(savedPlayer);
+                }
+            });
+
+            teams.findOneAndUpdate({ name: req.body.team_name }, { $push: { playerList: newPlayer._id } }, { new: true }, (error, savedTeam) => {
+                if (!error && savedTeam) {
+                    //alert('Big Success')
+                }
+            })
         }
     });
-    teams.findOneAndUpdate({ name: req.body.team_name }, { $push: { playerList: newPlayer._id } }, { new: true }, (error, savedTeam) => {
-        if (!error && savedTeam) {
-            //alert('Big Success')
-        }
-    })
+
 })
 
 //players get

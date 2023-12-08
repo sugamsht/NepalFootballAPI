@@ -72,7 +72,7 @@ block page-header
                 button#team2_score_update UPDATE
                 br
                 br
-                input#clock_input_min(type='number' name='timer' value='1' min='1' max='90' hidden)
+                input#clock_input_min(type='number' name='timer' value='1' min='1' max='120' hidden)
                 | Minutes: 
                 span#clock_min 1
                 br
@@ -106,4 +106,5 @@ block page-header
             //- button#show_msg SHOW
             //- br
     script(src='/js/live.js')
+    script(src='/js/util.js')
     script(src='https://code.jquery.com/jquery-3.6.0.min.js' integrity='sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=' crossorigin='anonymous')
