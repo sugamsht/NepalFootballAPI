@@ -4,11 +4,8 @@ let selectedTournamentData; // Declare data outside the event listener scope
 let url;
 
 document.addEventListener("DOMContentLoaded", function (event) {
-    if (location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname === "") {
-        url = 'http://localhost:3000';
-    } else {
-        url = 'https://nepalscores.herokuapp.com';
-    }
+
+    url = apiUrl; // apiUrl is passed from the server side
 
     fetch(url + '/api/tournaments')
         .then(response => response.json())

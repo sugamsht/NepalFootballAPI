@@ -22,13 +22,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
         document.getElementById('resultTitle').setAttribute('value', tournament_title);
     });
 
-    let url;
-    if (location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname === "") {
-        url = 'http://localhost:3000';
-    } else {
-        url = 'https://nepalscores.herokuapp.com';
-    }
-
     document.getElementById('fixtureButton').addEventListener('click', function (e) {
         var fixtureTitle = document.getElementById("selectFixture").value;
         document.getElementById('scoreboardTitle').setAttribute('value', fixtureTitle);

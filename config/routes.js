@@ -26,6 +26,9 @@ module.exports = function (app) {
     res.render('home/live', { username: req.user.username });
   });
 
+  app.get('/js/menu.js', (req, res) => {
+    res.render('js/menu', { apiUrl: process.env.Backend_URL });
+  });
 
   // app.get('/', home.index)
 
@@ -81,8 +84,8 @@ module.exports = function (app) {
   //   res.redirect('/login');
   // });
 
-  app.post('/logout', function(req, res, next) {
-    req.logout(function(err) {
+  app.post('/logout', function (req, res, next) {
+    req.logout(function (err) {
       if (err) { return next(err); }
       res.redirect('/');
     });
