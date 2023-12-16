@@ -5,8 +5,7 @@ const mongoose = require('mongoose');
 var cors = require('cors');
 
 var corsOptions = {
-    origin: 'http://localhost:5000',
-    // origin: ['http://localhost:5000/', 'https://nepscores.herokuapp.com'],
+    origin: ['http://localhost:5000/', process.env.Backend_URL],
     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
 
@@ -150,6 +149,14 @@ router.get('/tables', cors(corsOptions), function (req, res) {
 
 router.post('/scoreboard', function (req, res) {
     fixtures.findOne({ fixname: req.body.fixname }, function (err, data) {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        if (!data) {
+            console.error('No document found with that fixname');
+            return;
+        }
         var fixId = data._id;
         var lineup = [req.body.line1, req.body.liney2];
         console.log("yo lineup aako", lineup);

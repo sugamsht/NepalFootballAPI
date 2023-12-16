@@ -5,6 +5,8 @@ let url;
 
 document.addEventListener("DOMContentLoaded", function (event) {
 
+    // console.log("The hostname and port is ", window.location.hostname, window.location.port);
+    apiUrl = "//" + window.location.hostname + ":" + window.location.port;
     url = apiUrl; // apiUrl is passed from the server side
 
     fetch(url + '/api/tournaments')
