@@ -20,3 +20,9 @@ exports.live = function (req, res) {
     title: 'login to mess things up'
   });
 };
+
+exports.settings = function (req, res) {
+  res.render('home/settings', {
+    title: 'Settings'
+  });
+};

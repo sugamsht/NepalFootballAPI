@@ -8,6 +8,8 @@ nav.navbar.navbar-expand-md.navbar-dark.fixed-top.bg-dark
         a.nav-link(href="/" title="Home") Home
       li(class=isActive('/live') ? 'active nav-item' : 'nav-item')
         a.nav-link(href="/live" title="Live") Live 
+      li(class=isActive('/settings') ? 'active nav-item' : 'nav-item')
+        a.nav-link(href="/settings" title="Settings") Settings
       option 
       select#selectTournament(name='tournament_title')
       button#titleButton Submit

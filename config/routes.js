@@ -91,6 +91,8 @@ module.exports = function (app) {
     });
   });
 
+  app.get('/settings', ensureAuthenticated, home.settings);
+
   /**
  * Error handling
  */

@@ -473,6 +473,43 @@ router.post('/players', function (req, res) {
 
 })
 
+//players delete
+router.delete('/players/:id', function (req, res) {
+    players.findByIdAndRemove(req.params.id, (error, deletedPlayer) => {
+        if (error) {
+            res.status(500).send(error);
+        } else if (!deletedPlayer) {
+            res.status(404).send({ message: 'Player not found' });
+        } else {
+            res.status(200).send({ message: 'Player deleted successfully' });
+        }
+    });
+});
+
+//players update
+router.put('/players/:id', function (req, res) {
+    players.findByIdAndUpdate(req.params.id, {
+        fname: req.body.fname,
+        lname: req.body.lname,
+        position: req.body.position,
+        'tournament.$[elem].jersey_no': req.body.jersey_no
+    },
+        {
+            new: true,
+            arrayFilters: [{ 'elem._id': req.body.tournament_id }]
+        },
+        (error, updatedPlayer) => {
+            if (error) {
+                res.status(500).send(error);
+            } else if (!updatedPlayer) {
+                res.status(404).send({ message: 'Player not found' });
+            } else {
+                res.status(200).send(updatedPlayer);
+            }
+        });
+});
+
+
 //players get
 router.get('/players', cors(corsOptions), function (req, res) {
     players.find({},
