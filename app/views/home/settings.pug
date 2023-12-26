@@ -2,15 +2,12 @@ extends ../layouts/default.pug
 
 block content
     div
-        h1 Player Information
+        h1 Player Information(Select Tournament First)
         select#playerSelect
         input(type='text' id='fname' placeholder='First Name')
         input(type='text' id='lname' placeholder='Last Name')
         input(type='text' id='position' placeholder='Position')
-        // New input field for jersey number
-        input(type='text' id='jersey_no' placeholder='Jersey Number')
-        // Dropdown for tournaments
-        select#tournamentSelect
+        input(type='number' id='jersey_no' placeholder='Jersey Number')
         button#updateButton Update Player
         button#deleteButton Delete Player
     script(src='/js/settings.js')

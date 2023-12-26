@@ -3,33 +3,29 @@ const fnameInput = document.getElementById('fname');
 const lnameInput = document.getElementById('lname');
 const positionInput = document.getElementById('position');
 const jerseyNoInput = document.getElementById('jersey_no');  // New input field for jersey number
-const tournamentSelect = document.getElementById('tournamentSelect'); // New dropdown for tournaments
 const updateButton = document.getElementById('updateButton');
 const deleteButton = document.getElementById('deleteButton');
 
 let players = [];
+let tournament_title;
+url = "//" + window.location.hostname + ":" + window.location.port;
+
+
+document.getElementById('titleButton').addEventListener('click', function (e) {
+    tournament_title = document.getElementById("selectTournament").value;
+});
+
 
 async function fetchPlayers() {
-    const response = await fetch(`http://localhost:3000/api/players`);
+    const response = await fetch(`${url}/api/players`);
     players = await response.json();
     const selectedPlayerId = playerSelect.value; // Store the selected player
     playerSelect.innerHTML = '';
-    tournamentSelect.innerHTML = '';
-    const tournamentNames = new Set(); // Set to store unique tournament names
     for (const player of players) {
         const option = document.createElement('option');
         option.value = player._id;
-        option.textContent = `${player.fname} ${player.lname}`;
+        option.textContent = `${player.fname} ${player.lname} `;
         playerSelect.appendChild(option);
-        player.tournament.forEach(tournament => {
-            if (!tournamentNames.has(tournament.tournament_title)) { // If the tournament name is not in the Set
-                tournamentNames.add(tournament.tournament_title); // Add the tournament name to the Set
-                const tournamentOption = document.createElement('option');
-                tournamentOption.value = tournament._id;
-                tournamentOption.text = tournament.tournament_title;
-                tournamentSelect.appendChild(tournamentOption);
-            }
-        });
     }
     // Reselect the previously selected player
     playerSelect.value = selectedPlayerId;
@@ -43,15 +39,19 @@ playerSelect.addEventListener('change', function () {
         fnameInput.value = selectedPlayer.fname || '';
         lnameInput.value = selectedPlayer.lname || '';
         positionInput.value = selectedPlayer.position || '';
-        const selectedTournament = selectedPlayer.tournament.find(tournament => tournament.tournament_title === tournamentSelect.options[tournamentSelect.selectedIndex].text);
+        selectedTournament = selectedPlayer.tournament.find(tournament => tournament.tournament_title === tournament_title);
         jerseyNoInput.value = selectedTournament ? selectedTournament.jersey_no || '' : '';
     }
 });
 
+
 async function updatePlayer() {
+    if (!tournament_title) {
+        alert('Please select a tournament first.');
+        return;
+    }
     const selectedPlayer = playerSelect.value;
     const selectedPlayerName = playerSelect.options[playerSelect.selectedIndex].text;
-    const selectedTournamentId = tournamentSelect.value; // Get selected tournament id
     const confirmation = confirm(`Are you sure you want to update this player '${selectedPlayerName}'?`);
     if (confirmation) {
         const updateData = {};
@@ -59,10 +59,11 @@ async function updatePlayer() {
         if (lnameInput.value) updateData.lname = lnameInput.value;
         if (positionInput.value) updateData.position = positionInput.value;
         if (jerseyNoInput.value) {
-            updateData.tournament_id = selectedTournamentId; // Add tournament_id to updateData
-            updateData.jersey_no = jerseyNoInput.value;
+            updateData.tournament_title = tournament_title;
+            updateData.jersey_no = Number(jerseyNoInput.value);
         }
-        await fetch(`http://localhost:3000/api/players/${selectedPlayer}`, {
+        // console.log("Update data is ", updateData);
+        await fetch(`${url}/api/players/${selectedPlayer}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(updateData),
@@ -72,11 +73,15 @@ async function updatePlayer() {
 }
 
 async function deletePlayer() {
+    if (!tournament_title) {
+        alert('Please select a tournament first.');
+        return;
+    }
     const selectedPlayer = playerSelect.value;
     const selectedPlayerName = playerSelect.options[playerSelect.selectedIndex].text;
     const confirmation = confirm(`Are you sure you want to delete this player '${selectedPlayerName}'?`);
     if (confirmation) {
-        await fetch(`http://localhost:3000/api/players/${selectedPlayer}`, { method: 'DELETE' });
+        await fetch(`${url}/api/players/${selectedPlayer}`, { method: 'DELETE' });
         fetchPlayers();
     }
 }

@@ -5,9 +5,8 @@ let url;
 
 document.addEventListener("DOMContentLoaded", function (event) {
 
-    // console.log("The hostname and port is ", window.location.hostname, window.location.port);
-    apiUrl = "//" + window.location.hostname + ":" + window.location.port;
-    url = apiUrl; // apiUrl is passed from the server side
+    // url = apiUrl; // apiUrl is passed from the server side
+    url = "//" + window.location.hostname + ":" + window.location.port;
 
     fetch(url + '/api/tournaments')
         .then(response => response.json())
@@ -17,7 +16,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
             optionsd.reverse(); // New Tournament first
             var select0 = document.getElementById("selectTournament");
 
-            console.log("This is your data ", optionsd);
+            // console.log("This is your data ", optionsd);
 
             for (var i = 0; i < optionsd.length; i++) {
                 var opt = optionsd[i];
@@ -33,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
     document.getElementById('titleButton').addEventListener('click', function (e) {
         var tournament_title = document.getElementById("selectTournament").value;
-        console.log("Tournament title is ", tournament_title);
+        // console.log("Tournament title is ", tournament_title);
 
         selectedTournamentData = tournamentData.find(item => item.title === tournament_title);
 

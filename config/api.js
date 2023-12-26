@@ -488,16 +488,17 @@ router.delete('/players/:id', function (req, res) {
 
 //players update
 router.put('/players/:id', function (req, res) {
-    players.findByIdAndUpdate(req.params.id, {
-        fname: req.body.fname,
-        lname: req.body.lname,
-        position: req.body.position,
-        'tournament.$[elem].jersey_no': req.body.jersey_no
-    },
+    players.findOneAndUpdate(
+        { _id: req.params.id, "tournament.tournament_title": req.body.tournament_title },
         {
-            new: true,
-            arrayFilters: [{ 'elem._id': req.body.tournament_id }]
+            $set: {
+                "tournament.$.jersey_no": req.body.jersey_no,
+                fname: req.body.fname,
+                lname: req.body.lname,
+                position: req.body.position
+            }
         },
+        { new: true, useFindAndModify: false },
         (error, updatedPlayer) => {
             if (error) {
                 res.status(500).send(error);
@@ -506,9 +507,9 @@ router.put('/players/:id', function (req, res) {
             } else {
                 res.status(200).send(updatedPlayer);
             }
-        });
+        }
+    );
 });
-
 
 //players get
 router.get('/players', cors(corsOptions), function (req, res) {
