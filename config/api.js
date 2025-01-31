@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 var cors = require('cors');
 
 var corsOptions = {
-    origin: ['http://localhost:5000/', process.env.Backend_URL],
+    origin: ['http://localhost:5000', process.env.FRONTEND_URL],
     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
 
