@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 var cors = require('cors');
 
 var corsOptions = {
-    origin: ['http://localhost:5000/', process.env.Backend_URL],
+    origin: ['http://localhost:5000', process.env.FRONTEND_URL],
     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
 
@@ -147,7 +147,7 @@ router.get('/tables', cors(corsOptions), function (req, res) {
 
 //post and get scoreboard
 
-router.post('/scoreboard', function (req, res) {
+router.post('/scoreboard', cors(corsOptions), function (req, res) {
     fixtures.findOne({ fixname: req.body.fixname }, function (err, data) {
         if (err) {
             console.error(err);
@@ -214,7 +214,7 @@ router.get('/scoreboard', cors(corsOptions), function (req, res) {
         });
 });
 
-router.post('/editScoreboard/', function (req, res) {
+router.post('/editScoreboard/', cors(corsOptions), function (req, res) {
     var fixname = req.body.fixname;
     var player_name = null;
     var fname, lname, jersey_no, tournament_title;
@@ -322,7 +322,7 @@ router.post('/editScoreboard/', function (req, res) {
 
 
 //fixtures post and get
-router.post('/fixtures', function (req, res) {
+router.post('/fixtures', cors(corsOptions), function (req, res) {
     teams.findOne({ name: req.body.team1 }, (error, savedTeam) => {
         var team1 = savedTeam._id;
         teams.findOne({ name: req.body.team2 }, (error, savedTeam) => {
@@ -372,7 +372,7 @@ router.get('/fixtures', cors(corsOptions), function (req, res) {
 });
 
 //put method for fixtures
-router.post('/editFixtures/', function (req, res) {
+router.post('/editFixtures/', cors(corsOptions), function (req, res) {
     // console.log(req.body);
     var fixname = req.body.fixname;
     var dat = new Date(req.body.date).toDateString();
@@ -406,7 +406,7 @@ router.post('/editFixtures/', function (req, res) {
 })
 
 //players halne
-router.post('/players', function (req, res) {
+router.post('/players', cors(corsOptions), function (req, res) {
     let newPlayer = new players({
         team_name: req.body.team_name,
         fname: req.body.fname,
@@ -474,7 +474,7 @@ router.post('/players', function (req, res) {
 })
 
 //players delete
-router.delete('/players/:id', function (req, res) {
+router.delete('/players/:id', cors(corsOptions), function (req, res) {
     players.findByIdAndRemove(req.params.id, (error, deletedPlayer) => {
         if (error) {
             res.status(500).send(error);
@@ -487,7 +487,7 @@ router.delete('/players/:id', function (req, res) {
 });
 
 //players update
-router.put('/players/:id', function (req, res) {
+router.put('/players/:id', cors(corsOptions), function (req, res) {
     players.findOneAndUpdate(
         { _id: req.params.id, "tournament.tournament_title": req.body.tournament_title },
         {
@@ -524,7 +524,7 @@ router.get('/players', cors(corsOptions), function (req, res) {
 
 
 //Tournament post and get
-router.post('/tournaments', function (req, res) {
+router.post('/tournaments', cors(corsOptions), function (req, res) {
     let newTournament = new tournaments({
         title: req.body.title,
         stadium: req.body.stadium,
@@ -567,7 +567,7 @@ router.get('/tournaments', cors(corsOptions), function (req, res) {
 });
 
 //teams halne
-router.post('/teams', function (req, res) {
+router.post('/teams', cors(corsOptions), function (req, res) {
     let newTeam = new teams({
         tournament_title: req.body.tournament_title,
         name: req.body.name,
@@ -626,7 +626,7 @@ router.get('/teams', cors(corsOptions), function (req, res) {
 });
 
 //results halne
-router.post('/results', function (req, res) {
+router.post('/results', cors(corsOptions), function (req, res) {
     var fixtureResult = req.body.fixtureResult;
     //split fixtureResult
     var result = fixtureResult.split(' vs ');
@@ -713,7 +713,7 @@ router.get('/results', cors(corsOptions), function (req, res) {
 });
 
 //edit result
-router.post('/editResults/', function (req, res) {
+router.post('/editResults/', cors(corsOptions), function (req, res) {
     // console.log(req.body);
     var fixtureResult = req.body.fixtureResult;
     if (!fixtureResult) {
