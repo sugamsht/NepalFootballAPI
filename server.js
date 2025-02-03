@@ -10,11 +10,27 @@
  * Module dependencies
  */
 
+const express = require('express');
+const cors = require('cors'); // Add this line
+const app = express();
+// Add CORS configuration before routes
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || 'http://localhost:5000',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions)); // Add this line before other middleware
+
+// Add OPTIONS handler for preflight requests
+app.options('*', cors(corsOptions));
+
+
 require('dotenv').config();
 
 const fs = require('fs');
 const join = require('path').join;
-const express = require('express');
 const mongoose = require('mongoose');
 const passport = require('passport');
 const config = require('./config');
@@ -22,7 +38,6 @@ const config = require('./config');
 const models = join(__dirname, 'app/models');
 const port = process.env.PORT || 3000;
 
-const app = express();
 const connection = connect();
 
 /**

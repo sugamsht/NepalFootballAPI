@@ -36,7 +36,14 @@ module.exports = function (app) {
 
   app.get('/live', home.live)
 
-  app.use('/api', require('./api'));
+  // Replace with:
+  const apiRouter = require('./api');
+  app.use('/api', (req, res, next) => {
+    // Set CORS headers specifically for API routes
+    res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:5000');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    next();
+  }, apiRouter);
 
 
   //register

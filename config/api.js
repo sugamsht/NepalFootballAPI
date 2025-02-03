@@ -4,11 +4,17 @@ const alert = require('alert');
 const mongoose = require('mongoose');
 var cors = require('cors');
 
-var corsOptions = {
-    origin: ['http://localhost:5000', process.env.FRONTEND_URL],
-    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-}
-
+const corsOptions = {
+    origin: [
+        'http://localhost:5000',
+        process.env.FRONTEND_URL,
+        process.env.Backend_URL
+    ],
+    credentials: true, // Allow credentials
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
+    allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+    optionsSuccessStatus: 200
+};
 
 //Schemas
 let fixtureSchema = new mongoose.Schema({
@@ -98,6 +104,226 @@ let tableSchema = new mongoose.Schema({
     gd: { type: Number, default: 0 },
     points: { type: Number, default: 0 }
 });
+
+//Admin controls
+const storySchema = new mongoose.Schema({
+    title: { type: String, required: true },
+    content: { type: String, required: true },
+    images: [String],
+    createdAt: { type: Date, default: Date.now }
+});
+
+const gallerySchema = new mongoose.Schema({
+    title: String,
+    imageUrl: { type: String, required: true },
+    caption: String,
+    category: String,
+    createdAt: { type: Date, default: Date.now }
+});
+
+const leagueSchema = new mongoose.Schema({
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    logo: { type: String },
+});
+
+// Register models
+const Story = mongoose.model('Story', storySchema);
+const Gallery = mongoose.model('Gallery', gallerySchema);
+const League = mongoose.model('League', leagueSchema);
+
+// Admin Stories Endpoints
+router.post('/admin/stories', cors(corsOptions), function (req, res) {
+    const newStory = new Story({
+        title: req.body.title,
+        content: req.body.content,
+        images: req.body.images,
+        createdAt: new Date()
+    });
+
+    newStory.save(function (err, savedStory) {
+        if (err) {
+            res.status(500).json({ success: false, error: err });
+        } else {
+            res.json({ success: true, data: savedStory });
+        }
+    });
+});
+
+router.get('/admin/stories', cors(corsOptions), function (req, res) {
+    Story.find({}, function (err, data) {
+        if (err) {
+            res.status(500).json({ success: false, error: err });
+        } else {
+            res.json({ success: true, data: data });
+        }
+    });
+});
+
+// Update Story
+router.put('/admin/stories/:id', cors(corsOptions), function (req, res) {
+    const { id } = req.params;
+
+    Story.findByIdAndUpdate(
+        id,
+        req.body,
+        { new: true, runValidators: true },
+        function (err, updatedStory) {
+            if (err) {
+                res.status(500).json({ success: false, error: err });
+            } else if (!updatedStory) {
+                res.status(404).json({ success: false, error: 'Story not found' });
+            } else {
+                res.json({ success: true, data: updatedStory });
+            }
+        }
+    );
+});
+
+// Delete Story
+router.delete('/admin/stories/:id', cors(corsOptions), function (req, res) {
+    const { id } = req.params;
+
+    Story.findByIdAndDelete(id, function (err, deletedStory) {
+        if (err) {
+            res.status(500).json({ success: false, error: err });
+        } else if (!deletedStory) {
+            res.status(404).json({ success: false, error: 'Story not found' });
+        } else {
+            res.json({ success: true, data: deletedStory });
+        }
+    });
+});
+
+
+// Admin Gallery Endpoints
+router.post('/admin/gallery', cors(corsOptions), function (req, res) {
+    const newGalleryItem = new Gallery({
+        title: req.body.title,
+        imageUrl: req.body.imageUrl,
+        caption: req.body.caption,
+        category: req.body.category,
+        createdAt: new Date()
+    });
+
+    newGalleryItem.save(function (err, savedItem) {
+        if (err) {
+            res.status(500).json({ success: false, error: err });
+        } else {
+            res.json({ success: true, data: savedItem });
+        }
+    });
+});
+
+router.get('/admin/gallery', cors(corsOptions), function (req, res) {
+    Gallery.find({}, function (err, data) {
+        if (err) {
+            res.status(500).json({ success: false, error: err });
+        } else {
+            res.json({ success: true, data: data });
+        }
+    });
+});
+
+// Update Gallery Item
+router.put('/admin/gallery/:id', cors(corsOptions), function (req, res) {
+    const { id } = req.params;
+
+    Gallery.findByIdAndUpdate(
+        id,
+        req.body,
+        { new: true, runValidators: true },
+        function (err, updatedItem) {
+            if (err) {
+                res.status(500).json({ success: false, error: err });
+            } else if (!updatedItem) {
+                res.status(404).json({ success: false, error: 'Gallery item not found' });
+            } else {
+                res.json({ success: true, data: updatedItem });
+            }
+        }
+    );
+});
+
+// Delete Gallery Item
+router.delete('/admin/gallery/:id', cors(corsOptions), function (req, res) {
+    const { id } = req.params;
+
+    Gallery.findByIdAndDelete(id, function (err, deletedItem) {
+        if (err) {
+            res.status(500).json({ success: false, error: err });
+        } else if (!deletedItem) {
+            res.status(404).json({ success: false, error: 'Gallery item not found' });
+        } else {
+            res.json({ success: true, data: deletedItem });
+        }
+    });
+});
+
+// Admin Leagues Endpoints
+router.post('/admin/leagues', cors(corsOptions), function (req, res) {
+    console.log('Request headers:', req.headers);
+    console.log('Request body:', req.body);
+    const newLeague = new League({
+        title: req.body.title,
+        description: req.body.description,
+        logo: req.body.logo
+    });
+
+    newLeague.save(function (err, savedLeague) {
+        if (err) {
+            res.status(500).json({ success: false, error: err });
+        } else {
+            res.json({ success: true, data: savedLeague });
+        }
+    });
+});
+
+router.get('/admin/leagues', cors(corsOptions), function (req, res) {
+    League.find({}, function (err, data) {
+        if (err) {
+            res.status(500).json({ success: false, error: err });
+        } else {
+            res.json({ success: true, data: data });
+        }
+    });
+});
+
+// Update League
+router.put('/admin/leagues/:id', cors(corsOptions), function (req, res) {
+    const { id } = req.params;
+
+    League.findByIdAndUpdate(
+        id,
+        req.body,
+        { new: true, runValidators: true },
+        function (err, updatedLeague) {
+            if (err) {
+                res.status(500).json({ success: false, error: err });
+            } else if (!updatedLeague) {
+                res.status(404).json({ success: false, error: 'League not found' });
+            } else {
+                res.json({ success: true, data: updatedLeague });
+            }
+        }
+    );
+});
+
+// Delete League
+router.delete('/admin/leagues/:id', cors(corsOptions), function (req, res) {
+    const { id } = req.params;
+
+    League.findByIdAndDelete(id, function (err, deletedLeague) {
+        if (err) {
+            res.status(500).json({ success: false, error: err });
+        } else if (!deletedLeague) {
+            res.status(404).json({ success: false, error: 'League not found' });
+        } else {
+            res.json({ success: true, data: deletedLeague });
+        }
+    });
+});
+
 
 
 //Models
