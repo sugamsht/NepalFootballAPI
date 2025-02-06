@@ -528,33 +528,6 @@ router.post('/editScoreboard/', cors(corsOptions), function (req, res) {
                 console.error('Error updating scoreboard:', error);
             }
         }).sort({ _id: -1 });
-
-    //yo result ma pathauna
-    let newResult = new results({
-        tournament_title: req.body.tournament_title,
-        fixtureResult: req.body.fixname,
-        score: [req.body.score1, req.body.score2],
-        fouls: req.body.fouls,
-        offsides: req.body.offsides,
-        corners: req.body.corners,
-        shots: req.body.shots
-    });
-
-    if (req.body.lineup) {
-        newResult.lineup = req.body.lineup; // Add lineup data to the result if provided
-    }
-
-    newResult.save((error, savedResult) => {
-        if (!error && savedResult) {
-            alert('Big Success' + savedResult)
-        }
-    });
-
-    tournaments.findOneAndUpdate({ title: req.body.tournament_title }, { $push: { resultList: newResult._id } }, { new: true }, (error, savedTeam) => {
-        if (!error && savedTeam) {
-            //alert('Big Success')
-        }
-    })
 });
 
 
@@ -801,6 +774,17 @@ router.get('/tournaments', cors(corsOptions), function (req, res) {
             }
         })
 
+});
+
+//just get tournaments name
+router.get('/tournamentnames', cors(corsOptions), function (req, res) {
+    tournaments.find({}, 'title', function (err, data) {
+        if (err) {
+            res.status(500).json({ success: false, error: err });
+        } else {
+            res.json({ success: true, data: data });
+        }
+    });
 });
 
 //teams halne
