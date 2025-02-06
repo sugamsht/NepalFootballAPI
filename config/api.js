@@ -114,7 +114,7 @@ const storySchema = new mongoose.Schema({
 });
 
 const gallerySchema = new mongoose.Schema({
-    title: String,
+    title: { type: String, required: true },
     imageUrl: { type: String, required: true },
     caption: String,
     category: String,
@@ -384,7 +384,7 @@ router.post('/scoreboard', cors(corsOptions), function (req, res) {
             return;
         }
         var fixId = data._id;
-        var lineup = [req.body.line1, req.body.liney2];
+        var lineup = [req.body.line1, req.body.line2];
         console.log("yo lineup aako", lineup);
         let newScoreboard = new scoreboards({
             score1: req.body.score1,
@@ -466,55 +466,61 @@ router.post('/editScoreboard/', cors(corsOptions), function (req, res) {
     }
 
     var eventtype = req.body.eventtype;
-
-    var event = `${req.body.timer}' ${player_name} ${eventtype}`;
+    var event = eventtype ? `${req.body.timer}' ${player_name} ${eventtype}` : null;
 
     if (!fixname) {
         return res.status(400).json({ error: 'Bhayena hai bhayena' });
     }
 
-    const updateField = req.body.eventtype === 'goal' ? 'goals_scored' :
-        req.body.eventtype === 'yellow' ? 'yellow_cards' :
-            req.body.eventtype === 'red' ? 'red_cards' : null;
+    const updateField = eventtype === 'goal' ? 'goals_scored' :
+        eventtype === 'yellow' ? 'yellow_cards' :
+            eventtype === 'red' ? 'red_cards' : null;
 
-    if (!updateField) {
-        return res.status(400).json({ error: 'Invalid eventtype' });
+    const updateObject = {};
+    if (updateField) {
+        updateObject.$inc = {
+            [`tournament.$[elem].${updateField}`]: 1
+        };
     }
 
-    const updateObject = {
-        $inc: {
-            [`tournament.$[elem].${updateField}`]: 1
+    if (updateField) {
+        players.findOneAndUpdate(
+            { 'tournament.jersey_no': jersey_no, fname, lname, 'tournament.tournament_title': tournament_title },
+            updateObject,
+            { new: true, arrayFilters: [{ 'elem.tournament_title': tournament_title }] },
+            (error, savedResults) => {
+                if (!error && savedResults) {
+                    console.log('Player updated successfully:', savedResults);
+                    // reset form or additional logic
+                } else {
+                    console.error('Error updating player:', error);
+                    console.log("Player not found:", { fname, lname, tournament_title });
+                }
+            }
+        );
+    }
+
+    const scoreboardUpdate = {
+        $set: {
+            score1: req.body.score1,
+            score2: req.body.score2,
+            timer: req.body.timer
         }
     };
 
-    updateObject.$inc[`tournament.$[elem].${updateField}`] = 1;
+    if (req.body.lineup) {
+        scoreboardUpdate.$set.lineup = req.body.lineup; // Add lineup data to the scoreboard if provided
+    }
 
-    players.findOneAndUpdate(
-        { 'tournament.jersey_no': jersey_no, fname, lname, 'tournament.tournament_title': tournament_title },
-        updateObject,
-        { new: true, arrayFilters: [{ 'elem.tournament_title': tournament_title }] },
-        (error, savedResults) => {
-            if (!error && savedResults) {
-                console.log('Player updated successfully:', savedResults);
-                // reset form or additional logic
-            } else {
-                console.error('Error updating player:', error);
-                console.log("Player not found:", { fname, lname, tournament_title });
-            }
-        }
-    );
+    if (event) {
+        scoreboardUpdate.$push = {
+            event: event
+        };
+    }
 
     scoreboards.findOneAndUpdate({ fixname: fixname },
-        {
-            $set: {
-                score1: req.body.score1,
-                score2: req.body.score2,
-                timer: req.body.timer,
-            },
-            $push: {
-                event: event
-            }
-        }, { new: true }, (error, savedResults) => {
+        scoreboardUpdate,
+        { new: true }, (error, savedResults) => {
             if (!error && savedResults) {
                 console.log('Big Success', savedResults);
                 // Additional logic or reset form
@@ -522,7 +528,6 @@ router.post('/editScoreboard/', cors(corsOptions), function (req, res) {
                 console.error('Error updating scoreboard:', error);
             }
         }).sort({ _id: -1 });
-
 
     //yo result ma pathauna
     let newResult = new results({
@@ -534,17 +539,23 @@ router.post('/editScoreboard/', cors(corsOptions), function (req, res) {
         corners: req.body.corners,
         shots: req.body.shots
     });
+
+    if (req.body.lineup) {
+        newResult.lineup = req.body.lineup; // Add lineup data to the result if provided
+    }
+
     newResult.save((error, savedResult) => {
         if (!error && savedResult) {
             alert('Big Success' + savedResult)
         }
     });
+
     tournaments.findOneAndUpdate({ title: req.body.tournament_title }, { $push: { resultList: newResult._id } }, { new: true }, (error, savedTeam) => {
         if (!error && savedTeam) {
             //alert('Big Success')
         }
     })
-})
+});
 
 
 //fixtures post and get
