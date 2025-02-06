@@ -581,6 +581,44 @@ router.get('/fixtures', cors(corsOptions), function (req, res) {
         })
 });
 
+// Update fixture (PUT)
+router.put('/fixtures/:id', cors(corsOptions), function (req, res) {
+    const fixtureId = req.params.id;
+    const dat = new Date(req.body.date).toDateString();
+    const updateData = {
+        tournament_title: req.body.tournament_title,
+        team1: req.body.team1,
+        team2: req.body.team2,
+        stadium: req.body.stadium,
+        date: dat,
+        time: req.body.time,
+        fixname: req.body.fixname
+    };
+    fixtures.findByIdAndUpdate(fixtureId, { $set: updateData }, { new: true, runValidators: true }, function (err, updatedFixture) {
+        if (err) {
+            return res.status(500).json({ success: false, error: err });
+        }
+        if (!updatedFixture) {
+            return res.status(404).json({ success: false, message: 'Fixture not found.' });
+        }
+        res.json({ success: true, message: 'Fixture updated successfully.', data: updatedFixture });
+    });
+});
+
+// Delete fixture (DELETE)
+router.delete('/fixtures/:id', cors(corsOptions), function (req, res) {
+    const fixtureId = req.params.id;
+    fixtures.findByIdAndDelete(fixtureId, function (err, deletedFixture) {
+        if (err) {
+            return res.status(500).json({ success: false, error: err });
+        }
+        if (!deletedFixture) {
+            return res.status(404).json({ success: false, message: 'Fixture not found.' });
+        }
+        res.json({ success: true, message: 'Fixture deleted successfully.', data: deletedFixture });
+    });
+});
+
 //put method for fixtures
 router.post('/editFixtures/', cors(corsOptions), function (req, res) {
     // console.log(req.body);
@@ -698,17 +736,17 @@ router.delete('/players/:id', cors(corsOptions), function (req, res) {
 
 //players update
 router.put('/players/:id', cors(corsOptions), function (req, res) {
-    players.findOneAndUpdate(
-        { _id: req.params.id, "tournament.tournament_title": req.body.tournament_title },
+    players.findByIdAndUpdate(
+        req.params.id,
         {
             $set: {
-                "tournament.$.jersey_no": req.body.jersey_no,
                 fname: req.body.fname,
                 lname: req.body.lname,
+                dob: req.body.dob,
                 position: req.body.position
             }
         },
-        { new: true, useFindAndModify: false },
+        { new: true, runValidators: true },
         (error, updatedPlayer) => {
             if (error) {
                 res.status(500).send(error);
@@ -800,9 +838,6 @@ router.post('/teams', cors(corsOptions), function (req, res) {
     newTeam.save((error, savedTeam) => {
         if (!error && savedTeam) {
             alert('Big Success' + savedTeam)
-            //reset form
-            // res.redirect('/');
-            //res.json(savedTeam);
         }
     });
 
@@ -844,6 +879,42 @@ router.get('/teams', cors(corsOptions), function (req, res) {
         }
     )
         .sort([['points', -1], ['gd', -1]])
+});
+
+// Update team (PUT)
+router.put('/teams/:id', cors(corsOptions), function (req, res) {
+    const teamId = req.params.id;
+    const updateData = {
+        tournament_title: req.body.tournament_title,
+        name: req.body.name,
+        location: req.body.location,
+        logo: req.body.logo,
+        manager: req.body.manager,
+        playerList: req.body.playerList
+    };
+    teams.findByIdAndUpdate(teamId, { $set: updateData }, { new: true, runValidators: true }, function (err, updatedTeam) {
+        if (err) {
+            return res.status(500).json({ success: false, error: err });
+        }
+        if (!updatedTeam) {
+            return res.status(404).json({ success: false, message: 'Team not found.' });
+        }
+        res.json({ success: true, message: 'Team updated successfully.', data: updatedTeam });
+    });
+});
+
+// Delete team (DELETE)
+router.delete('/teams/:id', cors(corsOptions), function (req, res) {
+    const teamId = req.params.id;
+    teams.findByIdAndDelete(teamId, function (err, deletedTeam) {
+        if (err) {
+            return res.status(500).json({ success: false, error: err });
+        }
+        if (!deletedTeam) {
+            return res.status(404).json({ success: false, message: 'Team not found.' });
+        }
+        res.json({ success: true, message: 'Team deleted successfully.', data: deletedTeam });
+    });
 });
 
 //results halne
@@ -931,6 +1002,35 @@ router.get('/results', cors(corsOptions), function (req, res) {
             }
         }
     )
+});
+
+router.delete('/results/:id', cors(corsOptions), function (req, res) {
+    results.findByIdAndDelete(req.params.id, function (err, deletedResult) {
+        if (err) {
+            return res.status(500).json({ success: false, error: err });
+        }
+        if (!deletedResult) {
+            return res.status(404).json({ success: false, message: 'Result not found.' });
+        }
+        res.json({ success: true, message: 'Result deleted successfully.', data: deletedResult });
+    });
+});
+
+router.put('/results/:id', cors(corsOptions), function (req, res) {
+    results.findByIdAndUpdate(
+        req.params.id,
+        { $set: req.body },
+        { new: true, runValidators: true },
+        function (err, updatedResult) {
+            if (err) {
+                return res.status(500).json({ success: false, error: err });
+            }
+            if (!updatedResult) {
+                return res.status(404).json({ success: false, message: 'Result not found.' });
+            }
+            res.json({ success: true, message: 'Result updated successfully.', data: updatedResult });
+        }
+    );
 });
 
 //edit result
