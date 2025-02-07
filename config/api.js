@@ -586,15 +586,4 @@ router.put('/results/:id', cors(corsOptions), asyncHandler(async (req, res) => {
     res.json({ success: true, message: 'Result updated successfully.', data: updatedResult });
 }));
 
-router.post('/editResults/', cors(corsOptions), asyncHandler(async (req, res) => {
-    const { fixtureResult } = req.body;
-    if (!fixtureResult) return res.json({ error: 'Bhayena hai bhayena' });
-    const savedResults = await results.findOneAndUpdate({ fixtureResult }, {
-        $set: { fouls: req.body.fouls, offsides: req.body.offsides, corners: req.body.corners, shots: req.body.shots }
-    }, { new: true });
-    if (savedResults) {
-        alert('Big Success' + savedResults);
-    }
-}));
-
 module.exports = router;
