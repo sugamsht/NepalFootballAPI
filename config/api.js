@@ -572,6 +572,68 @@ router.get('/results', cors(corsOptions), asyncHandler(async (req, res) => {
     res.json(arrayOfResults);
 }));
 
+router.get('/results/:id', cors(corsOptions), asyncHandler(async (req, res) => {
+    const resultItem = await results.findById(req.params.id);
+    if (!resultItem) {
+        return res.status(404).json({ success: false, message: 'Result not found.' });
+    }
+    res.json({ success: true, data: resultItem });
+}));
+
+router.get('/teams/:id', cors(corsOptions), asyncHandler(async (req, res) => {
+    const team = await teams.findById(req.params.id).populate('playerList');
+    if (!team) {
+        return res.status(404).json({ success: false, message: 'Team not found.' });
+    }
+    res.json({ success: true, data: team });
+}));
+
+router.get('/teams/search/:teamName', cors(corsOptions), asyncHandler(async (req, res) => {
+    const teamName = req.params.teamName;
+    const team = await teams.find({ name: teamName }).populate('playerList');
+    if (!team || team.length === 0) {
+        return res.status(404).json({ success: false, message: 'Team not found.' });
+    }
+    res.json({ success: true, data: team });
+}));
+
+router.get('/fixtures/search', cors(corsOptions), asyncHandler(async (req, res) => {
+    console.log('Fixture search endpoint hit');
+    const { team1, team2 } = req.query;
+    const query = {};
+    console.log('team1:', team1, 'team2:', team2);
+
+    if (team1) {
+        // Use a regex search for partial and case-insensitive match on team1
+        query.team1 = { $regex: team1, $options: 'i' };
+    }
+    if (team2) {
+        // Use a regex search for partial and case-insensitive match on team2
+        query.team2 = { $regex: team2, $options: 'i' };
+    }
+
+    const fixturesFound = await fixtures.find(query)
+        .populate('team1Object')
+        .populate('team2Object');
+
+    if (!fixturesFound || fixturesFound.length === 0) {
+        return res.status(404).json({ success: false, message: 'No fixtures found.' });
+    }
+    res.json({ success: true, data: fixturesFound });
+}));
+
+
+// GET a fixture by id
+router.get('/fixtures/:id', cors(corsOptions), asyncHandler(async (req, res) => {
+    const fixtureItem = await fixtures.findById(req.params.id)
+        .populate('team1Object')
+        .populate('team2Object');
+    if (!fixtureItem) {
+        return res.status(404).json({ success: false, message: 'Fixture not found.' });
+    }
+    res.json({ success: true, data: fixtureItem });
+}));
+
 router.delete('/results/:id', cors(corsOptions), asyncHandler(async (req, res) => {
     const deletedResult = await results.findByIdAndDelete(req.params.id);
     if (!deletedResult)
