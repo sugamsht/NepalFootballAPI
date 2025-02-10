@@ -572,6 +572,22 @@ router.get('/results', cors(corsOptions), asyncHandler(async (req, res) => {
     res.json(arrayOfResults);
 }));
 
+router.get('/results/search', cors(corsOptions), asyncHandler(async (req, res) => {
+    const { team } = req.query;
+    if (!team) {
+        return res.status(400).json({ success: false, message: 'Team parameter is required.' });
+    }
+    // Search for results where fixtureResult contains the team name (partial & case-insensitive)
+    const resultsFound = await results.find({
+        fixtureResult: { $regex: team, $options: 'i' }
+    });
+
+    if (!resultsFound || resultsFound.length === 0) {
+        return res.status(404).json({ success: false, message: 'No results found matching that team name.' });
+    }
+    res.json({ success: true, data: resultsFound });
+}));
+
 router.get('/results/:id', cors(corsOptions), asyncHandler(async (req, res) => {
     const resultItem = await results.findById(req.params.id);
     if (!resultItem) {
@@ -598,28 +614,42 @@ router.get('/teams/search/:teamName', cors(corsOptions), asyncHandler(async (req
 }));
 
 router.get('/fixtures/search', cors(corsOptions), asyncHandler(async (req, res) => {
-    console.log('Fixture search endpoint hit');
-    const { team1, team2 } = req.query;
-    const query = {};
-    console.log('team1:', team1, 'team2:', team2);
+    const { team, team1, team2 } = req.query;
 
-    if (team1) {
-        // Use a regex search for partial and case-insensitive match on team1
-        query.team1 = { $regex: team1, $options: 'i' };
-    }
-    if (team2) {
-        // Use a regex search for partial and case-insensitive match on team2
-        query.team2 = { $regex: team2, $options: 'i' };
-    }
+    if (team) {
+        // Exact match on team name in either team1 or team2
+        const fixturesFound = await fixtures.find({
+            $or: [
+                { team1: team },
+                { team2: team }
+            ]
+        }).populate('team1Object team2Object');
 
-    const fixturesFound = await fixtures.find(query)
-        .populate('team1Object')
-        .populate('team2Object');
+        if (!fixturesFound || fixturesFound.length === 0) {
+            return res.status(404).json({ success: false, message: 'No fixtures found matching that team name.' });
+        }
+        return res.json({ success: true, data: fixturesFound });
+    } else if (team1 || team2) {
+        // Use regex search for partial and case-insensitive match on team1/team2
+        const query = {};
+        if (team1) {
+            query.team1 = { $regex: team1, $options: 'i' };
+        }
+        if (team2) {
+            query.team2 = { $regex: team2, $options: 'i' };
+        }
 
-    if (!fixturesFound || fixturesFound.length === 0) {
-        return res.status(404).json({ success: false, message: 'No fixtures found.' });
+        const fixturesFound = await fixtures.find(query)
+            .populate('team1Object')
+            .populate('team2Object');
+
+        if (!fixturesFound || fixturesFound.length === 0) {
+            return res.status(404).json({ success: false, message: 'No fixtures found.' });
+        }
+        return res.json({ success: true, data: fixturesFound });
+    } else {
+        return res.status(400).json({ success: false, message: 'No valid query parameter provided.' });
     }
-    res.json({ success: true, data: fixturesFound });
 }));
 
 
