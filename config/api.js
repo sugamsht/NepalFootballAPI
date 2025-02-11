@@ -63,6 +63,7 @@ const teamSchema = new mongoose.Schema({
 const resultSchema = new mongoose.Schema({
     tournament_title: { type: String, required: true },
     fixtureResult: { type: String, required: true },
+    date: { type: String },
     score: [Number],
     fouls: [Number],
     offsides: [Number],
@@ -234,7 +235,11 @@ router.post('/tables', cors(corsOptions), asyncHandler(async (req, res) => {
 }));
 
 router.get('/tables', cors(corsOptions), asyncHandler(async (req, res) => {
-    const data = await tables.find({});
+    const query = {};
+    if (req.query.tournament_title) {
+        query.tournament_title = req.query.tournament_title;
+    }
+    const data = await tables.find(query);
     res.json({ success: true, message: data });
 }));
 
@@ -531,31 +536,72 @@ router.post('/results', cors(corsOptions), asyncHandler(async (req, res) => {
     const gd2 = score2 - score1;
     if (score1 >= 0 && score2 >= 0) {
         await Promise.all([
-            tables.findOneAndUpdate({ tournament_title: req.body.tournament_title, team_name: team1 }, { $inc: { gd: gd1, gf: score1, ga: score2, played: 1 } }, { new: true }),
-            tables.findOneAndUpdate({ tournament_title: req.body.tournament_title, team_name: team2 }, { $inc: { gd: gd2, gf: score2, ga: score1, played: 1 } }, { new: true })
+            tables.findOneAndUpdate(
+                { tournament_title: req.body.tournament_title, team_name: team1 },
+                { $inc: { gd: gd1, gf: score1, ga: score2, played: 1 } },
+                { new: true }
+            ),
+            tables.findOneAndUpdate(
+                { tournament_title: req.body.tournament_title, team_name: team2 },
+                { $inc: { gd: gd2, gf: score2, ga: score1, played: 1 } },
+                { new: true }
+            )
         ]);
         if (score1 > score2) {
             await Promise.all([
-                tables.findOneAndUpdate({ tournament_title: req.body.tournament_title, team_name: team1 }, { $inc: { win: 1, points: 3 } }, { new: true }),
-                tables.findOneAndUpdate({ tournament_title: req.body.tournament_title, team_name: team2 }, { $inc: { lost: 1 } }, { new: true })
+                tables.findOneAndUpdate(
+                    { tournament_title: req.body.tournament_title, team_name: team1 },
+                    { $inc: { win: 1, points: 3 } },
+                    { new: true }
+                ),
+                tables.findOneAndUpdate(
+                    { tournament_title: req.body.tournament_title, team_name: team2 },
+                    { $inc: { lost: 1 } },
+                    { new: true }
+                )
             ]);
         } else if (score1 < score2) {
             await Promise.all([
-                tables.findOneAndUpdate({ tournament_title: req.body.tournament_title, team_name: team1 }, { $inc: { lost: 1 } }, { new: true }),
-                tables.findOneAndUpdate({ tournament_title: req.body.tournament_title, team_name: team2 }, { $inc: { win: 1, points: 3 } }, { new: true })
+                tables.findOneAndUpdate(
+                    { tournament_title: req.body.tournament_title, team_name: team1 },
+                    { $inc: { lost: 1 } },
+                    { new: true }
+                ),
+                tables.findOneAndUpdate(
+                    { tournament_title: req.body.tournament_title, team_name: team2 },
+                    { $inc: { win: 1, points: 3 } },
+                    { new: true }
+                )
             ]);
         } else {
             await Promise.all([
-                tables.findOneAndUpdate({ tournament_title: req.body.tournament_title, team_name: team1 }, { $inc: { draw: 1, points: 1 } }, { new: true }),
-                tables.findOneAndUpdate({ tournament_title: req.body.tournament_title, team_name: team2 }, { $inc: { draw: 1, points: 1 } }, { new: true })
+                tables.findOneAndUpdate(
+                    { tournament_title: req.body.tournament_title, team_name: team1 },
+                    { $inc: { draw: 1, points: 1 } },
+                    { new: true }
+                ),
+                tables.findOneAndUpdate(
+                    { tournament_title: req.body.tournament_title, team_name: team2 },
+                    { $inc: { draw: 1, points: 1 } },
+                    { new: true }
+                )
             ]);
         }
     } else {
         console.log("Postponed vayo");
     }
+
+    // Get the latest fixture document using the natural insertion order
+    const matchingFixture = await fixtures
+        .findOne({ fixname: fixtureResult })
+        .sort({ $natural: -1 });
+    // Default to today's date if no matching fixture found
+    const resultDate = matchingFixture ? matchingFixture.date : new Date().toDateString();
+
     let newResult = new results({
         tournament_title: req.body.tournament_title,
         fixtureResult,
+        date: resultDate, // set the date equal to the last inserted fixture's date
         score: req.body.score,
         fouls: req.body.fouls,
         offsides: req.body.offsides,
@@ -564,7 +610,11 @@ router.post('/results', cors(corsOptions), asyncHandler(async (req, res) => {
     });
     const savedResult = await newResult.save();
     alert('Big Success' + savedResult);
-    await tournaments.findOneAndUpdate({ title: req.body.tournament_title }, { $push: { resultList: newResult._id } }, { new: true });
+    await tournaments.findOneAndUpdate(
+        { title: req.body.tournament_title },
+        { $push: { resultList: newResult._id } },
+        { new: true }
+    );
 }));
 
 router.get('/results', cors(corsOptions), asyncHandler(async (req, res) => {
@@ -573,19 +623,49 @@ router.get('/results', cors(corsOptions), asyncHandler(async (req, res) => {
 }));
 
 router.get('/results/search', cors(corsOptions), asyncHandler(async (req, res) => {
-    const { team } = req.query;
-    if (!team) {
-        return res.status(400).json({ success: false, message: 'Team parameter is required.' });
-    }
-    // Search for results where fixtureResult contains the team name (partial & case-insensitive)
-    const resultsFound = await results.find({
-        fixtureResult: { $regex: team, $options: 'i' }
-    });
+    const { team, team1, team2, fixname, date } = req.query;
+    let query = {};
 
-    if (!resultsFound || resultsFound.length === 0) {
-        return res.status(404).json({ success: false, message: 'No results found matching that team name.' });
+    // Add fixname search if provided (searching in fixtureResult)
+    if (fixname) {
+        query.fixtureResult = { $regex: fixname, $options: 'i' };
     }
-    res.json({ success: true, data: resultsFound });
+    // Add date search if provided
+    if (date) {
+        query.date = date;
+    }
+
+    // Existing search by team, team1 or team2
+    if (team) {
+        query.fixtureResult = { $regex: team, $options: 'i' };
+    } else if (team1 || team2) {
+        const conditions = [];
+        if (team1) {
+            conditions.push({ fixtureResult: { $regex: team1, $options: 'i' } });
+        }
+        if (team2) {
+            conditions.push({ fixtureResult: { $regex: team2, $options: 'i' } });
+        }
+        // Merge with any existing query conditions
+        if (conditions.length) {
+            if (Object.keys(query).length) {
+                // Combine existing query with new conditions
+                query = { $and: [query, ...conditions] };
+            } else {
+                query = { $and: conditions };
+            }
+        }
+    }
+
+    if (Object.keys(query).length === 0) {
+        return res.status(400).json({ success: false, message: 'No valid query parameter provided.' });
+    }
+
+    const resultsFound = await results.find(query);
+    if (!resultsFound || resultsFound.length === 0) {
+        return res.status(404).json({ success: false, message: 'No results found matching that criteria.' });
+    }
+    return res.json({ success: true, data: resultsFound });
 }));
 
 router.get('/results/:id', cors(corsOptions), asyncHandler(async (req, res) => {
