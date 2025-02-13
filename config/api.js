@@ -1,8 +1,20 @@
+// api.js
 const express = require('express');
 const router = express.Router();
-const alert = require('alert');
-const mongoose = require('mongoose');
 const cors = require('cors');
+
+const {
+    Story,
+    Gallery,
+    League,
+    Fixture,
+    Player,
+    Team,
+    Result,
+    Tournament,
+    Scoreboard,
+    Table
+} = require('./models');
 
 const corsOptions = {
     origin: [
@@ -16,244 +28,118 @@ const corsOptions = {
     optionsSuccessStatus: 200
 };
 
-// Schemas
-const fixtureSchema = new mongoose.Schema({
-    tournament_title: { type: String, required: true },
-    team1: { type: String, required: true },
-    team2: { type: String, required: true },
-    team1Object: [{ type: mongoose.Schema.Types.ObjectId, ref: 'teams' }],
-    team2Object: [{ type: mongoose.Schema.Types.ObjectId, ref: 'teams' }],
-    stadium: String,
-    date: { type: String },
-    time: String,
-    fixname: [String]
-});
+// Apply CORS globally on this router
+router.use(cors(corsOptions));
 
-const tournamentStatSchema = new mongoose.Schema({
-    tournament_title: { type: String },
-    team_name: { type: String },
-    jersey_no: { type: Number, default: 0 },
-    match_played: { type: Number, default: 0 },
-    goals_scored: { type: Number, default: 0 },
-    own_goals: { type: Number, default: 0 },
-    goals_conceded: { type: Number, default: 0 },
-    assists: { type: Number, default: 0 },
-    clean_sheets: { type: Number, default: 0 },
-    yellow_cards: { type: Number, default: 0 },
-    red_cards: { type: Number, default: 0 }
-});
-
-const playerSchema = new mongoose.Schema({
-    fname: { type: String, required: true },
-    lname: { type: String, required: true },
-    dob: { type: Date, default: Date.now },
-    position: { type: String, required: true },
-    tournament: [tournamentStatSchema]
-});
-
-const teamSchema = new mongoose.Schema({
-    tournament_title: { type: String, required: true },
-    name: { type: String, required: true },
-    location: { type: String },
-    logo: String,
-    manager: { type: String },
-    playerList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'players' }]
-});
-
-const resultSchema = new mongoose.Schema({
-    tournament_title: { type: String, required: true },
-    fixtureResult: { type: String, required: true },
-    date: { type: String },
-    score: [Number],
-    fouls: [Number],
-    offsides: [Number],
-    corners: [Number],
-    shots: [Number]
-});
-
-const tournamentSchema = new mongoose.Schema({
-    title: { type: String, required: true },
-    stadium: [{ type: String }],
-    teamList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'teams' }],
-    fixtureList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'fixtures' }],
-    resultList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'results' }],
-    tableList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'tables' }]
-});
-
-const scoreboardSchema = new mongoose.Schema({
-    score1: { type: Number, required: true, default: 0 },
-    score2: { type: Number, required: true, default: 0 },
-    timer: { type: String, default: '1' },
-    fixname: { type: String, required: true },
-    fixObject: { type: mongoose.Schema.Types.ObjectId, ref: 'fixtures' },
-    referee: { type: String },
-    event: [{ type: String }],
-    lineup: [{ type: String }]
-});
-
-const tableSchema = new mongoose.Schema({
-    tournament_title: { type: String, required: true },
-    team_name: { type: String, required: true },
-    played: { type: Number, default: 0 },
-    win: { type: Number, default: 0 },
-    lost: { type: Number, default: 0 },
-    draw: { type: Number, default: 0 },
-    gf: { type: Number, default: 0 },
-    ga: { type: Number, default: 0 },
-    gd: { type: Number, default: 0 },
-    points: { type: Number, default: 0 }
-});
-
-// Admin Schemas
-const storySchema = new mongoose.Schema({
-    title: { type: String, required: true },
-    content: { type: String, required: true },
-    images: [String],
-    createdAt: { type: Date, default: Date.now }
-});
-
-const gallerySchema = new mongoose.Schema({
-    title: { type: String, required: true },
-    imageUrl: { type: String, required: true },
-    caption: String,
-    category: String,
-    createdAt: { type: Date, default: Date.now }
-});
-
-const leagueSchema = new mongoose.Schema({
-    title: { type: String, required: true },
-    description: { type: String, required: true },
-    logo: { type: String }
-});
-
-// Register models
-const Story = mongoose.model('Story', storySchema);
-const Gallery = mongoose.model('Gallery', gallerySchema);
-const League = mongoose.model('League', leagueSchema);
-const fixtures = mongoose.model('fixtures', fixtureSchema);
-const players = mongoose.model('players', playerSchema);
-const teams = mongoose.model('teams', teamSchema);
-const results = mongoose.model('results', resultSchema);
-const tournaments = mongoose.model('tournaments', tournamentSchema);
-const scoreboards = mongoose.model('scoreboards', scoreboardSchema);
-const tables = mongoose.model('tables', tableSchema);
-const tournamentStats = mongoose.model('tournamentStats', tournamentStatSchema);
-
-// Helper function for async route handlers
+// Helper for async route handlers
 const asyncHandler = fn => (req, res, next) =>
     Promise.resolve(fn(req, res, next)).catch(next);
 
-// Admin Stories Endpoints
-router.post('/admin/stories', cors(corsOptions), asyncHandler(async (req, res) => {
+/* === ADMIN STORIES ENDPOINTS === */
+router.post('/admin/stories', asyncHandler(async (req, res) => {
     const newStory = new Story({ ...req.body, createdAt: new Date() });
     const savedStory = await newStory.save();
     res.json({ success: true, data: savedStory });
 }));
 
-router.get('/admin/stories', cors(corsOptions), asyncHandler(async (req, res) => {
+router.get('/admin/stories', asyncHandler(async (req, res) => {
     const data = await Story.find({});
     res.json({ success: true, data });
 }));
 
-router.put('/admin/stories/:id', cors(corsOptions), asyncHandler(async (req, res) => {
+router.put('/admin/stories/:id', asyncHandler(async (req, res) => {
     const updatedStory = await Story.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!updatedStory)
         return res.status(404).json({ success: false, error: 'Story not found' });
     res.json({ success: true, data: updatedStory });
 }));
 
-router.delete('/admin/stories/:id', cors(corsOptions), asyncHandler(async (req, res) => {
+router.delete('/admin/stories/:id', asyncHandler(async (req, res) => {
     const deletedStory = await Story.findByIdAndDelete(req.params.id);
     if (!deletedStory)
         return res.status(404).json({ success: false, error: 'Story not found' });
     res.json({ success: true, data: deletedStory });
 }));
 
-// Admin Gallery Endpoints
-router.post('/admin/gallery', cors(corsOptions), asyncHandler(async (req, res) => {
+/* === ADMIN GALLERY ENDPOINTS === */
+router.post('/admin/gallery', asyncHandler(async (req, res) => {
     const newGalleryItem = new Gallery({ ...req.body, createdAt: new Date() });
     const savedItem = await newGalleryItem.save();
     res.json({ success: true, data: savedItem });
 }));
 
-router.get('/admin/gallery', cors(corsOptions), asyncHandler(async (req, res) => {
+router.get('/admin/gallery', asyncHandler(async (req, res) => {
     const data = await Gallery.find({});
     res.json({ success: true, data });
 }));
 
-router.put('/admin/gallery/:id', cors(corsOptions), asyncHandler(async (req, res) => {
+router.put('/admin/gallery/:id', asyncHandler(async (req, res) => {
     const updatedItem = await Gallery.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!updatedItem)
         return res.status(404).json({ success: false, error: 'Gallery item not found' });
     res.json({ success: true, data: updatedItem });
 }));
 
-router.delete('/admin/gallery/:id', cors(corsOptions), asyncHandler(async (req, res) => {
+router.delete('/admin/gallery/:id', asyncHandler(async (req, res) => {
     const deletedItem = await Gallery.findByIdAndDelete(req.params.id);
     if (!deletedItem)
         return res.status(404).json({ success: false, error: 'Gallery item not found' });
     res.json({ success: true, data: deletedItem });
 }));
 
-// Admin Leagues Endpoints
-router.post('/admin/leagues', cors(corsOptions), asyncHandler(async (req, res) => {
-    console.log('Request headers:', req.headers);
-    console.log('Request body:', req.body);
+/* === ADMIN LEAGUES ENDPOINTS === */
+router.post('/admin/leagues', asyncHandler(async (req, res) => {
     const newLeague = new League(req.body);
     const savedLeague = await newLeague.save();
     res.json({ success: true, data: savedLeague });
 }));
 
-router.get('/admin/leagues', cors(corsOptions), asyncHandler(async (req, res) => {
+router.get('/admin/leagues', asyncHandler(async (req, res) => {
     const data = await League.find({});
     res.json({ success: true, data });
 }));
 
-router.put('/admin/leagues/:id', cors(corsOptions), asyncHandler(async (req, res) => {
+router.put('/admin/leagues/:id', asyncHandler(async (req, res) => {
     const updatedLeague = await League.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!updatedLeague)
         return res.status(404).json({ success: false, error: 'League not found' });
     res.json({ success: true, data: updatedLeague });
 }));
 
-router.delete('/admin/leagues/:id', cors(corsOptions), asyncHandler(async (req, res) => {
+router.delete('/admin/leagues/:id', asyncHandler(async (req, res) => {
     const deletedLeague = await League.findByIdAndDelete(req.params.id);
     if (!deletedLeague)
         return res.status(404).json({ success: false, error: 'League not found' });
     res.json({ success: true, data: deletedLeague });
 }));
 
-// Basic Route
+/* === BASIC ROUTE === */
 router.get('/hello', (req, res) => res.json({ hello: 'bro' }));
 
-// Tables Endpoints
-router.post('/tables', cors(corsOptions), asyncHandler(async (req, res) => {
-    const newTable = new tables({ tournament_title: req.body.tournament_title, team_name: req.body.team_name });
+/* === TABLES ENDPOINTS === */
+router.post('/tables', asyncHandler(async (req, res) => {
+    const newTable = new Table({ tournament_title: req.body.tournament_title, team_name: req.body.team_name });
     await newTable.save();
-    alert('Big Success' + newTable);
-    res.redirect('/');
+    res.json({ success: true, data: newTable });
 }));
 
-router.get('/tables', cors(corsOptions), asyncHandler(async (req, res) => {
+router.get('/tables', asyncHandler(async (req, res) => {
     const query = {};
     if (req.query.tournament_title) {
         query.tournament_title = req.query.tournament_title;
     }
-    const data = await tables.find(query);
+    const data = await Table.find(query);
     res.json({ success: true, message: data });
 }));
 
-// Scoreboard Endpoints
-router.post('/scoreboard', cors(corsOptions), asyncHandler(async (req, res) => {
-    const data = await fixtures.findOne({ fixname: req.body.fixname });
-    if (!data) {
-        console.error('No document found with that fixname');
-        return;
-    }
-    const fixId = data._id;
-    const lineup = [req.body.line1, req.body.line2];
-    console.log("Lineup received", lineup);
-    const newScoreboard = new scoreboards({
+
+/* === SCOREBOARD ENDPOINTS === */
+router.post('/scoreboard', asyncHandler(async (req, res) => {
+    const fixtureData = await Fixture.findOne({ fixname: req.body.fixname });
+    if (!fixtureData) return res.status(404).json({ error: 'Fixture not found' });
+    const fixId = fixtureData._id;
+    const lineup = [req.body.line1, req.body.line2].filter(Boolean);
+    const newScoreboard = new Scoreboard({
         score1: req.body.score1,
         score2: req.body.score2,
         timer: req.body.timer,
@@ -263,200 +149,202 @@ router.post('/scoreboard', cors(corsOptions), asyncHandler(async (req, res) => {
         lineup
     });
     await newScoreboard.save();
-    alert('Big Success' + newScoreboard);
-    res.redirect('/live');
+    res.json({ success: true, data: newScoreboard });
 }));
 
-router.get('/scoreboard', cors(corsOptions), asyncHandler(async (req, res) => {
-    const arrayOfResults = await scoreboards.find({}).sort({ _id: -1 }).limit(1)
+router.get('/scoreboard', asyncHandler(async (req, res) => {
+    const latestScoreboard = await Scoreboard.find({})
+        .sort({ _id: -1 })
+        .limit(1)
         .populate('fixObject')
         .populate({
             path: 'fixObject',
-            populate: { path: 'team1Object', populate: { path: 'playerList', model: 'players' } }
+            populate: { path: 'team1Object', populate: { path: 'playerList', model: 'Player' } }
         })
         .populate({
             path: 'fixObject',
-            populate: { path: 'team2Object', populate: { path: 'playerList', model: 'players' } }
+            populate: { path: 'team2Object', populate: { path: 'playerList', model: 'Player' } }
         });
-    res.json(arrayOfResults);
+    res.json(latestScoreboard);
 }));
 
-router.post('/editScoreboard/', cors(corsOptions), asyncHandler(async (req, res) => {
+router.post('/editScoreboard', asyncHandler(async (req, res) => {
     const { fixname, tournament_title } = req.body;
-    let jersey_no, fname, lname, player_name = null;
+    let jersey_no, fname, lname, player_name;
     const name1 = req.body.playername1?.split(' ');
     const name2 = req.body.playername2?.split(' ');
 
     if (name1 && name1.length > 1) {
         jersey_no = parseInt(name1[0].replace(/\D+/g, ''), 10) || 0;
-        fname = name1.slice(1, -1).join(' ') || " ";
-        lname = name1.slice(-1)[0] || " ";
+        fname = name1.slice(1, -1).join(' ') || "";
+        lname = name1.slice(-1)[0] || "";
         player_name = `${fname} ${lname}`;
-    }
-    if (name2 && name2.length > 1) {
+    } else if (name2 && name2.length > 1) {
         jersey_no = parseInt(name2[0].replace(/\D+/g, ''), 10) || 0;
-        fname = name2.slice(1, -1).join(' ') || " ";
-        lname = name2.slice(-1)[0] || " ";
+        fname = name2.slice(1, -1).join(' ') || "";
+        lname = name2.slice(-1)[0] || "";
         player_name = `${fname} ${lname}`;
     }
     const eventtype = req.body.eventtype;
     const event = eventtype ? `${req.body.timer}' ${player_name} ${eventtype}` : null;
-    if (!fixname) return res.status(400).json({ error: 'Bhayena hai bhayena' });
+    if (!fixname) return res.status(400).json({ error: 'Fixture name is required' });
+
     const updateField = eventtype === 'goal' ? 'goals_scored' :
         eventtype === 'yellow' ? 'yellow_cards' :
             eventtype === 'red' ? 'red_cards' : null;
-    const updateObject = {};
     if (updateField) {
-        updateObject.$inc = { [`tournament.$[elem].${updateField}`]: 1 };
-        await players.findOneAndUpdate(
+        await Player.findOneAndUpdate(
             { 'tournament.jersey_no': jersey_no, fname, lname, 'tournament.tournament_title': tournament_title },
-            updateObject,
+            { $inc: { [`tournament.$[elem].${updateField}`]: 1 } },
             { new: true, arrayFilters: [{ 'elem.tournament_title': tournament_title }] }
         );
     }
+
     const scoreboardUpdate = { $set: { score1: req.body.score1, score2: req.body.score2, timer: req.body.timer } };
     if (req.body.lineup) scoreboardUpdate.$set.lineup = req.body.lineup;
     if (event) scoreboardUpdate.$push = { event };
 
-    const savedResults = await scoreboards.findOneAndUpdate({ fixname }, scoreboardUpdate, { new: true }).sort({ _id: -1 });
-    if (savedResults) console.log('Big Success', savedResults);
+    const updatedScoreboard = await Scoreboard.findOneAndUpdate({ fixname }, scoreboardUpdate, { new: true });
+    if (updatedScoreboard) {
+        res.json({ success: true, data: updatedScoreboard });
+    } else {
+        res.status(404).json({ error: 'Scoreboard not found' });
+    }
 }));
 
-// Fixtures Endpoints
-router.post('/fixtures', cors(corsOptions), asyncHandler(async (req, res) => {
-    const savedTeam1 = await teams.findOne({ name: req.body.team1 });
-    const savedTeam2 = await teams.findOne({ name: req.body.team2 });
-    const fixname = req.body.team1 + ' vs ' + req.body.team2;
-    const dat = new Date(req.body.date).toDateString();
-    const newFixture = new fixtures({
+/* === FIXTURES ENDPOINTS === */
+router.post('/fixtures', asyncHandler(async (req, res) => {
+    const team1Doc = await Team.findOne({ name: req.body.team1 });
+    const team2Doc = await Team.findOne({ name: req.body.team2 });
+    if (!team1Doc || !team2Doc) return res.status(404).json({ error: 'One or both teams not found' });
+    const fixname = `${req.body.team1} vs ${req.body.team2}`;
+    const dateFormatted = new Date(req.body.date).toDateString();
+    const newFixture = new Fixture({
         tournament_title: req.body.tournament_title,
         team1: req.body.team1,
         team2: req.body.team2,
         stadium: req.body.stadium,
-        date: dat,
+        date: dateFormatted,
         time: req.body.time,
         fixname,
-        team1Object: savedTeam1._id,
-        team2Object: savedTeam2._id
+        team1Object: team1Doc._id,
+        team2Object: team2Doc._id
     });
     const savedFixture = await newFixture.save();
-    alert('Big Success' + savedFixture);
-    await tournaments.findOneAndUpdate(
+    await Tournament.findOneAndUpdate(
         { title: req.body.tournament_title },
         { $push: { fixtureList: newFixture._id } },
         { new: true }
     );
+    res.json({ success: true, data: savedFixture });
 }));
 
-router.get('/fixtures', cors(corsOptions), asyncHandler(async (req, res) => {
-    const resultsArr = await fixtures.find({}).exec();
-    res.json(resultsArr);
+router.get('/fixtures', asyncHandler(async (req, res) => {
+    const fixturesList = await Fixture.find({}).exec();
+    res.json(fixturesList);
 }));
 
-router.put('/fixtures/:id', cors(corsOptions), asyncHandler(async (req, res) => {
-    const dat = new Date(req.body.date).toDateString();
+router.put('/fixtures/:id', asyncHandler(async (req, res) => {
+    const dateFormatted = new Date(req.body.date).toDateString();
     const updateData = {
         tournament_title: req.body.tournament_title,
         team1: req.body.team1,
         team2: req.body.team2,
         stadium: req.body.stadium,
-        date: dat,
+        date: dateFormatted,
         time: req.body.time,
         fixname: req.body.fixname
     };
-    const updatedFixture = await fixtures.findByIdAndUpdate(req.params.id, { $set: updateData }, { new: true, runValidators: true });
+    const updatedFixture = await Fixture.findByIdAndUpdate(req.params.id, { $set: updateData }, { new: true, runValidators: true });
     if (!updatedFixture)
         return res.status(404).json({ success: false, message: 'Fixture not found.' });
     res.json({ success: true, message: 'Fixture updated successfully.', data: updatedFixture });
 }));
 
-router.delete('/fixtures/:id', cors(corsOptions), asyncHandler(async (req, res) => {
-    const deletedFixture = await fixtures.findByIdAndDelete(req.params.id);
+router.delete('/fixtures/:id', asyncHandler(async (req, res) => {
+    const deletedFixture = await Fixture.findByIdAndDelete(req.params.id);
     if (!deletedFixture)
         return res.status(404).json({ success: false, message: 'Fixture not found.' });
     res.json({ success: true, message: 'Fixture deleted successfully.', data: deletedFixture });
 }));
 
-router.post('/editFixtures/', cors(corsOptions), asyncHandler(async (req, res) => {
-    const dat = new Date(req.body.date).toDateString();
+router.post('/editFixtures', asyncHandler(async (req, res) => {
+    const dateFormatted = new Date(req.body.date).toDateString();
     const { fixname, postponed } = req.body;
-    if (!fixname) return res.json({ error: 'No fixture name' });
-    const query = postponed ? { fixname, date: dat } : { fixname };
-    const update = { $set: { date: dat, time: req.body.time, stadium: req.body.stadium } };
-    const savedFixture = await fixtures.findOneAndUpdate(query, update, { new: true });
-    if (savedFixture) {
-        alert('Big Success' + savedFixture);
+    if (!fixname) return res.status(400).json({ error: 'Fixture name is required' });
+    const query = postponed ? { fixname, date: dateFormatted } : { fixname };
+    const update = { $set: { date: dateFormatted, time: req.body.time, stadium: req.body.stadium } };
+    const updatedFixture = await Fixture.findOneAndUpdate(query, update, { new: true });
+    if (updatedFixture) {
+        res.json({ success: true, data: updatedFixture });
     } else {
-        alert('Enter Correct date of Postponed Fixture');
+        res.status(400).json({ error: 'Enter correct date of postponed fixture' });
     }
 }));
 
-// Players Endpoints
-router.post('/players', cors(corsOptions), asyncHandler(async (req, res) => {
-    let newPlayer = new players({
-        team_name: req.body.team_name,
-        fname: req.body.fname,
-        lname: req.body.lname,
-        dob: req.body.dob,
-        position: req.body.position,
-    });
-    const existingPlayer = await players.findOne({ fname: req.body.fname, lname: req.body.lname, position: req.body.position });
-    if (existingPlayer) {
-        existingPlayer.tournament.push({
-            tournament_title: req.body.tournament_title,
-            team_name: req.body.team_name,
-            jersey_no: req.body.jersey_no
-        });
-        await existingPlayer.save();
-        alert('Player already exists');
+/* === PLAYERS ENDPOINTS === */
+router.post('/players', asyncHandler(async (req, res) => {
+    const { team_name, fname, lname, dob, position, tournament_title, jersey_no } = req.body;
+    let playerDoc = await Player.findOne({ fname, lname, position });
+    if (playerDoc) {
+        playerDoc.tournament.push({ tournament_title, team_name, jersey_no });
+        await playerDoc.save();
+        res.json({ success: true, message: 'Player already exists. Tournament added.', data: playerDoc });
     } else {
-        newPlayer.tournament.push({
-            tournament_title: req.body.tournament_title,
-            team_name: req.body.team_name,
-            jersey_no: req.body.jersey_no
-        });
-        await newPlayer.save();
-        alert('Big Success' + newPlayer);
-        await teams.findOneAndUpdate({ name: req.body.team_name }, { $push: { playerList: newPlayer._id } }, { new: true });
+        playerDoc = new Player({ fname, lname, dob, position });
+        playerDoc.tournament.push({ tournament_title, team_name, jersey_no });
+        await playerDoc.save();
+        await Team.findOneAndUpdate({ name: team_name }, { $push: { playerList: playerDoc._id } }, { new: true });
+        res.json({ success: true, data: playerDoc });
     }
 }));
 
-router.delete('/players/:id', cors(corsOptions), asyncHandler(async (req, res) => {
-    const deletedPlayer = await players.findByIdAndRemove(req.params.id);
+router.get('/players/:id', asyncHandler(async (req, res) => {
+    const player = await Player.findById(req.params.id);
+    if (!player) {
+        return res.status(404).json({ success: false, message: 'Player not found' });
+    }
+    res.json({ success: true, data: player });
+}));
+
+router.delete('/players/:id', asyncHandler(async (req, res) => {
+    const deletedPlayer = await Player.findByIdAndRemove(req.params.id);
     if (!deletedPlayer)
-        return res.status(404).send({ message: 'Player not found' });
-    res.status(200).send({ message: 'Player deleted successfully' });
+        return res.status(404).json({ message: 'Player not found' });
+    res.json({ success: true, message: 'Player deleted successfully' });
 }));
 
-router.put('/players/:id', cors(corsOptions), asyncHandler(async (req, res) => {
-    const updatedPlayer = await players.findByIdAndUpdate(req.params.id, {
-        $set: { fname: req.body.fname, lname: req.body.lname, dob: req.body.dob, position: req.body.position }
-    }, { new: true, runValidators: true });
+router.put('/players/:id', asyncHandler(async (req, res) => {
+    const updatedPlayer = await Player.findByIdAndUpdate(
+        req.params.id,
+        { $set: { fname: req.body.fname, lname: req.body.lname, dob: req.body.dob, position: req.body.position } },
+        { new: true, runValidators: true }
+    );
     if (!updatedPlayer)
-        return res.status(404).send({ message: 'Player not found' });
-    res.status(200).send(updatedPlayer);
+        return res.status(404).json({ message: 'Player not found' });
+    res.json(updatedPlayer);
 }));
 
-router.get('/players', cors(corsOptions), asyncHandler(async (req, res) => {
-    const result = await players.find({});
-    res.json(result);
+router.get('/players', asyncHandler(async (req, res) => {
+    const playersList = await Player.find({});
+    res.json(playersList);
 }));
 
-// Tournaments Endpoints
-router.post('/tournaments', cors(corsOptions), asyncHandler(async (req, res) => {
-    let newTournament = new tournaments({
+/* === TOURNAMENTS ENDPOINTS === */
+router.post('/tournaments', asyncHandler(async (req, res) => {
+    const newTournament = new Tournament({
         title: req.body.title,
         stadium: req.body.stadium,
-        teams: req.body.teams,
+        teamList: req.body.teams,
         fixtureList: req.body.fixtures,
-        results: req.body.results
+        resultList: req.body.results
     });
     const savedTournament = await newTournament.save();
-    alert('Big Success' + savedTournament);
+    res.json({ success: true, data: savedTournament });
 }));
 
-router.get('/tournaments', cors(corsOptions), asyncHandler(async (req, res) => {
-    const data = await tournaments.find({})
+router.get('/tournaments', asyncHandler(async (req, res) => {
+    const data = await Tournament.find({})
         .populate('resultList')
         .populate('teamList')
         .populate('tableList')
@@ -471,14 +359,14 @@ router.get('/tournaments', cors(corsOptions), asyncHandler(async (req, res) => {
     res.json(data);
 }));
 
-router.get('/tournamentnames', cors(corsOptions), asyncHandler(async (req, res) => {
-    const data = await tournaments.find({}, 'title');
+router.get('/tournamentnames', asyncHandler(async (req, res) => {
+    const data = await Tournament.find({}, 'title');
     res.json({ success: true, data });
 }));
 
-// Teams Endpoints
-router.post('/teams', cors(corsOptions), asyncHandler(async (req, res) => {
-    let newTeam = new teams({
+/* === TEAMS ENDPOINTS === */
+router.post('/teams', asyncHandler(async (req, res) => {
+    const newTeam = new Team({
         tournament_title: req.body.tournament_title,
         name: req.body.name,
         location: req.body.location,
@@ -487,25 +375,25 @@ router.post('/teams', cors(corsOptions), asyncHandler(async (req, res) => {
         playerList: req.body.players
     });
     const savedTeam = await newTeam.save();
-    alert('Big Success' + savedTeam);
-    await tournaments.findOneAndUpdate({ title: req.body.tournament_title }, { $push: { teamList: savedTeam._id } }, { new: true });
+    await Tournament.findOneAndUpdate({ title: req.body.tournament_title }, { $push: { teamList: savedTeam._id } }, { new: true });
 
-    let newTable = new tables({
+    const newTable = new Table({
         tournament_title: req.body.tournament_title,
         team_name: req.body.name
     });
     const savedTable = await newTable.save();
-    alert('Big Success' + savedTable);
-    await tournaments.findOneAndUpdate({ title: req.body.tournament_title }, { $push: { tableList: savedTable._id } }, { new: true });
+    await Tournament.findOneAndUpdate({ title: req.body.tournament_title }, { $push: { tableList: savedTable._id } }, { new: true });
+
+    res.json({ success: true, data: { team: savedTeam, table: savedTable } });
 }));
 
-router.get('/teams', cors(corsOptions), asyncHandler(async (req, res) => {
-    let arrayOfResults = await teams.find({}).sort([['points', -1], ['gd', -1]]);
-    await teams.populate(arrayOfResults, { path: 'playerList' });
-    res.json(arrayOfResults);
+router.get('/teams', asyncHandler(async (req, res) => {
+    let teamsList = await Team.find({}).sort({ points: -1, gd: -1 });
+    teamsList = await Team.populate(teamsList, { path: 'playerList' });
+    res.json(teamsList);
 }));
 
-router.put('/teams/:id', cors(corsOptions), asyncHandler(async (req, res) => {
+router.put('/teams/:id', asyncHandler(async (req, res) => {
     const updateData = {
         tournament_title: req.body.tournament_title,
         name: req.body.name,
@@ -514,34 +402,35 @@ router.put('/teams/:id', cors(corsOptions), asyncHandler(async (req, res) => {
         manager: req.body.manager,
         playerList: req.body.playerList
     };
-    const updatedTeam = await teams.findByIdAndUpdate(req.params.id, { $set: updateData }, { new: true, runValidators: true });
+    const updatedTeam = await Team.findByIdAndUpdate(req.params.id, { $set: updateData }, { new: true, runValidators: true });
     if (!updatedTeam)
         return res.status(404).json({ success: false, message: 'Team not found.' });
     res.json({ success: true, message: 'Team updated successfully.', data: updatedTeam });
 }));
 
-router.delete('/teams/:id', cors(corsOptions), asyncHandler(async (req, res) => {
-    const deletedTeam = await teams.findByIdAndDelete(req.params.id);
+router.delete('/teams/:id', asyncHandler(async (req, res) => {
+    const deletedTeam = await Team.findByIdAndDelete(req.params.id);
     if (!deletedTeam)
         return res.status(404).json({ success: false, message: 'Team not found.' });
     res.json({ success: true, message: 'Team deleted successfully.', data: deletedTeam });
 }));
 
-// Results Endpoints
-router.post('/results', cors(corsOptions), asyncHandler(async (req, res) => {
+/* === RESULTS ENDPOINTS === */
+router.post('/results', asyncHandler(async (req, res) => {
     const fixtureResult = req.body.fixtureResult;
     const [team1, team2] = fixtureResult.split(' vs ');
     const [score1, score2] = req.body.score;
     const gd1 = score1 - score2;
     const gd2 = score2 - score1;
+
     if (score1 >= 0 && score2 >= 0) {
         await Promise.all([
-            tables.findOneAndUpdate(
+            Table.findOneAndUpdate(
                 { tournament_title: req.body.tournament_title, team_name: team1 },
                 { $inc: { gd: gd1, gf: score1, ga: score2, played: 1 } },
                 { new: true }
             ),
-            tables.findOneAndUpdate(
+            Table.findOneAndUpdate(
                 { tournament_title: req.body.tournament_title, team_name: team2 },
                 { $inc: { gd: gd2, gf: score2, ga: score1, played: 1 } },
                 { new: true }
@@ -549,12 +438,12 @@ router.post('/results', cors(corsOptions), asyncHandler(async (req, res) => {
         ]);
         if (score1 > score2) {
             await Promise.all([
-                tables.findOneAndUpdate(
+                Table.findOneAndUpdate(
                     { tournament_title: req.body.tournament_title, team_name: team1 },
                     { $inc: { win: 1, points: 3 } },
                     { new: true }
                 ),
-                tables.findOneAndUpdate(
+                Table.findOneAndUpdate(
                     { tournament_title: req.body.tournament_title, team_name: team2 },
                     { $inc: { lost: 1 } },
                     { new: true }
@@ -562,12 +451,12 @@ router.post('/results', cors(corsOptions), asyncHandler(async (req, res) => {
             ]);
         } else if (score1 < score2) {
             await Promise.all([
-                tables.findOneAndUpdate(
+                Table.findOneAndUpdate(
                     { tournament_title: req.body.tournament_title, team_name: team1 },
                     { $inc: { lost: 1 } },
                     { new: true }
                 ),
-                tables.findOneAndUpdate(
+                Table.findOneAndUpdate(
                     { tournament_title: req.body.tournament_title, team_name: team2 },
                     { $inc: { win: 1, points: 3 } },
                     { new: true }
@@ -575,12 +464,12 @@ router.post('/results', cors(corsOptions), asyncHandler(async (req, res) => {
             ]);
         } else {
             await Promise.all([
-                tables.findOneAndUpdate(
+                Table.findOneAndUpdate(
                     { tournament_title: req.body.tournament_title, team_name: team1 },
                     { $inc: { draw: 1, points: 1 } },
                     { new: true }
                 ),
-                tables.findOneAndUpdate(
+                Table.findOneAndUpdate(
                     { tournament_title: req.body.tournament_title, team_name: team2 },
                     { $inc: { draw: 1, points: 1 } },
                     { new: true }
@@ -588,20 +477,16 @@ router.post('/results', cors(corsOptions), asyncHandler(async (req, res) => {
             ]);
         }
     } else {
-        console.log("Postponed vayo");
+        console.log("Match postponed");
     }
 
-    // Get the latest fixture document using the natural insertion order
-    const matchingFixture = await fixtures
-        .findOne({ fixname: fixtureResult })
-        .sort({ $natural: -1 });
-    // Default to today's date if no matching fixture found
+    const matchingFixture = await Fixture.findOne({ fixname: fixtureResult }).sort({ $natural: -1 });
     const resultDate = matchingFixture ? matchingFixture.date : new Date().toDateString();
 
-    let newResult = new results({
+    const newResult = new Result({
         tournament_title: req.body.tournament_title,
         fixtureResult,
-        date: resultDate, // set the date equal to the last inserted fixture's date
+        date: resultDate,
         score: req.body.score,
         fouls: req.body.fouls,
         offsides: req.body.offsides,
@@ -609,153 +494,106 @@ router.post('/results', cors(corsOptions), asyncHandler(async (req, res) => {
         shots: req.body.shots
     });
     const savedResult = await newResult.save();
-    alert('Big Success' + savedResult);
-    await tournaments.findOneAndUpdate(
+    await Tournament.findOneAndUpdate(
         { title: req.body.tournament_title },
         { $push: { resultList: newResult._id } },
         { new: true }
     );
+    res.json({ success: true, data: savedResult });
 }));
 
-router.get('/results', cors(corsOptions), asyncHandler(async (req, res) => {
-    const arrayOfResults = await results.find({});
-    res.json(arrayOfResults);
+router.get('/results', asyncHandler(async (req, res) => {
+    const resultsList = await Result.find({});
+    res.json(resultsList);
 }));
 
-router.get('/results/search', cors(corsOptions), asyncHandler(async (req, res) => {
+router.get('/results/search', asyncHandler(async (req, res) => {
     const { team, team1, team2, fixname, date } = req.query;
     let query = {};
-
-    // Add fixname search if provided (searching in fixtureResult)
-    if (fixname) {
-        query.fixtureResult = { $regex: fixname, $options: 'i' };
-    }
-    // Add date search if provided
-    if (date) {
-        query.date = date;
-    }
-
-    // Existing search by team, team1 or team2
+    if (fixname) query.fixtureResult = { $regex: fixname, $options: 'i' };
+    if (date) query.date = date;
     if (team) {
         query.fixtureResult = { $regex: team, $options: 'i' };
     } else if (team1 || team2) {
         const conditions = [];
-        if (team1) {
-            conditions.push({ fixtureResult: { $regex: team1, $options: 'i' } });
-        }
-        if (team2) {
-            conditions.push({ fixtureResult: { $regex: team2, $options: 'i' } });
-        }
-        // Merge with any existing query conditions
-        if (conditions.length) {
-            if (Object.keys(query).length) {
-                // Combine existing query with new conditions
-                query = { $and: [query, ...conditions] };
-            } else {
-                query = { $and: conditions };
-            }
-        }
+        if (team1) conditions.push({ fixtureResult: { $regex: team1, $options: 'i' } });
+        if (team2) conditions.push({ fixtureResult: { $regex: team2, $options: 'i' } });
+        query = Object.keys(query).length ? { $and: [query, ...conditions] } : { $and: conditions };
     }
-
-    if (Object.keys(query).length === 0) {
+    if (Object.keys(query).length === 0)
         return res.status(400).json({ success: false, message: 'No valid query parameter provided.' });
-    }
 
-    const resultsFound = await results.find(query);
-    if (!resultsFound || resultsFound.length === 0) {
+    const resultsFound = await Result.find(query);
+    if (!resultsFound || resultsFound.length === 0)
         return res.status(404).json({ success: false, message: 'No results found matching that criteria.' });
-    }
-    return res.json({ success: true, data: resultsFound });
+
+    res.json({ success: true, data: resultsFound });
 }));
 
-router.get('/results/:id', cors(corsOptions), asyncHandler(async (req, res) => {
-    const resultItem = await results.findById(req.params.id);
-    if (!resultItem) {
-        return res.status(404).json({ success: false, message: 'Result not found.' });
-    }
+router.get('/results/:id', asyncHandler(async (req, res) => {
+    const resultItem = await Result.findById(req.params.id);
+    if (!resultItem) return res.status(404).json({ success: false, message: 'Result not found.' });
     res.json({ success: true, data: resultItem });
 }));
 
-router.get('/teams/:id', cors(corsOptions), asyncHandler(async (req, res) => {
-    const team = await teams.findById(req.params.id).populate('playerList');
-    if (!team) {
+router.delete('/results/:id', asyncHandler(async (req, res) => {
+    const deletedResult = await Result.findByIdAndDelete(req.params.id);
+    if (!deletedResult)
+        return res.status(404).json({ success: false, message: 'Result not found.' });
+    res.json({ success: true, message: 'Result deleted successfully.', data: deletedResult });
+}));
+
+router.put('/results/:id', asyncHandler(async (req, res) => {
+    const updatedResult = await Result.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true, runValidators: true });
+    if (!updatedResult)
+        return res.status(404).json({ success: false, message: 'Result not found.' });
+    res.json({ success: true, message: 'Result updated successfully.', data: updatedResult });
+}));
+
+/* === TEAM DETAILS ENDPOINTS === */
+router.get('/teams/:id', asyncHandler(async (req, res) => {
+    const team = await Team.findById(req.params.id).populate('playerList');
+    if (!team)
         return res.status(404).json({ success: false, message: 'Team not found.' });
-    }
     res.json({ success: true, data: team });
 }));
 
-router.get('/teams/search/:teamName', cors(corsOptions), asyncHandler(async (req, res) => {
+router.get('/teams/search/:teamName', asyncHandler(async (req, res) => {
     const teamName = req.params.teamName;
-    const team = await teams.find({ name: teamName }).populate('playerList');
-    if (!team || team.length === 0) {
+    const team = await Team.find({ name: teamName }).populate('playerList');
+    if (!team || team.length === 0)
         return res.status(404).json({ success: false, message: 'Team not found.' });
-    }
     res.json({ success: true, data: team });
 }));
 
-router.get('/fixtures/search', cors(corsOptions), asyncHandler(async (req, res) => {
+router.get('/fixtures/search', asyncHandler(async (req, res) => {
     const { team, team1, team2 } = req.query;
-
     if (team) {
-        // Exact match on team name in either team1 or team2
-        const fixturesFound = await fixtures.find({
-            $or: [
-                { team1: team },
-                { team2: team }
-            ]
+        const fixturesFound = await Fixture.find({
+            $or: [{ team1: team }, { team2: team }]
         }).populate('team1Object team2Object');
-
-        if (!fixturesFound || fixturesFound.length === 0) {
+        if (!fixturesFound || fixturesFound.length === 0)
             return res.status(404).json({ success: false, message: 'No fixtures found matching that team name.' });
-        }
         return res.json({ success: true, data: fixturesFound });
     } else if (team1 || team2) {
-        // Use regex search for partial and case-insensitive match on team1/team2
         const query = {};
-        if (team1) {
-            query.team1 = { $regex: team1, $options: 'i' };
-        }
-        if (team2) {
-            query.team2 = { $regex: team2, $options: 'i' };
-        }
-
-        const fixturesFound = await fixtures.find(query)
-            .populate('team1Object')
-            .populate('team2Object');
-
-        if (!fixturesFound || fixturesFound.length === 0) {
+        if (team1) query.team1 = { $regex: team1, $options: 'i' };
+        if (team2) query.team2 = { $regex: team2, $options: 'i' };
+        const fixturesFound = await Fixture.find(query).populate('team1Object team2Object');
+        if (!fixturesFound || fixturesFound.length === 0)
             return res.status(404).json({ success: false, message: 'No fixtures found.' });
-        }
         return res.json({ success: true, data: fixturesFound });
     } else {
         return res.status(400).json({ success: false, message: 'No valid query parameter provided.' });
     }
 }));
 
-
-// GET a fixture by id
-router.get('/fixtures/:id', cors(corsOptions), asyncHandler(async (req, res) => {
-    const fixtureItem = await fixtures.findById(req.params.id)
-        .populate('team1Object')
-        .populate('team2Object');
-    if (!fixtureItem) {
+router.get('/fixtures/:id', asyncHandler(async (req, res) => {
+    const fixtureItem = await Fixture.findById(req.params.id)
+        .populate('team1Object team2Object');
+    if (!fixtureItem)
         return res.status(404).json({ success: false, message: 'Fixture not found.' });
-    }
     res.json({ success: true, data: fixtureItem });
-}));
-
-router.delete('/results/:id', cors(corsOptions), asyncHandler(async (req, res) => {
-    const deletedResult = await results.findByIdAndDelete(req.params.id);
-    if (!deletedResult)
-        return res.status(404).json({ success: false, message: 'Result not found.' });
-    res.json({ success: true, message: 'Result deleted successfully.', data: deletedResult });
-}));
-
-router.put('/results/:id', cors(corsOptions), asyncHandler(async (req, res) => {
-    const updatedResult = await results.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true, runValidators: true });
-    if (!updatedResult)
-        return res.status(404).json({ success: false, message: 'Result not found.' });
-    res.json({ success: true, message: 'Result updated successfully.', data: updatedResult });
 }));
 
 module.exports = router;
