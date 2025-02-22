@@ -135,7 +135,17 @@ router.route('/players')
             body('dob').isISO8601(),
             body('position').isIn(['GK', 'DF', 'MF', 'FW'])
         ]),
-        playerController.create
+        asyncHandler(async (req, res) => {
+            const { tournament_title, team_name, jersey_no, ...rest } = req.body;
+            if (tournament_title && team_name && jersey_no) {
+                // Query tournament to get its title
+                const tournamentDoc = await Tournament.findById(tournament_title);
+                const titleText = tournamentDoc ? tournamentDoc.title : tournament_title;
+                rest.tournament = [{ tournament_title: titleText, team_name, jersey_no }];
+            }
+            const player = await Player.create(rest);
+            res.status(201).json(player);
+        })
     );
 
 router.route('/players/:id')

@@ -105,7 +105,7 @@ PlayerSchema.set('toObject', { virtuals: true });
 
 // Team Schema
 const TeamSchema = new Schema({
-    tournament: { type: Schema.Types.ObjectId, ref: 'Tournament' },
+    tournament_title: { type: String, required: true },
     name: { type: String, required: true, unique: true },
     location: { type: String, required: true },
     logo: String,
