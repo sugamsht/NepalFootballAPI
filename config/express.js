@@ -10,11 +10,14 @@ import flash from 'connect-flash';
 import winston from 'winston';
 import helpers from 'view-helpers';
 import { join } from 'path';
-
-import pkg from '../package.json' assert { type: 'json' };
 import dotenv from 'dotenv';
+import { createRequire } from 'module';  // Added for JSON import
 
 dotenv.config();
+
+// Replace the static import with createRequire
+const require = createRequire(import.meta.url);
+const pkg = require('../package.json');
 
 const configureExpress = (app, passport) => {
   const env = process.env.NODE_ENV || 'development';
@@ -24,8 +27,19 @@ const configureExpress = (app, passport) => {
       contentSecurityPolicy: {
         directives: {
           defaultSrc: ["'self'"],
-          scriptSrc: ["'self'", "'unsafe-inline'", "https://code.jquery.com", "https://cdnjs.cloudflare.com", "https://stackpath.bootstrapcdn.com"],
-          styleSrc: ["'self'", "'unsafe-inline'", "https://stackpath.bootstrapcdn.com", "https://fonts.googleapis.com"],
+          scriptSrc: [
+            "'self'",
+            "'unsafe-inline'",
+            "https://code.jquery.com",
+            "https://cdnjs.cloudflare.com",
+            "https://stackpath.bootstrapcdn.com"
+          ],
+          styleSrc: [
+            "'self'",
+            "'unsafe-inline'",
+            "https://stackpath.bootstrapcdn.com",
+            "https://fonts.googleapis.com"
+          ],
           imgSrc: ["'self'", "data:"],
           fontSrc: ["'self'", "https://fonts.gstatic.com"],
           connectSrc: ["'self'"],
@@ -35,7 +49,6 @@ const configureExpress = (app, passport) => {
   );
 
   app.use(compression({ threshold: 0 }));
-
   app.use(express.static(new URL('../public', import.meta.url).pathname));
 
   // Create a custom Winston logger with colorful, simple console logs
@@ -55,13 +68,8 @@ const configureExpress = (app, passport) => {
   const logger = winston.createLogger({
     level: 'info',
     transports: [
-      new winston.transports.Console({
-        format: consoleFormat,
-      }),
-      new winston.transports.File({
-        filename: 'logs/combined.log',
-        format: fileFormat,
-      }),
+      new winston.transports.Console({ format: consoleFormat }),
+      new winston.transports.File({ filename: 'logs/combined.log', format: fileFormat }),
     ],
   });
 
@@ -69,9 +77,7 @@ const configureExpress = (app, passport) => {
   if (env !== 'test') {
     app.use(
       morgan(env === 'production' ? 'combined' : 'tiny', {
-        stream: {
-          write: (message) => logger.info(message),
-        },
+        stream: { write: (message) => logger.info(message) },
       })
     );
   }
@@ -124,12 +130,11 @@ const configureExpress = (app, passport) => {
 
   app.use(passport.initialize());
   app.use(passport.session());
-
   app.use(flash());
   app.use(helpers(pkg.name));
 
   // Error handling middleware logs errors using our custom logger
-  app.use((err, req, res, next) => {
+  app.use((err, _req, res, _next) => {
     logger.error(err.stack);
     res.status(500).render('500', {
       error: err,
