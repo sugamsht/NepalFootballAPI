@@ -4,9 +4,9 @@
  * Module dependencies.
  */
 
-const test = require('tape');
-const request = require('supertest');
-const { app } = require('../server');
+import test, { onFinish } from 'tape';
+import request from 'supertest';
+import { app } from '../server';
 
 test('Home page', t => {
   request(app)
@@ -15,4 +15,4 @@ test('Home page', t => {
     .end(t.end);
 });
 
-test.onFinish(() => process.exit(0));
+onFinish(() => process.exit(0));
