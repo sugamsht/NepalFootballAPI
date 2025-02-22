@@ -1,41 +1,15 @@
-/*!
- * Module dependencies
- */
+// filepath: /d:/apps/Nepscore/NepalFootballAPI/app/models/user.js
+import mongoose from 'mongoose';
+const { Schema } = mongoose;
 
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-
-/**
- * User schema
- */
-
+// User schema
 const UserSchema = new Schema({
   username: { type: String, default: '' },
   password: { type: String, default: '' },
   salt: { type: String, default: '' }
 });
 
-/**
- * Add your
- * - pre-save hooks
- * - validations
- * - virtuals
- */
+// Methods and Statics can be added here
 
-/**
- * Methods
- */
-
-UserSchema.method({});
-
-/**
- * Statics
- */
-
-UserSchema.static({});
-
-/**
- * Register
- */
-
-mongoose.model('User', UserSchema);
+// Register
+export default mongoose.model('User', UserSchema);

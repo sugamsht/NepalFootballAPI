@@ -1,47 +1,78 @@
-// menu.js
-
-let selectedTournamentData; // Declare data outside the event listener scope
-let url;
-
 document.addEventListener("DOMContentLoaded", function (event) {
+    const url = window.location.origin;
+    let tournamentData;
+    let selectedTournamentData;
 
-    // url = apiUrl; // apiUrl is passed from the server side
-    url = "//" + window.location.hostname + ":" + window.location.port;
-
-    fetch(url + '/api/tournaments')
-        .then(response => response.json())
+    fetch(`${url}/api/tournaments`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(responseData => {
-            tournamentData = responseData; // Assign responseData to the global variable
-            var optionsd = tournamentData.map(item => item.title);
-            optionsd.reverse(); // New Tournament first
-            var select0 = document.getElementById("selectTournament");
+            tournamentData = responseData.data; // Access the 'data' property
 
-            // console.log("This is your data ", optionsd);
+            const selectTournament = document.getElementById("selectTournament");
+            tournamentData.forEach(tournament => {
+                const option = document.createElement("option");
+                option.value = tournament.title;
+                option.text = tournament.title;
+                selectTournament.appendChild(option);
+            });
 
-            for (var i = 0; i < optionsd.length; i++) {
-                var opt = optionsd[i];
-                var el = document.createElement("option");
-                el.text = opt;
-                el.value = opt;
-                select0.add(el);
+            if (tournamentData.length > 0) {
+                selectTournament.value = tournamentData[0].title;
+                document.getElementById('titleButton').click(); // Trigger initial data load
             }
         })
         .catch(error => {
-            console.error('Error fetching data:', error);
+            console.error('Error fetching tournaments:', error);
+            const selectTournament = document.getElementById("selectTournament");
+            const errorOption = document.createElement("option");
+            errorOption.text = "Error loading tournaments";
+            errorOption.disabled = true;
+            selectTournament.appendChild(errorOption);
         });
 
     document.getElementById('titleButton').addEventListener('click', function (e) {
-        var tournament_title = document.getElementById("selectTournament").value;
-        // console.log("Tournament title is ", tournament_title);
+        const selectedTournamentTitle = document.getElementById("selectTournament").value;
 
-        selectedTournamentData = tournamentData.find(item => item.title === tournament_title);
+        selectedTournamentData = tournamentData.find(item => item.title === selectedTournamentTitle);
 
         if (selectedTournamentData) {
             console.log("Selected tournament data:", selectedTournamentData);
 
-            // You can use the tournament data as needed in other parts of your code
+            // Now you have the selectedTournamentData.  Use it as needed.
+            // Example: Display fixtures for the selected tournament
+            displayFixtures(selectedTournamentData.fixtureList);
+
+            // Example: Display teams for the selected tournament
+            displayTeams(selectedTournamentData.teamList);
+
+            // Example: Display results for the selected tournament
+            displayResults(selectedTournamentData.resultList);
         } else {
             console.log("No data found for the selected tournament.");
         }
     });
+
+    // Example functions to display data (you'll need to implement these)
+    function displayFixtures(fixtures) {
+        // Implement logic to display fixtures in your UI
+        console.log("Fixtures:", fixtures); // Placeholder
+        // ... (Code to update the DOM with fixture data)
+    }
+
+    function displayTeams(teams) {
+        // Implement logic to display teams in your UI
+        console.log("Teams:", teams); // Placeholder
+        // ... (Code to update the DOM with team data)
+    }
+
+    function displayResults(results) {
+        // Implement logic to display results in your UI
+        console.log("Results:", results); // Placeholder
+        // ... (Code to update the DOM with result data)
+    }
 });

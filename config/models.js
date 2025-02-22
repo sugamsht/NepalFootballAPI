@@ -1,24 +1,67 @@
-// models.js
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-// Fixtures Schema
-const fixtureSchema = new mongoose.Schema({
-    tournament_title: { type: String, required: true },
-    team1: { type: String, required: true },
-    team2: { type: String, required: true },
-    team1Object: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Team' }],
-    team2Object: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Team' }],
-    stadium: String,
-    date: String,
-    time: String,
-    fixname: [String]
+// Match Statistics Sub-Schema
+const MatchStatsSchema = new Schema({
+    home: {
+        shots: { type: Number, default: 0 },
+        shots_on_target: { type: Number, default: 0 },
+        possession: Number,
+        corners: Number,
+        fouls: Number,
+        offsides: Number,
+        yellowCards: Number,
+        redCards: Number
+    },
+    away: {
+        shots: { type: Number, default: 0 },
+        shots_on_target: { type: Number, default: 0 },
+        possession: Number,
+        corners: Number,
+        fouls: Number,
+        offsides: Number,
+        yellowCards: Number,
+        redCards: Number
+    }
 });
 
-// Tournament Stat Schema
-const tournamentStatSchema = new mongoose.Schema({
-    tournament_title: String,
-    team_name: String,
-    jersey_no: { type: Number, default: 0 },
+// Match Events Sub-Schema
+const MatchEventSchema = new Schema({
+    minute: { type: Number, required: true },
+    player: { type: Schema.Types.ObjectId, ref: 'Player', required: true },
+    type: {
+        type: String,
+        enum: ['Goal', 'YellowCard', 'RedCard', 'Substitution', 'Penalty'],
+        required: true
+    },
+    team: { type: Schema.Types.ObjectId, ref: 'Team', required: true }
+});
+
+// Fixture Schema (Match)
+const FixtureSchema = new Schema({
+    tournament: { type: Schema.Types.ObjectId, ref: 'Tournament', required: true },
+    homeTeam: { type: Schema.Types.ObjectId, ref: 'Team', required: true },
+    awayTeam: { type: Schema.Types.ObjectId, ref: 'Team', required: true },
+    matchDate: { type: Date, required: true, index: true },
+    stadium: { type: String, required: true },
+    time: { type: String, required: true },
+    status: {
+        type: String,
+        enum: ['Scheduled', 'Live', 'Completed', 'Postponed'],
+        default: 'Scheduled'
+    },
+    score: {
+        home: { type: Number, default: 0 },
+        away: { type: Number, default: 0 }
+    },
+    stats: MatchStatsSchema,
+    events: [MatchEventSchema]
+}, { timestamps: true });
+
+// Player Tournament Performance (Renamed to PlayerStatSchema)
+const PlayerStatSchema = new Schema({
+    tournament_title: { type: String, required: true },
+    team_name: { type: String, required: true },
+    jersey_no: { type: Number, required: true, min: 1, max: 99 },
     match_played: { type: Number, default: 0 },
     goals_scored: { type: Number, default: 0 },
     own_goals: { type: Number, default: 0 },
@@ -27,63 +70,94 @@ const tournamentStatSchema = new mongoose.Schema({
     clean_sheets: { type: Number, default: 0 },
     yellow_cards: { type: Number, default: 0 },
     red_cards: { type: Number, default: 0 }
-});
+}, { _id: true });
 
 // Player Schema
-const playerSchema = new mongoose.Schema({
+const PlayerSchema = new Schema({
     fname: { type: String, required: true },
     lname: { type: String, required: true },
-    dob: { type: Date, default: Date.now },
-    position: { type: String, required: true },
-    tournament: [tournamentStatSchema]
+    dob: { type: Date, required: true },
+    position: {
+        type: String,
+        required: true,
+        enum: ['GK', 'DF', 'MF', 'FW']
+    },
+    // Array of embedded tournament performance subdocuments
+    tournament: [PlayerStatSchema]
+}, { timestamps: true });
+
+// Virtual for full name
+PlayerSchema.virtual('fullName').get(function () {
+    return `${this.fname.trim()} ${this.lname.trim()}`;
 });
+
+// Virtual for calculating age from dob
+PlayerSchema.virtual('age').get(function () {
+    if (!this.dob) return null;
+    const diffMs = Date.now() - this.dob.getTime();
+    const ageDate = new Date(diffMs);
+    return Math.abs(ageDate.getUTCFullYear() - 1970);
+});
+
+// Ensure virtuals are included when converting to JSON or plain objects
+PlayerSchema.set('toJSON', { virtuals: true });
+PlayerSchema.set('toObject', { virtuals: true });
 
 // Team Schema
-const teamSchema = new mongoose.Schema({
-    tournament_title: { type: String, required: true },
-    name: { type: String, required: true },
-    location: String,
+const TeamSchema = new Schema({
+    tournament: { type: Schema.Types.ObjectId, ref: 'Tournament' },
+    name: { type: String, required: true, unique: true },
+    location: { type: String, required: true },
     logo: String,
     manager: String,
-    playerList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Player' }]
-});
+    playerList: [{ type: Schema.Types.ObjectId, ref: 'Player' }]
+}, { timestamps: true });
 
 // Result Schema
-const resultSchema = new mongoose.Schema({
-    tournament_title: { type: String, required: true },
-    fixtureResult: { type: String, required: true },
-    date: String,
-    score: [Number],
-    fouls: [Number],
-    offsides: [Number],
-    corners: [Number],
-    shots: [Number]
-});
+const ResultSchema = new Schema({
+    tournament: { type: Schema.Types.ObjectId, ref: 'Tournament' },
+    fixture: { type: Schema.Types.ObjectId, ref: 'Fixture', required: true },
+    score: {
+        home: { type: Number, required: true },
+        away: { type: Number, required: true }
+    },
+    stats: MatchStatsSchema
+}, { timestamps: true });
 
 // Tournament Schema
-const tournamentSchema = new mongoose.Schema({
-    title: { type: String, required: true },
-    stadium: [String],
-    teamList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Team' }],
-    fixtureList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Fixture' }],
-    resultList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Result' }],
-    tableList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Table' }]
-});
+const TournamentSchema = new Schema({
+    title: { type: String, required: true, unique: true, index: true },
+    season: String,
+    startDate: Date,
+    endDate: Date,
+    status: {
+        type: String,
+        enum: ['Upcoming', 'Ongoing', 'Completed'],
+        default: 'Upcoming'
+    },
+    logo: { type: String, default: 'default.png' },
+    teamList: [{ type: Schema.Types.ObjectId, ref: 'Team' }],
+    fixtureList: [{ type: Schema.Types.ObjectId, ref: 'Fixture' }],
+    resultList: [{ type: Schema.Types.ObjectId, ref: 'Result' }]
+}, { timestamps: true });
 
-// Scoreboard Schema
-const scoreboardSchema = new mongoose.Schema({
-    score1: { type: Number, required: true, default: 0 },
-    score2: { type: Number, required: true, default: 0 },
-    timer: { type: String, default: '1' },
-    fixname: { type: String, required: true },
-    fixObject: { type: mongoose.Schema.Types.ObjectId, ref: 'Fixture' },
-    referee: String,
-    event: [String],
-    lineup: [String]
-});
+// Scoreboard Schema (Live match view)
+const ScoreboardSchema = new Schema({
+    score: {
+        home: { type: Number, default: 0 },
+        away: { type: Number, default: 0 }
+    },
+    timer: { type: String }, // e.g., "45+2"
+    fixture: { type: Schema.Types.ObjectId, ref: 'Fixture', required: true },
+    referee: String, // corrected spelling from "refree"
+    stats: MatchStatsSchema,
+    events: [MatchEventSchema],
+    homeLineup: [{ type: Schema.Types.ObjectId, ref: 'Player' }],
+    awayLineup: [{ type: Schema.Types.ObjectId, ref: 'Player' }]
+}, { timestamps: true });
 
-// Table Schema
-const tableSchema = new mongoose.Schema({
+// Table Schema (League standings)
+const TableSchema = new Schema({
     tournament_title: { type: String, required: true },
     team_name: { type: String, required: true },
     played: { type: Number, default: 0 },
@@ -94,41 +168,53 @@ const tableSchema = new mongoose.Schema({
     ga: { type: Number, default: 0 },
     gd: { type: Number, default: 0 },
     points: { type: Number, default: 0 }
-});
+}, { timestamps: true });
 
-// Admin Schemas
-const storySchema = new mongoose.Schema({
+// Story Schema (News or articles)
+const StorySchema = new Schema({
     title: { type: String, required: true },
     content: { type: String, required: true },
-    images: [String],
-    createdAt: { type: Date, default: Date.now }
-});
+    images: [String]
+}, { timestamps: true });
 
-const gallerySchema = new mongoose.Schema({
+// Gallery Schema (Media gallery)
+const GallerySchema = new Schema({
     title: { type: String, required: true },
     imageUrl: { type: String, required: true },
     caption: String,
-    category: String,
-    createdAt: { type: Date, default: Date.now }
-});
+    category: {
+        type: String,
+        enum: ['Match', 'Training', 'Event', 'Other']
+    }
+}, { timestamps: true });
 
-const leagueSchema = new mongoose.Schema({
-    title: { type: String, required: true },
+// League Schema
+const LeagueSchema = new Schema({
+    name: { type: String, required: true, unique: true },
     description: { type: String, required: true },
-    logo: String
-});
+    logo: String,
+    season: String,
+    status: {
+        type: String,
+        enum: ['Active', 'Inactive'],
+        default: 'Active'
+    },
+    teams: [{ type: Schema.Types.ObjectId, ref: 'Team' }]
+}, { timestamps: true });
 
-// Export models
-module.exports = {
-    Story: mongoose.model('Story', storySchema),
-    Gallery: mongoose.model('Gallery', gallerySchema),
-    League: mongoose.model('League', leagueSchema),
-    Fixture: mongoose.model('Fixture', fixtureSchema),
-    Player: mongoose.model('Player', playerSchema),
-    Team: mongoose.model('Team', teamSchema),
-    Result: mongoose.model('Result', resultSchema),
-    Tournament: mongoose.model('Tournament', tournamentSchema),
-    Scoreboard: mongoose.model('Scoreboard', scoreboardSchema),
-    Table: mongoose.model('Table', tableSchema),
-    TournamentStat: mongoose.model('TournamentStat', tournamentStatSchema)
+// Create Models
+const Team = model('Team', TeamSchema);
+const Player = model('Player', PlayerSchema);
+const Tournament = model('Tournament', TournamentSchema);
+const Fixture = model('Fixture', FixtureSchema);
+const Scoreboard = model('Scoreboard', ScoreboardSchema);
+const Story = model('Story', StorySchema);
+const Gallery = model('Gallery', GallerySchema);
+const League = model('League', LeagueSchema);
+const Result = model('Result', ResultSchema);
+const Table = model('Table', TableSchema);
+
+export {
+    Team, Player, Tournament, Fixture,
+    Scoreboard, Story, Gallery, League, Result, Table
 };

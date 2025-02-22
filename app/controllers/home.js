@@ -1,27 +1,22 @@
-/*!
- * Module dependencies.
- */
-
-exports.index = function (req, res) {
+export const index = (req, res) => {
   res.render('home/index', {
     title: 'Node Express Mongoose Boilerplate'
   });
-  // res.sendFile('/home/fon.html');
 };
 
-exports.login = function (req, res) {
+export const login = (req, res) => {
   res.render('home/login', {
     title: 'login to mess things up'
   });
 };
 
-exports.live = function (req, res) {
+export const live = (req, res) => {
   res.render('home/live', {
     title: 'login to mess things up'
   });
 };
 
-exports.settings = function (req, res) {
+export const settings = (req, res) => {
   res.render('home/settings', {
     title: 'Settings'
   });

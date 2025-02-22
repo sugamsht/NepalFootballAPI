@@ -1,25 +1,26 @@
-/* eslint-disable prettier/prettier */
-/**
- * Module dependencies.
- */
+import { Strategy as LocalStrategy } from 'passport-local';
+import User from '../../app/models/user.js';
+import { compare } from 'bcrypt'; // Use async bcrypt.compare
 
-const mongoose = require('mongoose');
-const LocalStrategy = require('passport-local').Strategy;
-const User = mongoose.model('User');
-
-const bcrypt = require('bcrypt');
-/**
- * Expose
- */
-
-module.exports = new LocalStrategy(
-  function (username, password, done) {
-    User.findOne({ username: username }, function (err, user) {
+export default new LocalStrategy(
+  async function (username, password, done) { // Make the strategy callback async
+    try {
+      const user = await User.findOne({ username }); // Use await
       console.log('User ' + username + ' attempted to log in.');
-      if (err) { return done(err); }
-      if (!user) { return done(null, false); }
-      if (!bcrypt.compareSync(password, user.password)) { return done(null, false); }
+
+      if (!user) {
+        return done(null, false, { message: 'Incorrect username.' });
+      }
+
+      const passwordMatch = await compare(password, user.password); // Await the comparison
+
+      if (!passwordMatch) {
+        return done(null, false, { message: 'Incorrect password.' });
+      }
+
       return done(null, user);
-    });
+    } catch (err) {
+      return done(err); // Handle errors
+    }
   }
 );

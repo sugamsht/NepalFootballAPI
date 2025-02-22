@@ -2,19 +2,19 @@
  * Module dependencies.
  */
 
-const path = require('path');
-const development = require('./env/development');
-const test = require('./env/test');
-const production = require('./env/production');
+import { normalize } from 'path';
+import development from './env/development';
+import test from './env/test';
+import production from './env/production';
 const defaults = {
-  root: path.normalize(__dirname + '/..')
+  root: normalize(__dirname + '/..')
 };
 
 /**
  * Expose
  */
 
-module.exports = {
+export default {
   development: Object.assign({}, development, defaults),
   test: Object.assign({}, test, defaults),
   production: Object.assign({}, production, defaults)

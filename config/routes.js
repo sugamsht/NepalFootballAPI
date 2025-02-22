@@ -1,128 +1,114 @@
-/* eslint-disable prettier/prettier */
-'use strict';
+import express from 'express';
+import { login, live, settings } from '../app/controllers/home.js';
+import { model } from 'mongoose';
+import passport from 'passport';
+import bcrypt from 'bcrypt';
+import apiRouter from './api.js';
 
-/**
- * Module dependencies.
- */
+const router = express.Router();
+const User = model('User');
 
-const home = require('../app/controllers/home');
-const mongoose = require('mongoose');
+// Middleware to check if user is authenticated
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/login');
+}
 
-const passport = require('passport');
-const User = mongoose.model('User');
-
-const bcrypt = require('bcrypt');
-/**
- * Expose
- */
-
-module.exports = function (app) {
-
-  app.route('/').get(ensureAuthenticated, (req, res) => {
-    res.render('home/index', { username: req.user.username });
+// Home page route
+router.get('/', ensureAuthenticated, (req, res) => {
+  res.render('home/index', {
+    username: req.user ? req.user.username : null,
+    isActive: (path) => req.originalUrl === path // Pass isActive function
   });
+});
 
-  app.route('/live').get(ensureAuthenticated, (req, res) => {
-    res.render('home/live', { username: req.user.username });
+// Live page route
+router.get('/live', ensureAuthenticated, (req, res) => {
+  res.render('home/live', {
+    username: req.user ? req.user.username : null,
+    isActive: (path) => req.originalUrl === path // Pass isActive function
   });
+});
 
-  app.get('/js/menu.js', (req, res) => {
-    res.render('js/menu', { apiUrl: process.env.Backend_URL });
-  });
+// Route for the combined login/registration page (GET /login)
+router.get('/login', login); // Your existing login controller
 
-  // app.get('/', home.index)
+// API routes with CORS headers
+router.use('/api', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:5000');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next();
+}, apiRouter);
 
-  app.get('/login', home.login);
+// Registration route (POST /register)
+router.post('/register', async (req, res, next) => {
+  try {
+    const hashedPassword = await bcrypt.hash(req.body.password, 12);
+    const existingUser = await User.findOne({ username: req.body.username });
 
-  app.get('/live', home.live)
+    if (existingUser) {
+      console.log(existingUser, "Already exists");
+      req.flash('error', 'Username already exists'); // Use flash messages for errors
+      return res.redirect('/login'); // Redirect back to login/registration form
+    }
 
-  // Replace with:
-  const apiRouter = require('./api');
-  app.use('/api', (req, res, next) => {
-    // Set CORS headers specifically for API routes
-    res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:5000');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    next();
-  }, apiRouter);
+    const newUser = await User.create({ username: req.body.username, password: hashedPassword });
+    console.log("User registered successfully");
+
+    req.login(newUser, (err) => { // Log in after successful registration
+      if (err) return next(err);
+      return res.redirect('/');
+    });
+
+  } catch (err) {
+    console.error("Error during registration:", err);
+    return next(err);
+  }
+});
+
+// Login route (POST /login)
+router.post('/login', passport.authenticate('local', {
+  failureRedirect: '/login',
+  failureFlash: true, // Enable flash messages for login errors
+  successRedirect: '/' // Redirect to / after successful login
+}));
 
 
-  //register
-  // app.route('/login').post(
-  //   (req, res, next) => {
-  //     // const password = req.body.password;
-  //     const password = bcrypt.hashSync(req.body.password, 12);
-  //     User.findOne({ username: req.body.username }, function (err, user) {
-  //       if (err) {
-  //         next(err);
-  //       } else if (user) {
-  //         console.log(user, "Already exists");
-  //         res.redirect('/');
-  //       } else {
-  //         User.create({ username: req.body.username, password: password }, (err, doc) => {
-  //           if (err) {
-  //             // res.redirect('/');
-  //             console.log(err);
-  //           } else {
-  //             console.log("Done")
-  //           }
-  //         });
-  //       }
-  //     });
-  //   },
-  //   passport.authenticate('local', { failureRedirect: '/' }),
-  //   (req, res, next) => {
-  //     res.redirect('/login');
-  //   }
-  // );
-
-  app.route('/login').post(passport.authenticate('local', { failureRedirect: '/login' }), (req, res) => {
+// Logout route
+router.post('/logout', (req, res, next) => {
+  req.logout(function (err) {
+    if (err) {
+      return next(err);
+    }
     res.redirect('/');
   });
+});
 
-  function ensureAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
-      return next();
-    }
-    res.redirect('/login');
+// Settings route
+router.get('/settings', ensureAuthenticated, settings);
+
+// Centralized error handling middleware
+router.use((err, req, res, next) => {
+  console.error(err.stack);
+
+  if (err.message && (err.message.includes('not found') || err.message.includes('Cast to ObjectId failed'))) {
+    return next(); // Pass 404 errors to the 404 handler
   }
 
-  // app.post('/logout', function (req, res) {
-  //   req.logout();
-  //   res.redirect('/login');
-  // });
-
-  app.post('/logout', function (req, res, next) {
-    req.logout(function (err) {
-      if (err) { return next(err); }
-      res.redirect('/');
-    });
+  res.status(500).render('500', {
+    error: err,  // Pass the error object itself
+    message: process.env.NODE_ENV === 'development' ? err.message : 'An error occurred.'
   });
+});
 
-  app.get('/settings', ensureAuthenticated, home.settings);
-
-  /**
- * Error handling
- */
-
-  app.use(function (err, req, res, next) {
-    // treat as 404
-    if (
-      err.message &&
-      (~err.message.indexOf('not found') ||
-        ~err.message.indexOf('Cast to ObjectId failed'))
-    ) {
-      return next();
-    }
-    console.error(err.stack);
-    // error page
-    res.status(500).render('500', { error: err.stack });
+// 404 handler (must be defined AFTER all other routes)
+router.use((req, res) => {
+  res.status(404).render('404', {
+    url: req.originalUrl,
+    message: 'Not Found'
   });
+});
 
-  // assume 404 since no middleware responded
-  app.use(function (req, res) {
-    res.status(404).render('404', {
-      url: req.originalUrl,
-      error: 'Not found'
-    });
-  });
-};
+export default router;

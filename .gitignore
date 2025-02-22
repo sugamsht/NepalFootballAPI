@@ -3,3 +3,5 @@ npm-debug.log
 .env
 data
 .vscode
+logs/combined.log
+logs/error.log

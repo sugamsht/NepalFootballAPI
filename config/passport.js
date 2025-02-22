@@ -1,23 +1,20 @@
-'use strict';
+import passport from 'passport';
+import localStrategy from './passport/local.js';
+import User from '../app/models/user.js'; // Path is correct now
 
-/*
- * Module dependencies.
- */
+passport.use(localStrategy);
 
-const mongoose = require('mongoose');
-const local = require('./passport/local');
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
 
-const User = mongoose.model('User');
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err);
+  }
+});
 
-/**
- * Expose
- */
-
-module.exports = function (passport) {
-  // serialize and deserialize sessions
-  passport.serializeUser((user, done) => done(null, user.id));
-  passport.deserializeUser((id, done) => User.findOne({ _id: id }, done));
-
-  // use these strategies
-  passport.use(local);
-};
+export default passport;

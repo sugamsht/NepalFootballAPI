@@ -1,8 +1,5 @@
-extends layouts/default.pug
-
-block main
-  h2 500 - Oops! Internal server error occured
+extends layouts/default
 
 block content
-  if env == 'development'
-    pre #{ error }
+  h1 500 - Server Error
+  p An error occurred while processing your request.

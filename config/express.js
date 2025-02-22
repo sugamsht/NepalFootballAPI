@@ -1,128 +1,143 @@
-/* eslint-disable prettier/prettier */
-/**
- * Module dependencies.
- */
+import express from 'express';
+import session from 'express-session';
+import compression from 'compression';
+import morgan from 'morgan';
+import cookieParser from 'cookie-parser';
+import methodOverride from 'method-override';
+import helmet from 'helmet';
+import MongoStore from 'connect-mongo';
+import flash from 'connect-flash';
+import winston from 'winston';
+import helpers from 'view-helpers';
+import { join } from 'path';
 
-const express = require('express');
-const session = require('express-session');
-const compression = require('compression');
-const morgan = require('morgan');
-const cookieParser = require('cookie-parser');
-const methodOverride = require('method-override');
-// const csrf = require('csurf');
-const helmet = require('helmet');
+import pkg from '../package.json' assert { type: 'json' };
+import dotenv from 'dotenv';
 
-const MongoStore = require('connect-mongo');
-const flash = require('connect-flash');
-const winston = require('winston');
-const helpers = require('view-helpers');
-const config = require('./');
-const pkg = require('../package.json');
+dotenv.config();
 
-const env = process.env.NODE_ENV || 'development';
-
-/**
- * Expose
- */
-
-module.exports = function (app, passport) {
+const configureExpress = (app, passport) => {
+  const env = process.env.NODE_ENV || 'development';
 
   app.use(
     helmet({
-      contentSecurityPolicy: false,
-    })
-  );
-
-  // Compression middleware (should be placed before express.static)
-  app.use(
-    compression({
-      threshold: 512,
-    })
-  );
-
-  // Static files middleware
-  app.use(express.static(config.root + '/public'));
-
-  // Use winston on production
-  let log;
-  if (env !== 'development') {
-    log = {
-      stream: {
-        write: (msg) => winston.info(msg),
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'", "'unsafe-inline'", "https://code.jquery.com", "https://cdnjs.cloudflare.com", "https://stackpath.bootstrapcdn.com"],
+          styleSrc: ["'self'", "'unsafe-inline'", "https://stackpath.bootstrapcdn.com", "https://fonts.googleapis.com"],
+          imgSrc: ["'self'", "data:"],
+          fontSrc: ["'self'", "https://fonts.gstatic.com"],
+          connectSrc: ["'self'"],
+        },
       },
-    };
-  } else {
-    log = 'dev';
+    })
+  );
+
+  app.use(compression({ threshold: 0 }));
+
+  app.use(express.static(new URL('../public', import.meta.url).pathname));
+
+  // Create a custom Winston logger with colorful, simple console logs
+  const consoleFormat = winston.format.combine(
+    winston.format.colorize({ all: true }),
+    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    winston.format.printf(
+      ({ timestamp, level, message }) => `${timestamp} ${level}: ${message.trim()}`
+    )
+  );
+
+  const fileFormat = winston.format.combine(
+    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    winston.format.json()
+  );
+
+  const logger = winston.createLogger({
+    level: 'info',
+    transports: [
+      new winston.transports.Console({
+        format: consoleFormat,
+      }),
+      new winston.transports.File({
+        filename: 'logs/combined.log',
+        format: fileFormat,
+      }),
+    ],
+  });
+
+  // Use a simple morgan format and send output to our Winston logger
+  if (env !== 'test') {
+    app.use(
+      morgan(env === 'production' ? 'combined' : 'tiny', {
+        stream: {
+          write: (message) => logger.info(message),
+        },
+      })
+    );
   }
 
-  // Don't log during tests
-  // Logging middleware
-  if (env !== 'test') app.use(morgan(log));
-
-  // set views path and default layout
-  app.set('views', config.root + '/app/views');
+  app.set('views', join(process.cwd(), 'app', 'views'));
   app.set('view engine', 'pug');
 
-  // expose package.json to views
-  app.use(function (req, res, next) {
-    res.locals.pkg = pkg;
-    res.locals.env = env;
+  app.use((req, res, next) => {
+    res.locals = {
+      pkg,
+      env,
+      currentYear: new Date().getFullYear(),
+      baseUrl: req.baseUrl,
+    };
     next();
   });
 
-  // bodyParser should be above methodOverride
-  app.use(express.urlencoded({ extended: true }));
+  app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+  app.use(express.json({ limit: '10kb' }));
+  app.use(methodOverride((req) => {
+    if (req.body && typeof req.body === 'object' && '_method' in req.body) {
+      const method = req.body._method;
+      delete req.body._method;
+      return method;
+    }
+  }));
 
-  app.use(express.json())
-
-  app.use(
-    methodOverride(function (req) {
-      if (req.body && typeof req.body === 'object' && '_method' in req.body) {
-        // look in urlencoded POST bodies and delete it
-        const method = req.body._method;
-        delete req.body._method;
-        return method;
-      }
-    })
-  );
-
-  // cookieParser should be above session
   app.use(cookieParser());
   app.use(
     session({
-      secret: pkg.name,
-      proxy: true,
-      resave: true,
-      saveUninitialized: true,
-      cookie: {
-        // Session expires after 24hr of inactivity.
-        expires: 86400000
-      },
+      name: 'sessionId',
+      secret: process.env.SESSION_SECRET || pkg.name,
+      resave: false,
+      saveUninitialized: false,
       store: MongoStore.create({
-        mongoUrl: config.db,
-        collection: 'sessions',
-      })
+        mongoUrl: process.env.MONGODB_URL,
+        collectionName: 'sessions',
+        ttl: 24 * 60 * 60,
+        autoRemove: 'interval',
+        autoRemoveInterval: 10 * 60,
+      }),
+      cookie: {
+        secure: env === 'production',
+        httpOnly: true,
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000,
+      },
     })
   );
 
-  // use passport session
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // connect flash for flash messages - should be declared after sessions
   app.use(flash());
-
-  // should be declared after session and flash
   app.use(helpers(pkg.name));
 
-  // adds CSRF support
-  // if (process.env.NODE_ENV !== 'test') {
-  //   app.use(csrf());
+  // Error handling middleware logs errors using our custom logger
+  app.use((err, req, res, next) => {
+    logger.error(err.stack);
+    res.status(500).render('500', {
+      error: err,
+      message: process.env.NODE_ENV === 'development' ? err.message : 'An error occurred.',
+    });
+  });
 
-  //   // This could be moved to view-helpers :-)
-  //   app.use(function(req, res, next) {
-  //     res.locals.csrf_token = req.csrfToken();
-  //     next();
-  //   });
-  // }
+  return app;
 };
+
+export default configureExpress;
