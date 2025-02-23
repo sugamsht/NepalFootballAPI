@@ -92,19 +92,6 @@ const tournamentController = createCrudController(Tournament, ['teamList', 'fixt
 const storyController = createCrudController(Story);
 const galleryController = createCrudController(Gallery);
 const leagueController = createCrudController(League, []);
-const scoreboardController = createCrudController(Scoreboard, [
-    {
-        path: 'fixture',
-        populate: [
-            { path: 'tournament', select: 'title logo _id' },
-            { path: 'homeTeam', select: 'name logo _id' },
-            { path: 'awayTeam', select: 'name logo _id' }
-        ]
-    },
-    { path: 'homeLineup', select: 'fname lname _id' },
-    { path: 'awayLineup', select: 'fname lname _id' },
-    { path: 'events', populate: { path: 'player', select: 'fname lname _id' } }
-]);
 const resultController = createCrudController(Result, ['fixture']);
 const tableController = createCrudController(Table);
 const fixtureController = createCrudController(Fixture, [
@@ -112,6 +99,56 @@ const fixtureController = createCrudController(Fixture, [
     'homeTeam',
     'awayTeam'
 ], ['status']);
+
+// Define the populate options
+const scoreboardPopulateOptions = [
+    {
+        path: 'fixture',
+        populate: [
+            { path: 'tournament', select: 'title logo _id' },
+            {
+                path: 'homeTeam',
+                select: 'name logo _id',
+                populate: { path: 'playerList', select: 'fname lname _id' }
+            },
+            {
+                path: 'awayTeam',
+                select: 'name logo _id',
+                populate: { path: 'playerList', select: 'fname lname _id' }
+            }
+        ]
+    },
+    { path: 'homeLineup', select: 'fname lname _id' },
+    { path: 'awayLineup', select: 'fname lname _id' },
+    { path: 'events', populate: { path: 'player', select: 'fname lname _id' } }
+];
+
+// Create the default CRUD controller for Scoreboard.
+const scoreboardController = createCrudController(Scoreboard, scoreboardPopulateOptions);
+
+// Override the default update method to include the $push operator for events.
+scoreboardController.update = asyncHandler(async (req, res) => {
+    const update = {};
+    if (req.body.score) update.score = req.body.score;
+    if (req.body.timer) update.timer = req.body.timer;
+    if (req.body.referee) update.referee = req.body.referee;
+    if (req.body.fixture) update.fixture = req.body.fixture;
+    if (req.body.lineup) update.lineup = req.body.lineup;
+    if (req.body.stats) update.stats = req.body.stats;
+    if (req.body.homeLineup) update.homeLineup = req.body.homeLineup;
+    if (req.body.awayLineup) update.awayLineup = req.body.awayLineup;
+    if (req.body.events) {
+        update.$push = { events: { $each: req.body.events } };
+    }
+    const doc = await Scoreboard.findByIdAndUpdate(
+        req.params.id,
+        update,
+        { new: true, runValidators: true }
+    ).populate(scoreboardPopulateOptions);
+    if (!doc) throw new ApiError('Scoreboard not found', 404);
+    res.json(doc);
+});
+
 // Teams Routes
 router.route('/teams')
     .get(teamController.getAll)
@@ -335,6 +372,7 @@ router.patch('/fixtures/:id/complete', asyncHandler(async (req, res) => {
 
 
 // Scoreboard Routes
+// Use scoreboardController for all scoreboard routes.
 router.route('/scoreboard')
     .get((req, res, next) => {
         if (!req.query.limit) {
@@ -347,51 +385,23 @@ router.route('/scoreboard')
         scoreboardController.create
     );
 
-// Update live match stats via scoreboard
-router.patch('/scoreboard/:id',
-    validateRequest([
-        body('score').optional().isObject(), // validate score object
-        body('timer').optional().isString(),
-        body('referee').optional().isString(),
-        body('fixture').optional().isString(),
-        body('lineup').optional().isString(),
-        body('stats').optional().isObject(),
-        body('events').optional().isArray()
-    ]),
-    asyncHandler(async (req, res) => {
-        const update = {};
-        if (req.body.score) {
-            update.score = req.body.score;
-        }
-        if (req.body.timer) {
-            update.timer = req.body.timer;
-        }
-        if (req.body.referee) {
-            update.referee = req.body.referee;
-        }
-        if (req.body.fixture) {
-            update.fixture = req.body.fixture;
-        }
-        if (req.body.lineup) {
-            update.lineup = req.body.lineup;
-        }
-        if (req.body.stats) {
-            update.stats = req.body.stats;
-        }
-        if (req.body.events) {
-            update.events = req.body.events;
-        }
-        const scoreboard = await Scoreboard.findByIdAndUpdate(
-            req.params.id,
-            update,
-            { new: true, runValidators: true }
-        );
-        res.json(scoreboard);
-    })
-);
-
 router.route('/scoreboard/:id')
     .get(scoreboardController.getById)
+    .patch(
+        validateRequest([
+            body('score').optional().isObject(),
+            body('timer').optional().isString(),
+            body('referee').optional().isString(),
+            body('fixture').optional().isString(),
+            body('lineup').optional().isString(),
+            body('stats').optional().isObject(),
+            body('events').optional().isArray(),
+            body('homeLineup').optional().isArray(),
+            body('awayLineup').optional().isArray()
+        ]),
+        // This calls our overridden update that uses $push for events.
+        scoreboardController.update
+    )
     .delete(scoreboardController.delete);
 
 // Results Routes
