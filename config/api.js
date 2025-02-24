@@ -153,6 +153,8 @@ scoreboardController.update = asyncHandler(async (req, res) => {
         { new: true, runValidators: true }
     ).populate(scoreboardPopulateOptions);
     if (!doc) throw new ApiError('Scoreboard not found', 404);
+    // Emit the updated scoreboard to connected clients
+    if (global.io) global.io.emit('scoreUpdate', doc);
     res.json(doc);
 });
 

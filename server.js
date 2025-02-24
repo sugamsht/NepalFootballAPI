@@ -11,6 +11,7 @@ import passport from './config/passport.js'; // Import configured passport
 import configureExpress from './config/express.js';
 import routes from './config/routes.js';// Import your routes
 import cors from 'cors'; // Import cors
+import { Server as SocketServer } from 'socket.io';  // Added Socket.IO import
 
 dotenv.config();
 
@@ -91,6 +92,10 @@ const initializeApp = async () => {
     if (NODE_ENV !== 'test') {
       server.listen(PORT, () => {
         logger.info(`Server running in ${NODE_ENV} mode on port ${PORT}`);
+        const io = new SocketServer(server, {
+          cors: { origin: FRONTEND_URL, methods: ['GET', 'POST'] }
+        });
+        global.io = io; // Expose io globally for use in API routes
       });
     }
 
