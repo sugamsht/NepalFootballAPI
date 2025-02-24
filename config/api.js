@@ -109,17 +109,24 @@ const scoreboardPopulateOptions = [
             {
                 path: 'homeTeam',
                 select: 'name logo _id',
-                populate: { path: 'playerList', select: 'fname lname _id' }
+                populate: { path: 'playerList', select: 'fname lname tournament.jersey_no _id' }
             },
             {
                 path: 'awayTeam',
                 select: 'name logo _id',
-                populate: { path: 'playerList', select: 'fname lname _id' }
+                populate: { path: 'playerList', select: 'fname lname tournament.jersey_no _id' }
             }
         ]
     },
-    { path: 'homeLineup', select: 'fname lname _id' },
-    { path: 'awayLineup', select: 'fname lname _id' },
+    {
+        // Updated select to include jersey_no inside tournament subdocument.
+        path: 'homeLineup',
+        select: 'fname lname tournament.jersey_no _id'
+    },
+    {
+        path: 'awayLineup',
+        select: 'fname lname tournament.jersey_no _id'
+    },
     { path: 'events', populate: { path: 'player', select: 'fname lname _id' } }
 ];
 
