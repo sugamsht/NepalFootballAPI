@@ -22,6 +22,8 @@ const pkg = require('../package.json');
 const configureExpress = (app, passport) => {
   const env = process.env.NODE_ENV || 'development';
 
+  app.set('trust proxy', 1);
+
   app.use(
     helmet({
       contentSecurityPolicy: {
