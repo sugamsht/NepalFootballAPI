@@ -485,6 +485,15 @@ router.route('/leagues/:id')
     .put(leagueController.update)
     .delete(leagueController.delete);
 
+// Session Verification Route
+router.get('/verify-session', (req, res) => {
+    // Verify that a valid session exists (for example, check if passport has stored a user)
+    if (req.session && req.session.passport && req.session.passport.user) {
+        return res.status(200).json({ valid: true });
+    }
+    return res.status(401).json({ valid: false });
+});
+
 // Error Handling Middleware
 router.use((err, req, res, next) => {
     console.error(err.stack);
