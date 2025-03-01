@@ -122,9 +122,12 @@ const configureExpress = (app, passport) => {
         autoRemoveInterval: 10 * 60,
       }),
       cookie: {
+        // Use the COOKIE_DOMAIN env variable in production
+        domain: env === 'production' ? process.env.COOKIE_DOMAIN : undefined,
         secure: env === 'production',
         httpOnly: true,
-        sameSite: 'strict',
+        // Use lax in production to allow cross-subdomain requests if needed
+        sameSite: env === 'production' ? 'lax' : 'strict',
         maxAge: 24 * 60 * 60 * 1000,
       },
     })
