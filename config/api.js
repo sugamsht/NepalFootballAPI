@@ -72,7 +72,7 @@ const createCrudController = (Model, populateOptions = [], searchFields = []) =>
     update: asyncHandler(async (req, res) => {
         const doc = await Model.findByIdAndUpdate(
             req.params.id,
-            req.body,
+            { $set: req.body },
             { new: true, runValidators: true }
         ).populate(populateOptions);
         if (!doc) throw new ApiError(`${Model.modelName} not found`, 404);
@@ -209,7 +209,7 @@ router.route('/tournaments')
 
 router.route('/tournaments/:id')
     .get(tournamentController.getById)
-    .put(tournamentController.update)
+    .patch(tournamentController.update)
     .delete(tournamentController.delete);
 
 // Fixtures Routes

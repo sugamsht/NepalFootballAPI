@@ -190,16 +190,10 @@ const GallerySchema = new Schema({
 
 // League Schema
 const LeagueSchema = new Schema({
-    name: { type: String, required: true, unique: true },
+    title: { type: String, required: true, unique: true },
     description: { type: String, required: true },
     logo: String,
     season: String,
-    status: {
-        type: String,
-        enum: ['Active', 'Inactive'],
-        default: 'Active'
-    },
-    teams: [{ type: Schema.Types.ObjectId, ref: 'Team' }]
 }, { timestamps: true });
 
 // Create Models
